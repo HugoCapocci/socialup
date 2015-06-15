@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html >
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta lang="fr" >
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Social Up</title>        
+        
+        <style>            
+            .stripped div:nth-child(even){
+                background-color: #dcdcdc;
+            }
+            .stripped div:nth-child(odd){
+                background-color: #aaaaaa;
+            }
+            .stripped-header {
+                background-color: #FFF !important;
+                text-align: center;
+            }
+            .dateColumn {
+                margin-left: 2px !important;
+                margin-right: 2px !important;
+                width: 13% !important;
+            }
+            @media (min-width: 800px) and (max-width: 1300px) {
+                .dateColumn {
+                    width: 13% !important;
+                }
+            }
+            @media (min-width: @screen-md-min) and (max-width: @screen-md-max) { 
+                .dateColumn {
+                    width: 13% !important;
+                }
+            }
+            @media (min-width: @screen-sm-min) and (max-width: @screen-sm-max) { 
+                .dateColumn {
+                    width: 13% !important;
+                }
+            }
+            @media (min-width: @screen-xs-min) and (max-width: @screen-xs-max) { 
+                .dateColumn {
+                    width: 13% !important;
+                }
+            }
+            
+            /* Heroixc Template */
+            body {
+                padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+            }
+            .hero-spacer {
+                margin-top: 50px;
+            }
+            .hero-feature {
+                margin-bottom: 30px;
+            }
+            footer {
+                margin: 50px 0;
+            }
+
+            /* hex: #a1bbc5 */
+            .oddResults {
+                background-color: rgba(161, 187, 197, 0.50);
+            }
+            
+            /* tooltip */
+            
+            .black-tooltip + .tooltip > .tooltip-inner {background-color: #000 ;}
+            .black-tooltip + .tooltip > .tooltip-arrow { border-bottom-color:#000; }
+         
+        </style>
+    </head>
+    <body ng-controller="MainController">
+
+       
+
+        <div ng-view></div>
+
+         <footer>
+            <div class="row text-center">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; Social Up 2015</p>
+                </div>
+            </div>
+        </footer>
+
+    </body>
+</html>
