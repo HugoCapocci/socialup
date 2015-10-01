@@ -4,6 +4,7 @@
   "description": "Optimize Social Network use",
   "main": "index.js",
   "scripts": {
+    "test": "mocha --recursive server/test/",
     "start": "node index.js",
     "postinstall": "node node_modules/bower/bin/bower install"
   },
@@ -16,7 +17,7 @@
     "q": "^1.2.0"
   },
   "engines": {
-    "node": "0.10.x"
+    "node": "4.1.1"
   },
   "repository": {
     "type": "git",
@@ -27,5 +28,10 @@
     "heroku",
     "express"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jasmine": "^2.3.2",
+    "mocha": "^2.3.3",
+    "should": "^7.1.0"
+  }
 }
