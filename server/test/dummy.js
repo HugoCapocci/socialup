@@ -9,4 +9,5 @@ describe("dummy need #1", function() {
     it("empty function should always return empty result", function() {
         should(dummy.emptyFunction()).be.exactly("");
     });
+    
 });

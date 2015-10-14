@@ -1,5 +1,7 @@
-var emptyFunction = function() {
+'use strict';
+
+function emptyFunction() {
     return "";
-};
+}
 
 exports.emptyFunction = emptyFunction;
