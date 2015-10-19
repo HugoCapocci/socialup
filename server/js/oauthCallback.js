@@ -2,7 +2,12 @@
 
 var express = require('express');
 var googleAPI = require('./googleAPI.js');
+var dailymotionAPI = require('./dailymotionAPI.js');
 var app = express();
+
+const DAILYMOTION_API_KEY ='899e322efb0511cecc7b';
+const DAILYMOTION_API_SECRET ='fb3ee342efb21270242f20c70e31a16ce1feee0c';
+const DAILYMOTION_REDIRECT_URL = 'http://localhost:3000/dailymotion2callback';
 
 /*app.configure('development', function() {
   app.use(express.errorHandler());
@@ -14,7 +19,7 @@ var app = express();
   /*app.use(express.favicon());*/
   /*app.use(express.logger('dev'));*/
   var bodyParser = require('body-parser');
-  app.use(bodyParser.urlencoded());
+  app.use(bodyParser.urlencoded({ extended: false }));
   var cookieParser = require('cookie-parser');
   app.use(cookieParser());
 /*});*/
@@ -22,10 +27,24 @@ var app = express();
 app.get('/google2callback', function(req, res) {
     console.log(req.query);
     var code = req.query.code;
-    console.log(code);    
+    console.log(code);
+    // validate client
     googleAPI.pushCode(code);
     res.send("OK");
-    //validate client
+
+});
+
+var dailymotionURL = "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+manage_videos+manage_playlists";
+
+console.log("dailymotionURL: ", dailymotionURL);
+
+app.get('/dailymotion2callback', function(req, res) {
+    
+    var code = req.query.code;
+    dailymotionAPI.pushCode(code).then(function() {
+         dailymotionAPI.sendVideo();
+    });
+    res.send("OK");
 });
 
 var server = app.listen(3000);
