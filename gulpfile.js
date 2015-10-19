@@ -7,6 +7,14 @@ var jshint = require('gulp-jshint');
 var packageJSON  = require('./package');
 var jshintConfig = packageJSON.jshintConfig;
 
+var mocha = require('gulp-mocha');
+
+gulp.task('unitTests', function () {
+    return gulp.src('server/test/*.js', {read: false})
+        // gulp-mocha needs filepaths so you can't have any plugins before it 
+        .pipe(mocha({reporter: 'nyan'}));
+});
+
 //for js in HTML files, not use with angular...
 gulp.task('lintHTML', function() {
     
@@ -21,7 +29,7 @@ gulp.task('lintHTML', function() {
     .pipe(jshint.reporter('default'));
 });
 
-gulp.task('jshintAngular', function() {
+gulp.task('jshintAngular', ['unitTests'], function() {
     
     jshintConfig.node=false;
     jshintConfig.esnext=false;
