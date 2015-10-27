@@ -1,6 +1,7 @@
 'use strict';
 var https = require('https');
 var http = require('http');
+var request = require('request');
 var Q = require('q');
 var fs = require('fs');
 var querystring = require('querystring');
@@ -10,7 +11,7 @@ const DAILYMOTION_API_KEY ='899e322efb0511cecc7b';
 const DAILYMOTION_API_SECRET ='fb3ee342efb21270242f20c70e31a16ce1feee0c';
 const DAILYMOTION_REDIRECT_URL = 'http://localhost:3000/dailymotion2callback';
 
-var token= {};
+var token;
 
 function pushCode(code) {
 
@@ -42,7 +43,7 @@ function pushCode(code) {
             //console.log('Response: ' + chunk);
             //TODO save the tokens
             token = JSON.parse(chunk);
-            deferred.resolve(chunk);
+            deferred.resolve(token);
             
             /*
             https://developer.dailymotion.com/api#video-upload
@@ -66,58 +67,67 @@ function pushCode(code) {
 
 function sendVideo() {
     
-    console.log('send video using access token: ',token.access_token);
+    var deferred = Q.defer();
     
     getUploadURL().then(function(urls) {
         //upload_url
-        //progress_url
-        
-        console.log("curl to " ,urls.upload_url);
-        
-        /*var urlComponent = urls.upload_url.replace('http://','').split('/upload?');
+        //progress_url        
+        console.log("curl to " ,urls.upload_url);        
+        var urlComponent = urls.upload_url.replace('http://','').split('/upload?');
         console.log("urlComponent: ", urlComponent);
         var fs = require('fs');
-        var filename = "server/test/uploadFile.flv";
-        var buf = fs.readFileSync(filename);
-        var stat = fs.statSync(filename);
-        var post_data = querystring.stringify({
-            'file' : buf
-        });
-
-        var post_options = {
-            host: urlComponent[0],
-            port: 80,
-            path: '/upload?'+urlComponent[1],
+        var filename = "server/test/uploadFile.mp4";
+               
+        //test with request API 
+        request({
             method: 'POST',
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'Content-Length': post_data.length
+            uri:    urls.upload_url,
+            auth:   {
+                bearer: token.access_token
+            },
+            formData: {
+                file: fs.createReadStream(filename)
             }
-        };
-        console.log("file length: ", stat.size);
-        console.log("post_data length: ", post_data.length);
-        var post_req = http.request(post_options, function(res) {
-            //console.log('htp request for video upload done '+ res.statusCode + ' ' +res.statusMessage);
-            console.log('htp request for video upload done ', res);
-            //res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                console.log('upload response: ', chunk);
-            });
-            res.on('end', function() {
-                console.log('http post ends'); 
-            });
-        });
-       
-        post_req.on('error', function(e) {
-            console.error(e);
-        });
-        
-         // post the data
-        post_req.write(post_data);
-        post_req.end();*/
-    });
+        }, function(err, response, body) {
             
+            if(err)
+                deferred.reject(new Error(err));
+            else {
+                var videoURL = JSON.parse(body).url;
+                console.log("video uploaded to URL: ", videoURL);
+                publishVideo(videoURL, deferred);
+            }
+        });
+    });
+    return deferred.promise;
+}
+
+function publishVideo(videoURL, deferred) {
     
+    request({
+        method : 'POST',
+        uri :  'https://api.dailymotion.com/me/videos',
+        auth : {
+            bearer: token.access_token
+        },
+        form : {
+            url: videoURL,
+            title : 'test',
+            channel : 'drhelmut',
+            description : 'test',
+            tags : ['popopo', 'WTC'],
+            published : true
+        }
+    }, function(err, response, body) {
+
+        if(err) {
+            console.log("cannot publish the video. Err: ",err);
+            deferred.reject(new Error(err));
+        } else { 
+            console.log("video published with response body ?", body);
+            deferred.resolve();
+        }
+    });
 }
 
 function getUploadURL() {
@@ -147,8 +157,8 @@ function getUploadURL() {
         });
     });
     
-    req.on('error', function(e) {
-        console.error(e);
+    req.on('error', function(e) {         
+        console.log('upload url error: ', e);
         deferred.reject(new Error(e));
     });
     

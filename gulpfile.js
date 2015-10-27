@@ -8,11 +8,23 @@ var packageJSON  = require('./package');
 var jshintConfig = packageJSON.jshintConfig;
 
 var mocha = require('gulp-mocha');
+var istanbul = require('gulp-istanbul');
 
-gulp.task('unitTests', function () {
+gulp.task('pre-test', function () {
+  return gulp.src(['server/**/*.js'])
+    // Covering files 
+    .pipe(istanbul())
+    // Force `require` to return covered files 
+    .pipe(istanbul.hookRequire());
+});
+
+gulp.task('unitTests', ['pre-test'], function () {
     return gulp.src('server/test/*.js', {read: false})
-        // gulp-mocha needs filepaths so you can't have any plugins before it 
-        .pipe(mocha({reporter: 'nyan'}));
+        // gulp-mocha needs filepaths so you can't have any plugins before it {reporter: 'nyan'}
+        .pipe(mocha())
+        .pipe(istanbul.writeReports());
+        // Enforce a coverage of at least 90% 
+      //  .pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } }));
 });
 
 //for js in HTML files, not use with angular...

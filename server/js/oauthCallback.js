@@ -25,11 +25,17 @@ const DAILYMOTION_REDIRECT_URL = 'http://localhost:3000/dailymotion2callback';
 /*});*/
 
 app.get('/google2callback', function(req, res) {
-    console.log(req.query);
+
     var code = req.query.code;
     console.log(code);
     // validate client
-    googleAPI.pushCode(code);
+    googleAPI.pushCode(code).then(function(tokens) {        
+        googleAPI.uploadFile(tokens).then(function() {
+            console.log("file uploaded");
+        }, function(err) {
+            console.error("error in file upload: ", err);
+        });
+    });
     res.send("OK");
 
 });
@@ -39,12 +45,18 @@ var dailymotionURL = "https://www.dailymotion.com/oauth/authorize?response_type=
 console.log("dailymotionURL: ", dailymotionURL);
 
 app.get('/dailymotion2callback', function(req, res) {
-    
+
     var code = req.query.code;
     dailymotionAPI.pushCode(code).then(function() {
-         dailymotionAPI.sendVideo();
+ 
+        //console.log("token retrieved ", tokens);
+        dailymotionAPI.sendVideo().then(function() {
+            res.send("OK");
+        }, function(err) {
+            res.send("ERROR "+err);
+        });        
     });
-    res.send("OK");
+    
 });
 
 var server = app.listen(3000);
