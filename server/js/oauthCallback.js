@@ -24,6 +24,8 @@ load REST API / start WEB server
 
 app.set('port', process.env.PORT || 5000);
 
+app.use(express.static(__dirname + '/public'));
+
 app.set('views', __dirname + '/public');
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -83,9 +85,9 @@ app.get('/facebook2callback', function(req, res) {
     
 });
 
-var server = app.listen(5000);
+var server = app.listen(app.get('port'), function() {
+   console.log('Express server started on port %s', server.address().port);
+});
 
 //generate client 
 console.log("valider URL: ", googleAPI.auth() );
-
-console.log('Express server started on port %s', server.address().port);

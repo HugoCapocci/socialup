@@ -7,9 +7,9 @@ var fs = require('fs');
 var querystring = require('querystring');
 
 //TODO externaliser dans variables denvironnement, git-ignored
-const DAILYMOTION_API_KEY ='899e322efb0511cecc7b';
-const DAILYMOTION_API_SECRET ='fb3ee342efb21270242f20c70e31a16ce1feee0c';
-const DAILYMOTION_REDIRECT_URL = 'http://localhost:3000/dailymotion2callback';
+const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY || '899e322efb0511cecc7b';
+const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET || 'fb3ee342efb21270242f20c70e31a16ce1feee0c';
+const DAILYMOTION_REDIRECT_URL = process.env.DAILYMOTION_REDIRECT_URL || 'http://localhost:3000/dailymotion2callback';
 
 var token;
 
