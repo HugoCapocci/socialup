@@ -22,7 +22,8 @@ STEP 2
 load REST API / start WEB server
 */
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 5000);
+
 app.set('views', __dirname + '/public');
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -82,7 +83,7 @@ app.get('/facebook2callback', function(req, res) {
     
 });
 
-var server = app.listen(3000);
+var server = app.listen(5000);
 
 //generate client 
 console.log("valider URL: ", googleAPI.auth() );
