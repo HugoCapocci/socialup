@@ -17,6 +17,8 @@
     "express": "~4.9.x",
     "googleapis": "^2.0.2",
     "moment": "^2.9.0",
+    "mongodb": "^2.0.47",
+    "node-schedule": "^0.2.9",
     "q": "^1.2.0",
     "querystring": "^0.2.0",
     "request": "^2.65.0"

@@ -13,6 +13,7 @@ var youtubeAPI = google.youtube({ version: 'v3', auth: oauth2Client });
 
 //generate url for OAuth authentication URI
 function auth() {
+
     // generate a url that asks permissions for Google+ and Google Calendar scopes
     var scopes = [
         'https://www.googleapis.com/auth/youtube.upload',
@@ -72,7 +73,7 @@ function uploadFile(tokens) {
         },
         resource : metaData
     };
-    
+
     // https://developers.google.com/youtube/v3/docs/videos/insert
     var videoUploadRequest = youtubeAPI.videos.insert(params, function() {
        // console.log("video uploaded on youtube on uri: ", videoUploadRequest.uri);
