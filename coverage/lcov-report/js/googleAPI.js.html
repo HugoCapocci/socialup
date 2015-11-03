@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">58.97% </span>
+        <span class="strong">48.94% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>23/39</span>
+        <span class='fraction'>23/47</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">50% </span>
+        <span class="strong">16.67% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/2</span>
+        <span class='fraction'>1/6</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">42.86% </span>
@@ -35,13 +35,13 @@
         <span class='fraction'>3/7</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">58.97% </span>
+        <span class="strong">48.94% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>23/39</span>
+        <span class='fraction'>23/47</span>
       </div>
     </div>
   </div>
-  <div class='status-line medium'></div>
+  <div class='status-line low'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -141,7 +141,27 @@
 96
 97
 98
-99</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -196,6 +216,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -209,6 +232,23 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -243,13 +283,13 @@
 var google = require('googleapis');
 var Q = require('q');
 &nbsp;
-const CLIENT_ID = '460439937906-82cfg0afrcijo1imh4la3hcb78h692ga.apps.googleusercontent.com';
-const CLIENT_SECRET = 'muE440-P1lSdV6OcNtnfeYIZ';
-const REDIRECT_URL = 'http://localhost:3000/google2callback';
+const GOOGLE_API_ID = process.env.GOOGLE_API_ID;
+const GOOGLE_API_SECRET = process.env.GOOGLE_API_SECRET;
+const GOOGLE_REDIRECT_URL = process.env.APP_URL + '/google2callback';
 //const REDIRECT_URL = 'https://oauth.io/auth';
 &nbsp;
 var OAuth2 = google.auth.OAuth2;
-var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+var oauth2Client = new OAuth2(GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_URL);
 var youtubeAPI = google.youtube({ version: 'v3', auth: oauth2Client });
 &nbsp;
 //generate url for OAuth authentication URI
@@ -286,7 +326,9 @@ function pushCode(code) {
     return deferred.promise;
 }
 &nbsp;
-<span class="fstat-no" title="function not covered" >function uploadFile(tokens) {</span>
+<span class="fstat-no" title="function not covered" >function uploadFile(tokens, file) {</span>
+    
+<span class="cstat-no" title="statement not covered" >    console.log('youtube UploadFile, file? ',file);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
     
@@ -303,17 +345,35 @@ function pushCode(code) {
           privacyStatus: 'private'
         }
     };
-<span class="cstat-no" title="statement not covered" >    var fs = require("fs");</span>
-<span class="cstat-no" title="statement not covered" >    var filename = "server/test/uploadFile.mp4";</span>
-<span class="cstat-no" title="statement not covered" >    var buf = fs.readFileSync(filename);</span>
-<span class="cstat-no" title="statement not covered" >    var params = {</span>
-        part : Object.keys(metaData).join(','),
-        media : {
-            mimeType :'video/x-flv',
-            body : buf
-        },
-        resource : metaData
-    };
+    
+<span class="cstat-no" title="statement not covered" >    var params;</span>
+<span class="cstat-no" title="statement not covered" >    if(file === undefined) {</span>
+<span class="cstat-no" title="statement not covered" >        var fs = require("fs");</span>
+<span class="cstat-no" title="statement not covered" >        var filename = "server/test/uploadFile.mp4";</span>
+<span class="cstat-no" title="statement not covered" >        var buf = fs.readFileSync(filename);</span>
+<span class="cstat-no" title="statement not covered" >        params = {</span>
+            part : Object.keys(metaData).join(','),
+            media : {
+                mimeType :'video/x-flv',
+                body : buf
+            },
+            resource : metaData
+        };
+    } else {
+<span class="cstat-no" title="statement not covered" >        var fs = require("fs");</span>
+<span class="cstat-no" title="statement not covered" >        var buf = fs.readFileSync(file.path);</span>
+<span class="cstat-no" title="statement not covered" >        if(buf === undefined) </span>
+<span class="cstat-no" title="statement not covered" >            deferred.reject(new Error('cannot load file from path'));</span>
+        
+<span class="cstat-no" title="statement not covered" >        params = {</span>
+            part : Object.keys(metaData).join(','),
+            media : {
+                mimeType : file.mimetype,
+                body : buf
+            },
+            resource : metaData
+        };
+    }
 &nbsp;
     // https://developers.google.com/youtube/v3/docs/videos/insert
 <span class="cstat-no" title="statement not covered" >    var videoUploadRequest = youtubeAPI.videos.insert(params, <span class="fstat-no" title="function not covered" >function() {</span></span>
@@ -327,7 +387,7 @@ function pushCode(code) {
  
 <span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('error', <span class="fstat-no" title="function not covered" >function(err) {</span></span>
 <span class="cstat-no" title="statement not covered" >        console.log("video upload request failed: ", err);</span>
-<span class="cstat-no" title="statement not covered" >         deferred.reject(new Error(err));</span>
+<span class="cstat-no" title="statement not covered" >        deferred.reject(new Error(err));</span>
     });
 &nbsp;
     //on data -&gt; TODO
@@ -343,7 +403,7 @@ exports.pushCode=pushCode;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Oct 30 2015 17:57:39 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Nov 03 2015 19:05:12 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

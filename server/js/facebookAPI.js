@@ -1,16 +1,14 @@
 'use strict';
 
-const FACEBOOK_APP_ID ='1547209032221140';
-const FACEBOOK_APP_SECRET ='77125a9aca3f82d53695d59329ca62f4';
-const FACEBOOK_REDIRECT_URI = 'http://localhost:3000/facebook2callback';
+const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
+const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
+const FACEBOOK_REDIRECT_URI = process.env.APP_URL + '/facebook2callback';
 
-var FBOAuthURL = 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=publish_actions+user_managed_groups';//+'&response_type=token';
 var https = require('https');
 var Q = require('q');
 var request = require('request');
 var token;
 
-console.log("facebook auth URL: ", FBOAuthURL);
 
 function pushCode(code) {
 
@@ -78,5 +76,12 @@ function sendVideo() {
     return deferred.promise;
 }
 
+function getOAuthURL() {
+    
+    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=publish_actions+user_managed_groups';//+'&response_type=token';
+
+}
+
 exports.pushCode=pushCode;
 exports.sendVideo=sendVideo;
+exports.getOAuthURL=getOAuthURL;

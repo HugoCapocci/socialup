@@ -6,6 +6,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Social Up</title>        
         
+        <!-- use require.js for dependeny injections -->
+        <script data-main="js/app/main.js" src="./require.js"></script>
+                
+        <link rel="stylesheet" href="bower_components/bootstrap-css-only/css/bootstrap.min.css" />
+        
         <style>            
             .stripped div:nth-child(even){
                 background-color: #dcdcdc;
@@ -67,11 +72,19 @@
             .black-tooltip + .tooltip > .tooltip-inner {background-color: #000 ;}
             .black-tooltip + .tooltip > .tooltip-arrow { border-bottom-color:#000; }
          
-        </style>
+        </style>     
+        
     </head>
     <body ng-controller="MainController">
-
-       
+        
+         <div class="container">             
+             <div>{{value}}</div>        
+             <div>                 
+                <a ng-repeat="provider in providers" href="{{oauthURLS[provider]}}" target="_blank">
+                    <img src="{{'images/'+provider+'.png'}}">
+                </a>
+             </div>
+        </div>
 
         <div ng-view></div>
 

@@ -2,13 +2,13 @@
 var google = require('googleapis');
 var Q = require('q');
 
-const CLIENT_ID = '460439937906-82cfg0afrcijo1imh4la3hcb78h692ga.apps.googleusercontent.com';
-const CLIENT_SECRET = 'muE440-P1lSdV6OcNtnfeYIZ';
-const REDIRECT_URL = 'http://localhost:3000/google2callback';
+const GOOGLE_API_ID = process.env.GOOGLE_API_ID;
+const GOOGLE_API_SECRET = process.env.GOOGLE_API_SECRET;
+const GOOGLE_REDIRECT_URL = process.env.APP_URL + '/google2callback';
 //const REDIRECT_URL = 'https://oauth.io/auth';
 
 var OAuth2 = google.auth.OAuth2;
-var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+var oauth2Client = new OAuth2(GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_URL);
 var youtubeAPI = google.youtube({ version: 'v3', auth: oauth2Client });
 
 //generate url for OAuth authentication URI
@@ -45,7 +45,9 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function uploadFile(tokens) {
+function uploadFile(tokens, file) {
+    
+    console.log('youtube UploadFile, file? ',file);
 
     var deferred = Q.defer();
     
@@ -62,17 +64,35 @@ function uploadFile(tokens) {
           privacyStatus: 'private'
         }
     };
-    var fs = require("fs");
-    var filename = "server/test/uploadFile.mp4";
-    var buf = fs.readFileSync(filename);
-    var params = {
-        part : Object.keys(metaData).join(','),
-        media : {
-            mimeType :'video/x-flv',
-            body : buf
-        },
-        resource : metaData
-    };
+    
+    var params;
+    if(file === undefined) {
+        var fs = require("fs");
+        var filename = "server/test/uploadFile.mp4";
+        var buf = fs.readFileSync(filename);
+        params = {
+            part : Object.keys(metaData).join(','),
+            media : {
+                mimeType :'video/x-flv',
+                body : buf
+            },
+            resource : metaData
+        };
+    } else {
+        var fs = require("fs");
+        var buf = fs.readFileSync(file.path);
+        if(buf === undefined) 
+            deferred.reject(new Error('cannot load file from path'));
+        
+        params = {
+            part : Object.keys(metaData).join(','),
+            media : {
+                mimeType : file.mimetype,
+                body : buf
+            },
+            resource : metaData
+        };
+    }
 
     // https://developers.google.com/youtube/v3/docs/videos/insert
     var videoUploadRequest = youtubeAPI.videos.insert(params, function() {
@@ -80,20 +100,19 @@ function uploadFile(tokens) {
     });
 
     videoUploadRequest.on('complete', function(response) {
-        console.log("video upload request complete with response: ", response);
+        //console.log("video upload request complete with response: ", response);
         deferred.resolve(response);
     });
  
     videoUploadRequest.on('error', function(err) {
-        console.log("video upload request failed: ", err);
-         deferred.reject(new Error(err));
+        //console.log("video upload request failed: ", err);
+        deferred.reject(new Error(err));
     });
 
     //on data -> TODO
-
     return deferred.promise;
-    
 }
+
 exports.uploadFile=uploadFile;
 exports.auth=auth;
 exports.pushCode=pushCode;

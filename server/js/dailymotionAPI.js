@@ -7,9 +7,9 @@ var fs = require('fs');
 var querystring = require('querystring');
 
 //TODO externaliser dans variables denvironnement, git-ignored
-const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY || '899e322efb0511cecc7b';
-const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET || 'fb3ee342efb21270242f20c70e31a16ce1feee0c';
-const DAILYMOTION_REDIRECT_URL = process.env.DAILYMOTION_REDIRECT_URL || 'http://localhost:3000/dailymotion2callback';
+const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
+const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
+const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
 var token;
 
@@ -40,17 +40,8 @@ function pushCode(code) {
     var post_req = https.request(post_options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-            //console.log('Response: ' + chunk);
-            //TODO save the tokens
             token = JSON.parse(chunk);
-            deferred.resolve(token);
-            
-            /*
-            https://developer.dailymotion.com/api#video-upload
-            GET /videos HTTP/1.1
-            Host: api.dailymotion.com
-            Authorization: Bearer <ACCESS_TOKEN>
-            */
+            deferred.resolve(token);      
         });       
     });
         
@@ -73,8 +64,8 @@ function sendVideo() {
         //upload_url
         //progress_url        
         console.log("curl to " ,urls.upload_url);        
-        var urlComponent = urls.upload_url.replace('http://','').split('/upload?');
-        console.log("urlComponent: ", urlComponent);
+       /* var urlComponent = urls.upload_url.replace('http://','').split('/upload?');
+        console.log("urlComponent: ", urlComponent);*/
         var fs = require('fs');
         var filename = "server/test/uploadFile.mp4";
                
@@ -166,5 +157,40 @@ function getUploadURL() {
     return deferred.promise;
 }
 
+function getUserInfo()  {
+    
+    var deferred = Q.defer();
+
+    var req_options = {
+        host: 'api.dailymotion.com',
+        port: 443,
+        path: '/user/me?fields=id,screenname,email',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer '+token.access_token
+        }
+    };
+
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+            deferred.resolve(JSON.parse(data));
+        });
+    });
+    
+    req.on('error', function(e) {         
+        console.log('get user infos error: ', e);
+        deferred.reject(new Error(e));
+    });
+    
+    req.end();
+    return deferred.promise;
+}
+    
 exports.sendVideo=sendVideo;
 exports.pushCode=pushCode;
+exports.getUserInfo=getUserInfo;
