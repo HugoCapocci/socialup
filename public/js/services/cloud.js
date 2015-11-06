@@ -11,7 +11,7 @@ define(['./module'], function (appModule) {
 
                 var deferred = $q.defer();
                 if(folderId===undefined)
-                    folderId='root'
+                    folderId='root';
                
                 $http.get('/cloudExplorer/'+folderId)
                 .then(function(response) {

@@ -18,6 +18,11 @@ const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
+const TEST_YOUTUBE = 'youtube';
+const TEST_DAILYMOTION = 'dailymotion';
+const TEST_FACEBOOK = 'facebook';
+const TEST_USER = 'user';
+
 /*
 STEP 1
 load existing scheduleEvents fromDataBase (nosql, format {date, event|eventName, eventsParams[]})
@@ -82,7 +87,7 @@ app.get('/google2callback', function(req, res) {
     // validate client
     googleAPI.pushCode(code).then(function(tokens) {
 
-        users[user].tokens['youtube']=tokens;
+        users[user].tokens[TEST_YOUTUBE]=tokens;
         console.log('stored token for youtube: ', users[user].tokens.youtube);
 
        /* googleAPI.checkDrive(tokens).then(function(files) {
@@ -102,7 +107,7 @@ app.get('/dailymotion2callback', function(req, res) {
 
     var code = req.query.code;
     
-    console.log('dailymotion code ')
+    console.log('dailymotion code ');
     
     //TODO improve the way user info in retrieved/send in the 'state' parameter
     var user = req.query.state;
@@ -116,7 +121,7 @@ app.get('/dailymotion2callback', function(req, res) {
         //retrieve user infos
         dailymotionAPI.getUserInfo(token).then(function(userInfo) {
             console.log("user id: " + userInfo.id);            
-            users[user].tokens['dailymotion']=token;
+            users[user].tokens[TEST_DAILYMOTION]=token;
             console.log('stored token for dailymotion: ', users[user].tokens.dailymotion);
             res.send("OK M."+userInfo.screenname);
         }, function(err) {
@@ -139,7 +144,7 @@ app.get('/facebook2callback', function(req, res) {
         };
     
     facebookAPI.pushCode(code).then(function(tokens) {
-       users[user].tokens['facebook']=tokens;
+       users[user].tokens[TEST_FACEBOOK]=tokens;
        console.log('stored token for facebook: ', users[user].tokens.facebook);
        res.send("FB AUTH OK");
     }, function(err) {
@@ -151,7 +156,7 @@ app.get('/facebook2callback', function(req, res) {
 app.get('/cloudExplorer/:folderId', function(req, res) {
 
     var folderId = req.params.folderId;
-    var myToken = users['user'].tokens['youtube'];
+    var myToken = users[TEST_USER].tokens[TEST_YOUTUBE];
     googleAPI.checkDrive(myToken, folderId).then(function(files) {
          res.send(files);
     }, function(err) {
@@ -173,7 +178,7 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
     if(req.body.isCloud) {
         
         //upload File to root folder
-        googleAPI.uploadDrive(users['user'].tokens['youtube'], req.file).then(function(results) {
+        googleAPI.uploadDrive(users[TEST_USER].tokens[TEST_YOUTUBE], req.file).then(function(results) {
             console.log("uploadDrive OK");
             fs.unlinkSync(req.file.path);
             res.send("uploadDrive OK");
@@ -212,7 +217,7 @@ function uploadToProviders(providers, file) {
 function uploadToProvider(provider, file) {
     console.log("curent provider "+provider); 
     var deffered = Q.defer();    
-    var myToken = users['user'].tokens[provider];
+    var myToken = users[TEST_USER].tokens[provider];
     var providerAPI;
     switch(provider) {
         case 'dailymotion' :

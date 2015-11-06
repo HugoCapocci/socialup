@@ -154,16 +154,10 @@ function checkDrive(tokens, folderId) {
         folderId='root';
 
     oauth2Client.setCredentials(tokens);
- 
-   // drive.files.list({maxResults: 100}, function(err, response) {
+    // drive.files.list({maxResults: 100}, function(err, response) {
     var filter = 'trashed=false';//'mimeType="application/vnd.google-apps.folder"'
     //list only folders
-    drive.children.list(
-        {
-            folderId : folderId, 
-            q: filter
-        }
-    , function(err, response) {
+    drive.children.list({ folderId : folderId, q: filter }, function(err, response) {
         if (err) {
           console.log('The API returned an error: ' + err);
           deferred.reject(new Error(err));
@@ -171,7 +165,7 @@ function checkDrive(tokens, folderId) {
         }
         //console.log('response: ', response);
         var files = response.items;
-        if (files.length == 0) {
+        if (files.length === 0) {
             console.log('No files found.');   
             deferred.resolve();
         } else {

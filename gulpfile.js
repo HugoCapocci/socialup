@@ -46,8 +46,9 @@ gulp.task('jshintAngular', ['unitTests'], function() {
     jshintConfig.node=false;
     jshintConfig.esnext=false;
     jshintConfig.browser=true;
+    jshintConfig.globals = {browser:true};
     
-    return gulp.src('./public/js/**/*.js')
+    return gulp.src(['./public/js/**/*.js', './require.js'])
     .pipe(jshint(jshintConfig))
     .pipe(jshint.reporter('jshint-stylish'))
     .pipe(jshint.reporter('fail'));

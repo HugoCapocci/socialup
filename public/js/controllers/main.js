@@ -19,7 +19,7 @@ define(['./module'], function (appModule) {
             
             $scope.providers.forEach(function(provider) {
                 authService.getProviderURL(provider).then(function(url) {
-                    console.log(provider+' url: ',url)
+                    console.log(provider+' url: ',url);
                     $scope.oauthURLS[provider]=url+'&state=user';
                 });
             });

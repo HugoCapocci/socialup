@@ -1,5 +1,3 @@
-'use strict';
-
 // TODO protéger zone admin par un filtre
 // TODO protéger tous les post/put/delete par un filtre
 define([
@@ -13,6 +11,8 @@ define([
     '../services/index',
     '../controllers/index' 
     ], function (angular) {
+    
+    'use strict';
         
         return angular.module('SocialUp', [
             'ngResource',
