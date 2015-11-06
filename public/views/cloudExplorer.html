@@ -1,4 +1,6 @@
- <div ng-controller="CloudExplorerController">   
+ <div ng-controller="CloudExplorerController">
+
+     <select class="form-control" ng-model="cloudExplorer.provider" ng-options="option for option in cloudExplorer.providers" ng-change="cloudExplorer.changeProvider()"></select> <br/>
     
      <treecontrol class="tree-classic"
        tree-model="dataForTheTree"

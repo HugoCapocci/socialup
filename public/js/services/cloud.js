@@ -7,13 +7,17 @@ define(['./module'], function (appModule) {
         function cloudService($http, $q, $window) {
 
             //authentication is made by provider callbacks
-            this.getFolders = function (folderId) {
+            this.getFolders = function(provider, folderId) {
 
                 var deferred = $q.defer();
                 if(folderId===undefined)
                     folderId='root';
-               
-                $http.get('/cloudExplorer/'+folderId)
+                
+                if(provider==='dropbox') {
+                    folderId = encodeURIComponent(folderId);
+                    console.log("encoded path ", folderId);
+                }
+                $http.get('/cloudExplorer/'+provider+'/'+folderId)
                 .then(function(response) {
                     console.log('response for folderId '+folderId+': ', response);
                     deferred.resolve(response.data);

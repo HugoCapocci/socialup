@@ -11,6 +11,7 @@ console.log("ENV ?", process.env.NODE_ENV);
 var googleAPI = require('./googleAPI.js');
 var dailymotionAPI = require('./dailymotionAPI.js');
 var facebookAPI = require('./facebookAPI.js');
+var dropboxAPI = require('./dropboxAPI.js');
 
 var app = express();
 
@@ -18,9 +19,10 @@ const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
-const TEST_YOUTUBE = 'youtube';
+const TEST_GOOGLE = 'google';
 const TEST_DAILYMOTION = 'dailymotion';
 const TEST_FACEBOOK = 'facebook';
+const TEST_DROPBOX = 'dropbox';
 const TEST_USER = 'user';
 
 /*
@@ -64,10 +66,12 @@ app.get('/oauthURL/:provider', function(req, res) {
         case 'facebook' :
             url = facebookAPI.getOAuthURL();
             break;
+        case 'dropbox' :
+            url = dropboxAPI.getOAuthURL();
+            break;
         default:
             res.send("404");
     }
-    
     res.send(url);
     console.log("oauth url for provider["+provider+"] -> ", url);
 });
@@ -87,8 +91,8 @@ app.get('/google2callback', function(req, res) {
     // validate client
     googleAPI.pushCode(code).then(function(tokens) {
 
-        users[user].tokens[TEST_YOUTUBE]=tokens;
-        console.log('stored token for youtube: ', users[user].tokens.youtube);
+        users[user].tokens[TEST_GOOGLE]=tokens;
+        console.log('stored token for google: ', users[user].tokens.google);
 
        /* googleAPI.checkDrive(tokens).then(function(files) {
              res.send(files);
@@ -142,7 +146,7 @@ app.get('/facebook2callback', function(req, res) {
         users[user] = {
             tokens : {} 
         };
-    
+
     facebookAPI.pushCode(code).then(function(tokens) {
        users[user].tokens[TEST_FACEBOOK]=tokens;
        console.log('stored token for facebook: ', users[user].tokens.facebook);
@@ -153,11 +157,45 @@ app.get('/facebook2callback', function(req, res) {
 
 });
 
-app.get('/cloudExplorer/:folderId', function(req, res) {
+app.get('/dropbox2callback', function(req, res) {
+
+    var code = req.query.code;
+    console.log("drop box code: ", code);
+    console.log("res.statusCode", res.statusCode);
+
+    var user = req.query.state;
+    if(users[user]===undefined)
+        users[user] = {
+            tokens : {} 
+        };
+    
+    dropboxAPI.pushCode(code).then(function(tokens) {
+       users[user].tokens[TEST_DROPBOX]=tokens;
+       console.log('stored token for dropbox: ', users[user].tokens.dropbox);
+       res.send("DROPBOX AUTH OK");
+    }, function(err) {
+        res.send("ERR AUTH");
+    });
+});
+
+app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
 
     var folderId = req.params.folderId;
-    var myToken = users[TEST_USER].tokens[TEST_YOUTUBE];
-    googleAPI.checkDrive(myToken, folderId).then(function(files) {
+    var provider = req.params.provider;
+
+    var myToken = users[TEST_USER].tokens[provider];
+    var providerAPI;
+    switch(provider) {
+        case 'google':
+            providerAPI = googleAPI;
+            break;
+        case 'dropbox' :
+            providerAPI = dropboxAPI;
+            break;
+    }
+    
+    console.log("Cloud provider: ", provider);
+    providerAPI.listFolder(myToken, folderId).then(function(files) {
          res.send(files);
     }, function(err) {
          res.send("Google OAuth OK but GoogleDrive err: "+err);
@@ -178,7 +216,7 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
     if(req.body.isCloud) {
         
         //upload File to root folder
-        googleAPI.uploadDrive(users[TEST_USER].tokens[TEST_YOUTUBE], req.file).then(function(results) {
+        googleAPI.uploadDrive(users[TEST_USER].tokens[TEST_GOOGLE], req.file).then(function(results) {
             console.log("uploadDrive OK");
             fs.unlinkSync(req.file.path);
             res.send("uploadDrive OK");

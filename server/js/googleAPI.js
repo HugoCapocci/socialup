@@ -147,7 +147,7 @@ function uploadDrive(tokens, file) {
     return deferred.promise;
 }
 
-function checkDrive(tokens, folderId) {
+function listFolder(tokens, folderId) {
 
     var deferred = Q.defer();
     if(folderId===undefined)
@@ -192,7 +192,9 @@ function checkFileData(fileId) {
             deferred.reject(err);
         } else {
             //console.log('mimeType? ', file.mimeType);
-            deferred.resolve({name:file.title, id: fileId, mimeType : file.mimeType});
+            deferred.resolve({
+                name:file.title, id: fileId, mimeType : file.mimeType, isFolder : file.mimeType === FOLDER_MIME_TYPE
+            });
         }
     });
     return deferred.promise;
@@ -202,5 +204,5 @@ exports.sendVideo=sendVideo;
 exports.auth=auth;
 exports.pushCode=pushCode;
 
-exports.checkDrive=checkDrive;
+exports.listFolder=listFolder;
 exports.uploadDrive=uploadDrive;
