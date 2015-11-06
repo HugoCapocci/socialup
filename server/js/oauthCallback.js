@@ -5,7 +5,12 @@ var multer  = require('multer');
 var upload = multer({ dest: 'server/uploads/' });
 var fs = require("fs");
 var Q = require('q');
-require('../../localeConfig.js');
+
+try {
+    require('../../localeConfig.js');
+} catch (error) {
+    console.warn("No configuration file found");
+}
 console.log("ENV ?", process.env.NODE_ENV);
 
 var googleAPI = require('./googleAPI.js');
