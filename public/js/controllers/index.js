@@ -1,4 +1,5 @@
 define([
     './main',
-    './uploadFile'
+    './uploadFile',
+    './cloudExplorer'
 ], function () {});

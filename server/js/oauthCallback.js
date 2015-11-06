@@ -4,6 +4,7 @@ var express = require('express');
 var multer  = require('multer');
 var upload = multer({ dest: 'server/uploads/' });
 var fs = require("fs");
+var Q = require('q');
 require('../../localeConfig.js');
 console.log("ENV ?", process.env.NODE_ENV);
 
@@ -83,14 +84,13 @@ app.get('/google2callback', function(req, res) {
 
         users[user].tokens['youtube']=tokens;
         console.log('stored token for youtube: ', users[user].tokens.youtube);
-        
-      /*  googleAPI.uploadFile(tokens).then(function() {
-            console.log("file uploaded");*/
-             res.send("OK");
-       /* }, function(err) {
-            console.error("error in file upload: ", err);
-            res.send("ERROR "+err);
+
+       /* googleAPI.checkDrive(tokens).then(function(files) {
+             res.send(files);
+        }, function(err) {
+             res.send("Google OAuth OK but GoogleDrive err: "+err);
         });*/
+        res.send("google auth OK");
     }, function(err) {
         console.error("error in token validation: ", err);
         res.send("ERROR "+err);
@@ -114,8 +114,7 @@ app.get('/dailymotion2callback', function(req, res) {
     //validate token
     dailymotionAPI.pushCode(code).then(function(token) {
         //retrieve user infos
-        dailymotionAPI.getUserInfo().then(function(userInfo) {
-            
+        dailymotionAPI.getUserInfo(token).then(function(userInfo) {
             console.log("user id: " + userInfo.id);            
             users[user].tokens['dailymotion']=token;
             console.log('stored token for dailymotion: ', users[user].tokens.dailymotion);
@@ -123,17 +122,9 @@ app.get('/dailymotion2callback', function(req, res) {
         }, function(err) {
             res.send("ERROR "+err);
         });
-        //console.log("token retrieved ", tokens);
-/*        dailymotionAPI.sendVideo().then(function() {
-            res.send("OK");
-        }, function(err) {
-            res.send("ERROR "+err);
-        });     */   
     });
     
 });
-
-console.log('FB URL', facebookAPI.getOAuthURL());
 
 app.get('/facebook2callback', function(req, res) {
 
@@ -148,38 +139,101 @@ app.get('/facebook2callback', function(req, res) {
         };
     
     facebookAPI.pushCode(code).then(function(tokens) {
-
        users[user].tokens['facebook']=tokens;
        console.log('stored token for facebook: ', users[user].tokens.facebook);
-       return facebookAPI.sendVideo();        
+       res.send("FB AUTH OK");
     }, function(err) {
         res.send("ERR AUTH");
-    }).then(function() {
-        res.send("VIDEO SEND !");
-    }, function(err) {
-        res.send("ERROR SENDING VIDEO"+err);
     });
 
 });
 
-app.post('/uploadFile', upload.single('file'), function(req, res) {
-    console.log("file upload - TODO");
-    console.log(req.file);
-    console.log('Title: ', req.body.title);
-    
-    //send file to youtube:   
+app.get('/cloudExplorer/:folderId', function(req, res) {
+
+    var folderId = req.params.folderId;
     var myToken = users['user'].tokens['youtube'];
-    console.log("myToken: ", myToken);
-    googleAPI.uploadFile(myToken, req.file).then(function() {
-        console.log("uploadFile OK");
-        //supprimer fichier tempo
-        fs.unlinkSync(req.file.path);
-        res.send("uploadFile OK");
+    googleAPI.checkDrive(myToken, folderId).then(function(files) {
+         res.send(files);
+    }, function(err) {
+         res.send("Google OAuth OK but GoogleDrive err: "+err);
+    });
+    
+});
+
+app.post('/uploadFile', upload.single('file'), function(req, res) {
+    
+    //dailymotion issue : need file extension
+    var path = req.file.path;
+    fs.renameSync(path, path+'_'+req.file.originalname);
+    req.file.path = path+'_'+req.file.originalname;
+    
+    console.log("file upload:");
+    console.log(req.file);
+
+    if(req.body.isCloud) {
+        
+        //upload File to root folder
+        googleAPI.uploadDrive(users['user'].tokens['youtube'], req.file).then(function(results) {
+            console.log("uploadDrive OK");
+            fs.unlinkSync(req.file.path);
+            res.send("uploadDrive OK");
+        }, function(err) {
+            console.error("error in uploadDrive: ", err);
+            res.send("uploadDrive ERROR "+err);
+        });
+        
+    } else {
+        // provider for fileupload
+        var providers = req.body.providers.split(',');
+        console.log('targeted providers: ', providers);
+
+        uploadToProviders(providers, req.file).then(function(results) {
+            console.log("uploadFile OK");
+            fs.unlinkSync(req.file.path);
+            res.send("uploadFile OK");
+        }, function(err) {
+            console.error("error in uploadFile: ", err);
+            res.send("uploadFile ERROR "+err);
+        });
+    }
+});
+
+function uploadToProviders(providers, file) {
+    
+    var results = [];
+    for(var i=0; i< providers.length; i++) {
+        var provider = providers[i];
+        results.push(uploadToProvider(provider, file));
+    }
+    console.log("waitig for "+results.length+" promises");
+    return Q.all(results);
+}
+
+function uploadToProvider(provider, file) {
+    console.log("curent provider "+provider); 
+    var deffered = Q.defer();    
+    var myToken = users['user'].tokens[provider];
+    var providerAPI;
+    switch(provider) {
+        case 'dailymotion' :
+            providerAPI = dailymotionAPI;
+            break;
+        case 'youtube' :
+            providerAPI = googleAPI;
+            break;
+        case 'facebook' :
+            providerAPI = facebookAPI;
+            break;
+    }
+    providerAPI.sendVideo(myToken, file).then(function() {
+        console.log("uploadFile OK with provider "+provider);
+        deffered.resolve('ok promise '+provider);
     }, function(err) {
         console.error("error in uploadFile: ", err);
-        res.send("uploadFile ERROR "+err);
-    }); 
-})
+        deffered.reject(new Error(err));
+    });
+    return deffered.promise;
+}
 
 var server = app.listen(app.get('port'), function() {
    console.log('Express server started on port %s', server.address().port);

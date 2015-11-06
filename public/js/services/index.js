@@ -1,3 +1,4 @@
 define([
-    './authentication'
+    './authentication',
+    './cloud'
 ], function () {});

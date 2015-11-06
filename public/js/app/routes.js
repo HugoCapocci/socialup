@@ -12,6 +12,12 @@ define(['angular', 'app'], function(angular, app) {
             reloadOnSearch : false
         });
         
+        $routeProvider.when('/cloudExplorer', {
+            templateUrl: 'views/cloudExplorer.html',
+            controller: 'CloudExplorerController',
+            reloadOnSearch : false
+        });
+        
     /*    $routeProvider.when('/', {
             templateUrl: 'views/home.html',
             controller: 'HomeController'

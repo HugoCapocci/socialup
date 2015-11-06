@@ -5,7 +5,8 @@ define(['./module'], function (appModule) {
     appModule.controller('UploadFileController', ['$scope', 'FileUploader', function($scope, FileUploader) {
         
         $scope.uploadFileData = {
-            title : "titre par défaut"
+            title : "titre par défaut",
+            isCloud : false
         };
         $scope.uploader = new FileUploader({url : '/uploadFile'});
         $scope.uploader.filters.push({
@@ -25,9 +26,14 @@ define(['./module'], function (appModule) {
         };
         
         $scope.validateFieldsAndUpload = function(item) {
-            item.formData = [{'title' : $scope.uploadFileData.title}];
+            item.formData = [{'title' : $scope.uploadFileData.title}, {'providers' : ['youtube', 'dailymotion','facebook'] }];
+            if($scope.uploadFileData.isCloud) {
+                console.log("add cloud option");
+                item.formData.push( {'isCloud' : true} );
+            }
             item.upload();
         };
+        
     }]);
 
 });

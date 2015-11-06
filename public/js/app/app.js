@@ -9,6 +9,7 @@ define([
     'angular-bootstrap',
     'angular-bootstrap-tpls',
     'angular-file-upload',
+    'angular-tree-control',
     '../services/index',
     '../controllers/index' 
     ], function (angular) {
@@ -19,6 +20,7 @@ define([
             'ui.bootstrap',
             'ui.bootstrap.tpls',
             'angularFileUpload',
+            'treeControl',
             'SocialUp.services',
             'SocialUp.controllers'
         ]);

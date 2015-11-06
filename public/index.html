@@ -8,9 +8,13 @@
         
         <!-- use require.js for dependeny injections -->
         <script data-main="js/app/main.js" src="./require.js"></script>
+
+        <!-- link for CSS when using the tree as a Dom element -->
+        <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control.css">
+        <!-- link for CSS when using the tree as an attribute -->
+        <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control-attribute.css">
                 
-        <link rel="stylesheet" href="bower_components/bootstrap-css-only/css/bootstrap.min.css" />
-        
+        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.min.css" />
         <style>            
             .stripped div:nth-child(even){
                 background-color: #dcdcdc;
@@ -85,6 +89,9 @@
                 </a>
              </div>
         </div>
+
+        <a href="#/uploadFile">upload a file</a><br/>
+        <a href="#/cloudExplorer">explore google drive</a><br/>
 
         <div ng-view></div>
 

@@ -7,8 +7,7 @@ const FACEBOOK_REDIRECT_URI = process.env.APP_URL + '/facebook2callback';
 var https = require('https');
 var Q = require('q');
 var request = require('request');
-var token;
-
+var fs = require("fs");
 
 function pushCode(code) {
 
@@ -30,8 +29,7 @@ function pushCode(code) {
         });
         res.on('end', function() {
             console.log("code validated ?  ",data);
-            token = JSON.parse(data);
-            deferred.resolve(token);
+            deferred.resolve(JSON.parse(data));
         });
     });
     
@@ -45,22 +43,17 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function sendVideo() {
-    
+function sendVideo(token, file) {
+
     var deferred = Q.defer();
-    
-    var fs = require("fs");
-    var filename = "server/test/uploadFile.mp4";
-    var buf = fs.readFileSync(filename);
     var GROUP_ID = '334292563361295';
     // 'me'
-
     request({
         method: 'POST',
         uri: 'https://graph-video.facebook.com/v2.5/'+GROUP_ID+'/videos',
         formData: {
             access_token : token.access_token,
-            source: fs.createReadStream(filename)
+            source: fs.createReadStream(file.path)
         }
 
     }, function(err, response, body) {

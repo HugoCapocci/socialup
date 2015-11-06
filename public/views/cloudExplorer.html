@@ -1,0 +1,12 @@
+ <div ng-controller="CloudExplorerController">   
+    
+     <treecontrol class="tree-classic"
+       tree-model="dataForTheTree"
+       options="treeOptions"
+       on-selection="showSelected(node)" 
+       on-node-toggle="showToggle(node, expanded, $parentNode, $index, $first, $middle, $last, $odd, $even)"
+       selected-node="node1">
+       {{node.name}}
+    </treecontrol>
+     
+</div>

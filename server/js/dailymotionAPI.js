@@ -11,8 +11,6 @@ const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
-var token;
-
 function pushCode(code) {
 
     var deferred = Q.defer();
@@ -40,11 +38,10 @@ function pushCode(code) {
     var post_req = https.request(post_options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-            token = JSON.parse(chunk);
-            deferred.resolve(token);      
+            deferred.resolve(JSON.parse(chunk));
         });       
     });
-        
+
     post_req.on('error', function(e) {
       deferred.reject(new Error(e));
     });
@@ -52,48 +49,43 @@ function pushCode(code) {
     // post the data
     post_req.write(post_data);
     post_req.end();
-   
+    
     return deferred.promise;
 }
 
-function sendVideo() {
+function sendVideo(token, file) {
     
     var deferred = Q.defer();
     
-    getUploadURL().then(function(urls) {
-        //upload_url
-        //progress_url        
-        console.log("curl to " ,urls.upload_url);        
-       /* var urlComponent = urls.upload_url.replace('http://','').split('/upload?');
-        console.log("urlComponent: ", urlComponent);*/
-        var fs = require('fs');
-        var filename = "server/test/uploadFile.mp4";
-               
+    getUploadURL(token).then(function(urls) {
+
         //test with request API 
         request({
             method: 'POST',
-            uri:    urls.upload_url,
-            auth:   {
+            uri: urls.upload_url,
+            auth: {
                 bearer: token.access_token
             },
             formData: {
-                file: fs.createReadStream(filename)
+                file: fs.createReadStream(file.path)
             }
         }, function(err, response, body) {
             
             if(err)
                 deferred.reject(new Error(err));
             else {
+                
+                console.log("body ?", body);
                 var videoURL = JSON.parse(body).url;
                 console.log("video uploaded to URL: ", videoURL);
-                publishVideo(videoURL, deferred);
+                publishVideo(videoURL, token, deferred);
             }
         });
     });
     return deferred.promise;
 }
 
-function publishVideo(videoURL, deferred) {
+function publishVideo(videoURL, token, deferred) {
     
     request({
         method : 'POST',
@@ -121,7 +113,7 @@ function publishVideo(videoURL, deferred) {
     });
 }
 
-function getUploadURL() {
+function getUploadURL(token) {
     
     var deferred = Q.defer();
 
@@ -143,7 +135,7 @@ function getUploadURL() {
             data+=chunk;
         });
         res.on('end', function() {
-            //console.log("upload url? ",data);
+            console.log("upload url? ",data);
             deferred.resolve(JSON.parse(data));
         });
     });
@@ -157,7 +149,7 @@ function getUploadURL() {
     return deferred.promise;
 }
 
-function getUserInfo()  {
+function getUserInfo(token)  {
     
     var deferred = Q.defer();
 

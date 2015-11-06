@@ -6,7 +6,8 @@ require.config({
         'angular-route' : '../../bower_components/angular-route/angular-route.min',
         'angular-bootstrap' : '../../bower_components/angular-bootstrap/ui-bootstrap',
         'angular-bootstrap-tpls' : '../../bower_components/angular-bootstrap/ui-bootstrap-tpls',
-        'angular-file-upload' : '../../bower_components/angular-file-upload/dist/angular-file-upload.min'
+        'angular-file-upload' : '../../bower_components/angular-file-upload/dist/angular-file-upload.min',
+        'angular-tree-control' : '../../bower_components/angular-tree-control/angular-tree-control'
     },
     shim : {
         'angular' : {
@@ -19,12 +20,15 @@ require.config({
         'angular-bootstrap' : {
             deps : ['angular']
         },
-         'angular-bootstrap-tpls' : {
+        'angular-bootstrap-tpls' : {
             deps : ['angular']
         },
-         'angular-file-upload' : {
+        'angular-file-upload' : {
             deps : ['angular']
-        }
+        },
+        'angular-tree-control' : {
+            deps : ['angular']
+        }        
     },
      // kick start application
     deps: ['./bootstrap']

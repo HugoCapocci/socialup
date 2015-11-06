@@ -1,6 +1,8 @@
  <div ng-controller="UploadFileController">
     
      <input type="file" nv-file-select uploader="uploader"/><br/>
+     
+     <input type="checkbox" ng-model="uploadFileData.isCloud" /> cloud? <br/>
     
      <ul>
         <li ng-repeat="item in uploader.queue">
