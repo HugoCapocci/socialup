@@ -12,9 +12,7 @@ describe("test Google API", function() {
 
     it("wrong token should be rejetcted", function(done) {
         
-        googleAPI.pushCode('4/bzJ4zkPNwJXShSLmB1IRhHRFyXcqFiNUEANXOZVtSEU').then(function() {
-            done('token should not be retrieved')
-        }, function(err) {
+        googleAPI.pushCode('4/bzJ4zkPNwJXShSLmB1IRhHRFyXcqFiNUEANXOZVtSEU').then(null, function(err) {
             done();
         });
  

@@ -17,6 +17,7 @@ var googleAPI = require('./googleAPI.js');
 var dailymotionAPI = require('./dailymotionAPI.js');
 var facebookAPI = require('./facebookAPI.js');
 var dropboxAPI = require('./dropboxAPI.js');
+var twitterAPI = require('./twitterAPI.js');
 
 var app = express();
 
@@ -27,6 +28,7 @@ const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 const TEST_GOOGLE = 'google';
 const TEST_DAILYMOTION = 'dailymotion';
 const TEST_FACEBOOK = 'facebook';
+const TEST_TWITTER = 'twitter';
 const TEST_DROPBOX = 'dropbox';
 const TEST_USER = 'user';
 
@@ -37,6 +39,17 @@ load existing scheduleEvents fromDataBase (nosql, format {date, event|eventName,
 var scheduledEvents = {}; //byUser
 
 var tokens = {};
+
+//clean temp files if any    
+var path = './server/uploads/';
+fs.readdir(path, function (err, files) {
+    if (err) {
+        console.log("cannot found folder "+path);
+    } else
+        files.forEach(function (file) {
+            fs.unlinkSync(file);
+        });
+});
 
 /*
 STEP 2
@@ -60,25 +73,48 @@ app.get('/oauthURL/:provider', function(req, res) {
     
     var provider = req.params.provider;
     var url;
-    switch(provider) {
-        case 'dailymotion' : 
-            url = "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists";
-            break;
-        case 'google' :
-        case 'youtube' :
-            url = googleAPI.auth();
-            break;
-        case 'facebook' :
-            url = facebookAPI.getOAuthURL();
-            break;
-        case 'dropbox' :
-            url = dropboxAPI.getOAuthURL();
-            break;
-        default:
-            res.send("404");
+    
+    //twitter is more complicated and cannot give synch url
+    if(provider==='twitter') {
+        
+        twitterAPI.getTokens().then(function(tokens) {
+        
+            //store token for user
+            if(users[TEST_USER]===undefined)
+                users[TEST_USER] = {
+                    tokens : {} 
+                };
+            //save user token (step1)
+            users[TEST_USER].tokens[TEST_TWITTER]=tokens;
+            res.send(twitterAPI.getOAuthURL()+'?oauth_token='+tokens.oauth_token);
+        }, function(err) {
+            console.log("error when computing twitter oauth url for user: ", err);
+            res.send(err);
+        });
+        
+    } else {
+        
+        switch(provider) {
+            case 'dailymotion' : 
+                url = "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists";
+                break;
+            case 'google' :
+            case 'youtube' :
+                url = googleAPI.auth();
+                break;
+            case 'facebook' :
+                url = facebookAPI.getOAuthURL();
+                break;
+            case 'dropbox' :
+                url = dropboxAPI.getOAuthURL();
+                break;
+          
+            default:
+                res.send("404");
+        }
+        res.send(url);
+        console.log("oauth url for provider["+provider+"] -> ", url);
     }
-    res.send(url);
-    console.log("oauth url for provider["+provider+"] -> ", url);
 });
 
 app.get('/google2callback', function(req, res) {
@@ -183,6 +219,53 @@ app.get('/dropbox2callback', function(req, res) {
     });
 });
 
+app.get('/twitter2callback', function(req, res) {
+    
+    console.log("callback data ",req.query);
+
+    var oauth_token = req.query.oauth_token;
+    var oauth_verifier = req.query.oauth_verifier;
+    var user = req.query.state;
+    
+    var tokens =  users[user].tokens[TEST_TWITTER];
+    tokens.oauth_token=oauth_token;
+    twitterAPI.getAccessToken(oauth_verifier, tokens).then(function(tokens2) {
+        
+        users[user].tokens[TEST_TWITTER]=tokens2;
+        
+        console.log("new tokens ",tokens2);
+        //tweete !
+        return twitterAPI.tweet(tokens2, "TEST MSG API");
+        //return twitterAPI.getTweets(tokens2);
+        
+    }, function(err) {
+        res.send("ERR TWITTER AUTH VERIFIER: ", err);
+   
+    }).then(
+        function(response) {
+           // console.log("TWITTER AUTH VERIFIER OK, tweets? ",response);
+            res.send("TWITTER AUTH VERIFIER OK");
+        }, function(err) {
+            res.send("TWITTER AUTH VERIFIER OK, tweet error: ", err);
+        }
+    );
+
+});
+
+app.post('/twitter/:oauthVerifier', function(req, res) { 
+
+    var oauthVerifier = req.params.oauthVerifier;
+    var user = TEST_USER;    
+    
+    twitterAPI.getAccessToken(oauthVerifier, users[user].tokens[TEST_TWITTER]).then(function(tokens) {
+       users[TEST_USER].tokens[TEST_TWITTER]=tokens;
+       res.send("TWITTER AUTH VERIFIER OK");
+    }, function(err) {
+        res.send("ERR TWITTER AUTH VERIFIER");
+    });
+    
+});
+
 app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
 
     var folderId = req.params.folderId;
@@ -220,9 +303,10 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
 
     if(req.body.isCloud) {
         
+        var myToken = users[TEST_USER].tokens[TEST_DROPBOX];
         //upload File to root folder
-        googleAPI.uploadDrive(users[TEST_USER].tokens[TEST_GOOGLE], req.file).then(function(results) {
-            console.log("uploadDrive OK");
+        dropboxAPI.uploadDrive(myToken, req.file).then(function(results) {
+            console.log("uploadDrive OK on dropbox");
             fs.unlinkSync(req.file.path);
             res.send("uploadDrive OK");
         }, function(err) {
@@ -253,12 +337,12 @@ function uploadToProviders(providers, file) {
         var provider = providers[i];
         results.push(uploadToProvider(provider, file));
     }
-    console.log("waitig for "+results.length+" promises");
+   // console.log("waitig for "+results.length+" promises");
     return Q.all(results);
 }
 
 function uploadToProvider(provider, file) {
-    console.log("curent provider "+provider); 
+    //console.log("curent provider "+provider); 
     var deffered = Q.defer();    
     var myToken = users[TEST_USER].tokens[provider];
     var providerAPI;
@@ -274,10 +358,10 @@ function uploadToProvider(provider, file) {
             break;
     }
     providerAPI.sendVideo(myToken, file).then(function() {
-        console.log("uploadFile OK with provider "+provider);
+      //  console.log("uploadFile OK with provider "+provider);
         deffered.resolve('ok promise '+provider);
     }, function(err) {
-        console.error("error in uploadFile: ", err);
+        //console.error("error in uploadFile: ", err);
         deffered.reject(new Error(err));
     });
     return deffered.promise;

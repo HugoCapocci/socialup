@@ -11,16 +11,32 @@ define(['./module'], function (appModule) {
 
                 var deferred = $q.defer();
                 $http.get('/oauthURL/'+provider)
-                .then(function (response) {
+                .then(function(response) {
+                    
                     console.log('response for provider '+provider+': ', response);
                     deferred.resolve(response.data);
-                }, function (err) {
+                }, function(err) {
+                    
                     console.log("err: ", err);
                     deferred.reject(err);
                 });
                 return deferred.promise;
             };
-            
+        
+            this.getTwitterAccessToken = function(oauthVerifier) {
+                var deferred = $q.defer();
+                $http.post('/twitter/'+oauthVerifier)
+                .then(function (response) {
+                    console.log('response for getTwitterAccessToken: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    
+                    console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+
         }]
     );
 });

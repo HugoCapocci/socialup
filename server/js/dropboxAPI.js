@@ -1,5 +1,10 @@
 'use strict';
 
+/*
+* DROP BOX WEB API
+* see https://www.dropbox.com/developers-v1/core/docs
+*/
+
 const DROPBOX_APP_KEY = process.env.DROPBOX_APP_KEY;
 const DROPBOX_APP_SECRET = process.env.DROPBOX_APP_SECRET;
 const DROPBOX_REDIRECT_URI = process.env.APP_URL + '/dropbox2callback';
@@ -68,8 +73,6 @@ function listFolder(token, path) {
         recursive: false,
         include_media_info: false
     };
-    
-    console.log("path? ", path);
 
     request({
         uri: 'https://'+END_POINT+'/2/files/list_folder',
@@ -100,6 +103,43 @@ function listFolder(token, path) {
     return deferred.promise;
 }
 
+function uploadDrive(tokens, file) {
+    
+    var deferred = Q.defer();
+    
+/*    var post_data = querystring.stringify({
+        'mode': 'overwrite',
+        'autorename': true,
+        'mute': false
+    });*/
+    // 
+    request({
+      /*  uri: 'https://content.dropboxapi.com/2/files/upload?arg='+post_data,*/
+        uri : 'https://content.dropboxapi.com/1/files_put/auto/'+file.originalname,
+        auth: {
+            bearer: tokens.access_token
+        },
+        method: "POST",
+        body: fs.readFileSync(file.path)
+    }, function (error, response, body){
+      
+        if(error)
+            deferred.reject(new Error(error));
+        else {
+            //console.log("data? ", body);
+            console.log("response? ", response);
+            deferred.resolve();
+        }
+    });
+    
+    return deferred.promise;
+    
+}
+
+function downloadFile() {
+    
+}
+
 function getOAuthURL() {
 
     //add require_role    
@@ -109,3 +149,4 @@ function getOAuthURL() {
 exports.pushCode=pushCode;
 exports.getOAuthURL=getOAuthURL;
 exports.listFolder=listFolder;
+exports.uploadDrive=uploadDrive;
