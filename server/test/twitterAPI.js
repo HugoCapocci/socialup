@@ -8,39 +8,50 @@ const TEST_BASE_STRING = 'POST&https%3A%2F%2Fapi.twitter.com%2F1%2Fstatuses%2Fup
 
 const TEST_SIGNING_KEY = 'kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE';
 
+const TEST_SIGNATURE = 'tnnArxj06cWHq44gCs1OSKk/jLY=';
+
 describe("test Twitter API", function() {
     
+     var params = {
+        status : 'Hello Ladies + Gentlemen, a signed OAuth request!',
+        include_entities : true,
+        oauth_consumer_key : 'xvz1evFS4wEEPTGEFPHBog',
+        oauth_nonce	: 'kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg',
+        oauth_signature_method: 'HMAC-SHA1',
+        oauth_timestamp	: 1318622958,
+        oauth_token	: '370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb',
+        oauth_version : '1.0'
+    };
+    
+    var httpMethod='post';
+    var url = 'https://api.twitter.com/1/statuses/update.json'; 
+    var consumerSecret='kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw';
+    var tokenSecret = 'LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE';
+    
     it("STEP 1 - signature base string encoding", function() {
-        
-        var httpMethod='post';
-        var url = 'https://api.twitter.com/1/statuses/update.json';
-        
-        var params = {
-            status : 'Hello Ladies + Gentlemen, a signed OAuth request!',
-            include_entities : true,
-            oauth_consumer_key : 'xvz1evFS4wEEPTGEFPHBog',
-            oauth_nonce	: 'kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg',
-            oauth_signature_method: 'HMAC-SHA1',
-            oauth_timestamp	: 1318622958,
-            oauth_token	: '370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb',
-            oauth_version : '1.0'
-        };
-        twitterAPI.createSignatureBaseString(params, httpMethod, url).should.equal(TEST_BASE_STRING);
-        
+        twitterAPI.createSignatureBaseString(params, httpMethod, url).should.equal(TEST_BASE_STRING); 
     });
 
     it("STEP 2 - signing key", function() {
-        
-        var consumerSecret='kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw';
-        var tokenSecret = 'LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE';
-
         twitterAPI.createSigningKey(consumerSecret, tokenSecret).should.equal(TEST_SIGNING_KEY);
-        
     });
     
     it('STEP 3 - create signature', function() {
-
-        twitterAPI.createSignature(TEST_BASE_STRING, TEST_SIGNING_KEY).should.equal('tnnArxj06cWHq44gCs1OSKk/jLY=');
+        twitterAPI.createSignature(TEST_BASE_STRING, TEST_SIGNING_KEY).should.equal(TEST_SIGNATURE);
+    });
+    
+    it('Global Signature TEST ', function() {
+        twitterAPI.getSignature(params, httpMethod, url, tokenSecret, consumerSecret).should.equal(TEST_SIGNATURE);
+    });
+    
+    it('body response to token object', function() {
+        var tokens = twitterAPI.bodyToTokens("param1=value1&param2=value2");
+        tokens.param1.should.equal('value1');
+        tokens.param2.should.equal('value2');
+    });
+    
+    if('check oauth url', function() {
+        twitterAPI.getOAuthURL().should.equal('https://api.twitter.com/oauth/authorize');
     });
     
 });

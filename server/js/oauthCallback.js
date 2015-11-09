@@ -233,7 +233,7 @@ app.get('/twitter2callback', function(req, res) {
         
         users[user].tokens[TEST_TWITTER]=tokens2;
         
-        console.log("new tokens ",tokens2);
+       /* console.log("new tokens ",tokens2);
         //tweete !
         return twitterAPI.tweet(tokens2, "TEST MSG API");
         //return twitterAPI.getTweets(tokens2);
@@ -241,8 +241,8 @@ app.get('/twitter2callback', function(req, res) {
     }, function(err) {
         res.send("ERR TWITTER AUTH VERIFIER: ", err);
    
-    }).then(
-        function(response) {
+    }).then(*/
+        //function(response) {
            // console.log("TWITTER AUTH VERIFIER OK, tweets? ",response);
             res.send("TWITTER AUTH VERIFIER OK");
         }, function(err) {
@@ -252,7 +252,7 @@ app.get('/twitter2callback', function(req, res) {
 
 });
 
-app.post('/twitter/:oauthVerifier', function(req, res) { 
+/*app.post('/twitter/:oauthVerifier', function(req, res) { 
 
     var oauthVerifier = req.params.oauthVerifier;
     var user = TEST_USER;    
@@ -264,7 +264,7 @@ app.post('/twitter/:oauthVerifier', function(req, res) {
         res.send("ERR TWITTER AUTH VERIFIER");
     });
     
-});
+});*/
 
 app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
 

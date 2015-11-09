@@ -38,10 +38,9 @@ function getTokens() {
         'oauth_timestamp' : Math.round(new Date() / 1000),
         'oauth_token' : TOKEN,
         'oauth_version' : '1.0'
-        
     };
     var url= 'https://api.twitter.com/oauth/request_token';
-    headerParams.oauth_signature = getSignature(headerParams, 'post', url, TOKEN_SECRET);
+    headerParams.oauth_signature = getSignature(headerParams, 'post', url, TOKEN_SECRET, APP_SECRET);
         
     request({
         uri : url,
@@ -94,11 +93,11 @@ function createSignature(baseString, signingKey) {
     return hmac.update(baseString).digest('base64');
 }
 
-function getSignature(params, httpMethod, url, tokenSecret) {
+//APP_SECRET
+function getSignature(params, httpMethod, url, tokenSecret, consumerSecret) {
     var baseString = createSignatureBaseString(params, httpMethod, url);
-    
     console.log("SIGNATURE BASE STRING ", baseString);
-    return createSignature(baseString, createSigningKey(APP_SECRET, tokenSecret));
+    return createSignature(baseString, createSigningKey(consumerSecret, tokenSecret));
 }
 
 // 'percent encode'
@@ -128,7 +127,7 @@ function getAccessToken(oauthVerifier, tokens) {
         console.log("pas de oauth token secret, use default");
         token_secret= TOKEN_SECRET;
     }
-    headerParams.oauth_signature = getSignature(headerParams, 'post', url, token_secret);
+    headerParams.oauth_signature = getSignature(headerParams, 'post', url, token_secret, APP_SECRET);
 
     request({
         uri : url,
@@ -168,7 +167,7 @@ function tweet(tokens, message) {
     globalParams.status=message;
     
     var url= 'https://api.twitter.com/1.1/statuses/update.json';
-    headerParams.oauth_signature = getSignature(globalParams, 'post', url, tokens.oauth_token_secret);
+    headerParams.oauth_signature = getSignature(globalParams, 'post', url, tokens.oauth_token_secret, APP_SECRET);
 
     request({
         uri : url,
@@ -208,7 +207,7 @@ function getTweets(tokens) {
     globalParams.user_id=tokens.user_id;
     
     var url= 'https://api.twitter.com/1.1/statuses/user_timeline.json';
-    headerParams.oauth_signature = getSignature(globalParams, 'get', url, tokens.oauth_token_secret);
+    headerParams.oauth_signature = getSignature(globalParams, 'get', url, tokens.oauth_token_secret, APP_SECRET);
 
     request({
         uri : url+'?user_id='+tokens.user_id,
@@ -250,3 +249,5 @@ exports.createSignature=createSignature;
 exports.getAccessToken=getAccessToken;
 exports.tweet=tweet;
 exports.getTweets=getTweets;
+exports.getSignature=getSignature;
+exports.bodyToTokens=bodyToTokens;
