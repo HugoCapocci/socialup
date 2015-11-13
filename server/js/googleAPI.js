@@ -1,4 +1,12 @@
 'use strict';
+
+/**
+* Google WEB API
+* Youtube see https://developers.google.com/youtube/v3/
+* GoogeDrive see https://developers.google.com/drive/web/about-sdk
+* Google+ see https://developers.google.com/+/domains/getting-started
+*/
+
 var google = require('googleapis');
 var Q = require('q');
 var fs = require("fs");
@@ -11,8 +19,9 @@ const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 
 var OAuth2 = google.auth.OAuth2;
 var oauth2Client = new OAuth2(GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_URL);
-var youtubeAPI = google.youtube({ version: 'v3', auth: oauth2Client });
-var drive = google.drive({ version: 'v2', auth: oauth2Client});
+var youtubeAPI = google.youtube({version: 'v3', auth: oauth2Client});
+var drive = google.drive({version: 'v2', auth: oauth2Client});
+/*var googlePlus = google.plusDomains({version : 'v1', auth: oauth2Client});*/
 
 //generate url for OAuth authentication URI
 function auth() {
@@ -25,11 +34,14 @@ function auth() {
         'https://www.googleapis.com/auth/youtube.force-ssl',
         'https://www.googleapis.com/auth/drive.file',
         'https://www.googleapis.com/auth/drive.appdata',
-        'https://www.googleapis.com/auth/drive.metadata.readonly'
+        'https://www.googleapis.com/auth/drive.metadata.readonly'/*,
+        'https://www.googleapis.com/auth/plus.me',
+        'https://www.googleapis.com/auth/plus.login',
+        'https://www.googleapis.com/auth/plus.stream.write'*/
     ];
     var url = oauth2Client.generateAuthUrl({
-      access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
-      scope: scopes // If you only need one scope you can pass it as string
+        access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
+        scope: scopes // If you only need one scope you can pass it as string
     });
     return url;
 }

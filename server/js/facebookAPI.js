@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+* FACEBOOK WEB API
+* see https://developers.facebook.com/docs/graph-api/using-graph-api/v2.5
+*/
+
 const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 const FACEBOOK_REDIRECT_URI = process.env.APP_URL + '/facebook2callback';
@@ -70,11 +75,33 @@ function sendVideo(token, file) {
 }
 
 function getOAuthURL() {
-    
     return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=publish_actions+user_managed_groups';//+'&response_type=token';
+}
 
+function postMessage(tokens, message) {
+
+    var deferred = Q.defer();
+    request({
+        method: 'POST',
+        uri: 'https://graph.facebook.com/me/feed',
+        formData: {
+            access_token : tokens.access_token,
+            message: message
+        }
+
+    }, function(err, response, body) {
+
+        if(err)
+            deferred.reject(new Error(err));
+        else {
+            console.log('FB Message Response: ' + response);
+            deferred.resolve(body);  
+        }
+    });
+    return deferred.promise;
 }
 
 exports.pushCode=pushCode;
 exports.sendVideo=sendVideo;
 exports.getOAuthURL=getOAuthURL;
+exports.postMessage=postMessage;

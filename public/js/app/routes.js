@@ -18,7 +18,13 @@ define(['angular', 'app'], function(angular, app) {
             reloadOnSearch : false
         });
         
-    /*    $routeProvider.when('/', {
+        $routeProvider.when('/postMessage', {
+            templateUrl: 'views/postMessage.html',
+            controller: 'PostMessageController',
+            reloadOnSearch : false
+        });
+        
+        /*  $routeProvider.when('/', {
             templateUrl: 'views/home.html',
             controller: 'HomeController'
         });*/

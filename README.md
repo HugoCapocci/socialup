@@ -12,6 +12,7 @@ DAILYMOTION_API_KEY, DAILYMOTION_API_SECRET : OAuth credentials for dailymotion
 FACEBOOK_APP_ID, FACEBOOK_APP_SECRET : OAuth credentials for facebook
 GOOGLE_API_ID, GOOGLE_API_SECRET : OAuth credentials for google/youtube
 DROPBOX_APP_KEY, DROPBOX_APP_SECRET : OAuth credentials for dropbox cloud storage
+TWITTER_APP_KEY, TWITTER_APP_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET : OAuth credentials for twitter
 
 MONGOLAB_URI : Url to cloud mongolab database
 APP_URL : your target URL

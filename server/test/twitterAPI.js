@@ -49,8 +49,8 @@ describe("test Twitter API", function() {
         tokens.param1.should.equal('value1');
         tokens.param2.should.equal('value2');
     });
-    
-    if('check oauth url', function() {
+
+    it('check oauth url', function() {
         twitterAPI.getOAuthURL().should.equal('https://api.twitter.com/oauth/authorize');
     });
     

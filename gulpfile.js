@@ -9,6 +9,7 @@ var jshintConfig = packageJSON.jshintConfig;
 
 var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
+var uglify = require('gulp-uglify');
 
 gulp.task('pre-test', function () {
   return gulp.src(['server/**/*.js'])

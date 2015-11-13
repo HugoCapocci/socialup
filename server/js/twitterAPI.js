@@ -152,7 +152,7 @@ function getAccessToken(oauthVerifier, tokens) {
     return deferred.promise;
 }
 
-function tweet(tokens, message) {
+function postMessage(tokens, message) {
     
     var deferred = Q.defer();
     var headerParams = {
@@ -247,7 +247,7 @@ exports.createSignatureBaseString=createSignatureBaseString;
 exports.createSigningKey=createSigningKey;
 exports.createSignature=createSignature;
 exports.getAccessToken=getAccessToken;
-exports.tweet=tweet;
+exports.postMessage=postMessage;
 exports.getTweets=getTweets;
 exports.getSignature=getSignature;
 exports.bodyToTokens=bodyToTokens;

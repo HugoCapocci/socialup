@@ -34,11 +34,10 @@ const TEST_USER = 'user';
 
 /*
 STEP 1
-load existing scheduleEvents fromDataBase (nosql, format {date, event|eventName, eventsParams[]})
+load existing scheduleEvents fromDataBase
 */
-var scheduledEvents = {}; //byUser
-
-var tokens = {};
+var scheduler = require('./scheduler.js');
+scheduler.loadScheduledEvents();
 
 //clean temp files if any    
 var path = './server/uploads/';
@@ -57,6 +56,7 @@ load REST API / start WEB server
 */
 //store users with data and oauth tokens
 var users = {};
+var tokens = {};
 
 app.set('port', process.env.PORT);
 
@@ -65,6 +65,7 @@ app.use(express.static('public'));
 app.set('views', __dirname + '/public');
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
@@ -113,14 +114,13 @@ app.get('/oauthURL/:provider', function(req, res) {
                 res.send("404");
         }
         res.send(url);
-        console.log("oauth url for provider["+provider+"] -> ", url);
+        //console.log("oauth url for provider["+provider+"] -> ", url);
     }
 });
 
 app.get('/google2callback', function(req, res) {
 
     var code = req.query.code;
-    console.log(code);
 
     //TODO improve the way user info in retrieved/send in the 'state' parameter
     var user = req.query.state;
@@ -235,7 +235,7 @@ app.get('/twitter2callback', function(req, res) {
         
        /* console.log("new tokens ",tokens2);
         //tweete !
-        return twitterAPI.tweet(tokens2, "TEST MSG API");
+        return twitterAPI.postMessage(tokens2, "TEST MSG API");
         //return twitterAPI.getTweets(tokens2);
         
     }, function(err) {
@@ -290,6 +290,54 @@ app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
     });
     
 });
+
+app.post('/message', function(req, res) {
+
+    //console.log("req.body: ",req.body);
+    var providers = req.body.providers;
+    var message = req.body.message; 
+
+    postMessageToProviders(providers, message).then(function() {
+         res.send();
+    }, function(err) {
+         res.send("Cannot send message err: "+err);
+    });
+});
+function postMessageToProviders(providers, message) {
+    var results = [];
+    for(var i=0; i< providers.length; i++) {
+        var provider = providers[i];
+        results.push(postMessageToProvider(provider, message));
+    }
+   // console.log("waitig for "+results.length+" promises");
+    return Q.all(results);
+}
+function postMessageToProvider(provider, message) {
+    
+    console.log("postMessageToProvider "+provider); 
+    var deffered = Q.defer();    
+    var myToken = users[TEST_USER].tokens[provider];
+    var providerAPI;
+    switch(provider) {
+        case 'twitter' :
+            providerAPI = twitterAPI;
+            break;
+        case 'google' :
+            providerAPI = googleAPI;
+            break;
+        case 'facebook' :
+            providerAPI = facebookAPI;
+            break;
+    }
+    providerAPI.postMessage(myToken, message).then(function() {
+      //  console.log("uploadFile OK with provider "+provider);
+        deffered.resolve('ok promise '+provider);
+    }, function(err) {
+        //console.error("error in uploadFile: ", err);
+        deffered.reject(new Error(err));
+    });
+    return deffered.promise;
+}
 
 app.post('/uploadFile', upload.single('file'), function(req, res) {
     
