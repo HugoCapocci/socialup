@@ -15,10 +15,23 @@ describe("schedule events service", function() {
     const USER = 'test_user';
     const USER2 = 'test_user_bis';
     
+    after(function(done) {
+
+        this.timeout(10000);
+        // empty collection after tests
+        var MongoClient = require('mongodb').MongoClient;      
+        MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
+            db.collection("scheduledEvents").remove({}, function() {
+                db.close();
+                done();
+            });
+        });
+    });
+
     it("schedule event with 1 parameter only", function(done) {
         // old date so job will be executed directly
         var date = new Date(2012, 10, 29, 10, 30, 0);
-        var event = function(param) {
+        var event = function(eventId, param) {
             console.log("event avec param: ", param);
             should(param).be.exactly("test");
             done();
@@ -32,7 +45,7 @@ describe("schedule events service", function() {
     it("schedule event with 3 parameters", function(done) {
         // old date so job will be executed directly
         var date = new Date(2012, 10, 29, 10, 30, 0);
-        var event = function(param1, param2, param3) {
+        var event = function(eventId, param1, param2, param3) {
             should(param1).be.exactly("test1");
             should(param2).be.exactly("test2");
             should(param3).be.exactly("test3");
@@ -48,7 +61,7 @@ describe("schedule events service", function() {
         // newer date        
         var date = new Date(Date.now() + 1500);
         var eventId;
-        var event = function(param) {
+        var event = function(eventId, param) {
             console.log("late event");
             should(param).be.exactly("late test");
             //event cannot be cancelled anymore, since it has been executed
@@ -91,21 +104,13 @@ describe("schedule events service", function() {
      
         var date = new Date(Date.now() + 3000);
         var eventId;
-        var event = function(param) {
+        var event = function(eventId, param) {
             finish(param);
         };
 
         function finish(param) {
             console.log("late event, eventId: ", eventId);
             should(param).be.exactly("late test");   
-            /*scheduler.deleteScheduledEvent(eventId).then(function(numberOfRemovedEvents) {
-                console.log("numberOfRemovedEvents: ",numberOfRemovedEvents);
-               (numberOfRemovedEvents).should.equal(1);
-                done();
-            }, function(err) {
-                console.log("error: ",err);
-                done(err);
-            });*/
             done();
         }
         scheduler.addEventListerner("event5", event);
@@ -122,13 +127,9 @@ describe("schedule events service", function() {
 
         var facebookAPI = require('../js/facebookAPI.js');
         var event = facebookAPI.getOAuthURL;
-        this.timeout(5000);
+        this.timeout(10000);
      
         var date = new Date(Date.now() + 3000);
-        /*var eventId = scheduler.scheduleEvent(USER, date, event, [""], function(oauthURL) {
-            (oauthURL.length).should.be.above(1);
-            done();
-        });*/
         scheduler.addEventListerner("event6", event);
         scheduler.saveScheduledEvent(USER, date, "event6", [""]).then(function(result) {
             console.log("result? ", result);

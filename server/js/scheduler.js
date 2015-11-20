@@ -28,7 +28,7 @@ function scheduleEvent(user, date, event, eventParams, callback) {
     return eventId;
 }
 
-function addEventToSchedule(user, date, event, eventParams, eventId, callback) {
+function addEventToSchedule(user, date, eventName, eventParams, eventId, callback) {
     
     //iso database
     if(scheduleEvents[user]===undefined)
@@ -37,11 +37,11 @@ function addEventToSchedule(user, date, event, eventParams, eventId, callback) {
     schedule.scheduleJob(eventId, date, function() {
 
         deleteEventFromUser(user, eventId);
-        // console.log("event found? ", event);            
-        var args = [event];
+        // console.log("eventName found? ", eventName);            
+        var args = [eventName, eventId];
         args = args.concat(eventParams);
         // console.log("args? ", args);
-        
+
         var hasListeners = eventEmitter.emit.apply(eventEmitter, args);
         if(!hasListeners) {
             console.log("pas de listener pour l'event ", event);
@@ -204,3 +204,4 @@ exports.cancelEvent=cancelEvent;
 exports.saveScheduledEvent=saveScheduledEvent;
 exports.deleteScheduledEvent=deleteScheduledEvent;
 exports.loadScheduledEvents=loadScheduledEvents;
+exports.updateEventAfterExecution=updateEventAfterExecution;

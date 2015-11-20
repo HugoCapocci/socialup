@@ -18,6 +18,7 @@ var dailymotionAPI = require('./dailymotionAPI.js');
 var facebookAPI = require('./facebookAPI.js');
 var dropboxAPI = require('./dropboxAPI.js');
 var twitterAPI = require('./twitterAPI.js');
+var userDAO = require('./userDAO.js');
 
 var app = express();
 
@@ -33,14 +34,58 @@ const TEST_DROPBOX = 'dropbox';
 const TEST_USER = 'user';
 
 /*
-STEP 1
+STEP1
+load users
+*/
+//store users with data and oauth tokens
+var users = {};
+function initiateUser(user) {
+    console.log("initiate user with id: ", user);
+    users[user] = {
+        id : user,
+        tokens : {} 
+    };
+}
+userDAO.retrieveUser(TEST_USER).then(function(user) {
+    console.log("retieved users: ", user);
+    if(user!==null)
+        users[TEST_USER]=user;
+});
+
+/*
+STEP 2
+add events listeners
 load existing scheduleEvents fromDataBase
 */
 var scheduler = require('./scheduler.js');
+
+// add post message event
+scheduler.addEventListerner("message", function(eventId, providers, message) {
+   
+    return postMessageToProviders(providers, message).then(function(result) {
+        scheduler.updateEventAfterExecution(eventId, result);
+        console.log("message event listener OK");
+    }, function(err) {
+        console.log("Cannot send message err: "+err);
+        scheduler.updateEventAfterExecution(eventId, err);
+    });
+});
+//uploadToProviders(providers, file)
+scheduler.addEventListerner("uploadVideo", function(eventId, providers, file) {
+   
+    uploadToProviders(providers, file).then(function(result) {
+        scheduler.updateEventAfterExecution(eventId, result);
+        console.log("message event listener OK");
+    }, function(err) {
+        console.log("Cannot send message err: "+err);
+        scheduler.updateEventAfterExecution(eventId, err);
+    });
+});
+
 scheduler.loadScheduledEvents();
 
 //clean temp files if any    
-var path = './server/uploads/';
+/*var path = './server/uploads/';
 fs.readdir(path, function (err, files) {
     if (err) {
         console.log("cannot found folder "+path);
@@ -48,15 +93,12 @@ fs.readdir(path, function (err, files) {
         files.forEach(function (file) {
             fs.unlinkSync(file);
         });
-});
+});*/
 
 /*
-STEP 2
+STEP 3
 load REST API / start WEB server
 */
-//store users with data and oauth tokens
-var users = {};
-var tokens = {};
 
 app.set('port', process.env.PORT);
 
@@ -82,9 +124,7 @@ app.get('/oauthURL/:provider', function(req, res) {
         
             //store token for user
             if(users[TEST_USER]===undefined)
-                users[TEST_USER] = {
-                    tokens : {} 
-                };
+                 initiateUser(TEST_USER);
             //save user token (step1)
             users[TEST_USER].tokens[TEST_TWITTER]=tokens;
             res.send(twitterAPI.getOAuthURL()+'?oauth_token='+tokens.oauth_token);
@@ -92,7 +132,7 @@ app.get('/oauthURL/:provider', function(req, res) {
             console.log("error when computing twitter oauth url for user: ", err);
             res.send(err);
         });
-        
+
     } else {
         
         switch(provider) {
@@ -125,21 +165,24 @@ app.get('/google2callback', function(req, res) {
     //TODO improve the way user info in retrieved/send in the 'state' parameter
     var user = req.query.state;
     if(users[user]===undefined)
-        users[user] = {
-            tokens : {} 
-        };
+        initiateUser(user);
     
     // validate client
     googleAPI.pushCode(code).then(function(tokens) {
 
         users[user].tokens[TEST_GOOGLE]=tokens;
-        console.log('stored token for google: ', users[user].tokens.google);
+        console.log('stored token for google: ', tokens /*users[user].tokens.google*/);
 
        /* googleAPI.checkDrive(tokens).then(function(files) {
              res.send(files);
         }, function(err) {
              res.send("Google OAuth OK but GoogleDrive err: "+err);
         });*/
+        return userDAO.saveUser(users[user]);
+
+    }).then(function(userSaved) {
+        users[user] = userSaved;
+        console.log("userSaved: ", userSaved);
         res.send("google auth OK");
     }, function(err) {
         console.error("error in token validation: ", err);
@@ -157,9 +200,7 @@ app.get('/dailymotion2callback', function(req, res) {
     //TODO improve the way user info in retrieved/send in the 'state' parameter
     var user = req.query.state;
     if(users[user]===undefined)
-        users[user] = {
-            tokens : {} 
-        };
+        initiateUser(user);
     
     //validate token
     dailymotionAPI.pushCode(code).then(function(token) {
@@ -167,8 +208,13 @@ app.get('/dailymotion2callback', function(req, res) {
         dailymotionAPI.getUserInfo(token).then(function(userInfo) {
             console.log("user id: " + userInfo.id);            
             users[user].tokens[TEST_DAILYMOTION]=token;
+            //userInfo.screenname
             console.log('stored token for dailymotion: ', users[user].tokens.dailymotion);
-            res.send("OK M."+userInfo.screenname);
+            return userDAO.saveUser(users[user]);
+
+        }).then(function(userSaved) {
+            users[user] = userSaved;
+            res.send("OK DAILYMOTION");
         }, function(err) {
             res.send("ERROR "+err);
         });
@@ -184,14 +230,16 @@ app.get('/facebook2callback', function(req, res) {
 
     var user = req.query.state;
     if(users[user]===undefined)
-        users[user] = {
-            tokens : {} 
-        };
-
+        initiateUser(user);
+    
     facebookAPI.pushCode(code).then(function(tokens) {
        users[user].tokens[TEST_FACEBOOK]=tokens;
        console.log('stored token for facebook: ', users[user].tokens.facebook);
-       res.send("FB AUTH OK");
+       return userDAO.saveUser(users[user]);
+
+    }).then(function(userSaved) {
+        users[user] = userSaved;
+        res.send("FB AUTH OK");
     }, function(err) {
         res.send("ERR AUTH");
     });
@@ -206,15 +254,19 @@ app.get('/dropbox2callback', function(req, res) {
 
     var user = req.query.state;
     if(users[user]===undefined)
-        users[user] = {
-            tokens : {} 
-        };
+        initiateUser(user);
     
     dropboxAPI.pushCode(code).then(function(tokens) {
        users[user].tokens[TEST_DROPBOX]=tokens;
        console.log('stored token for dropbox: ', users[user].tokens.dropbox);
+        
+       return userDAO.saveUser(users[user]);
+
+    }).then(function(userSaved) {
+        users[user] = userSaved;       
        res.send("DROPBOX AUTH OK");
     }, function(err) {
+        console.log("err auth dropbox: ",err);
         res.send("ERR AUTH");
     });
 });
@@ -230,25 +282,16 @@ app.get('/twitter2callback', function(req, res) {
     var tokens =  users[user].tokens[TEST_TWITTER];
     tokens.oauth_token=oauth_token;
     twitterAPI.getAccessToken(oauth_verifier, tokens).then(function(tokens2) {
-        
         users[user].tokens[TEST_TWITTER]=tokens2;
-        
-       /* console.log("new tokens ",tokens2);
-        //tweete !
-        return twitterAPI.postMessage(tokens2, "TEST MSG API");
-        //return twitterAPI.getTweets(tokens2);
-        
+        return userDAO.saveUser(users[user]);
+
+    }).then(function(userSaved) {
+        users[user] = userSaved;
+        res.send("TWITTER AUTH VERIFIER OK");
+
     }, function(err) {
-        res.send("ERR TWITTER AUTH VERIFIER: ", err);
-   
-    }).then(*/
-        //function(response) {
-           // console.log("TWITTER AUTH VERIFIER OK, tweets? ",response);
-            res.send("TWITTER AUTH VERIFIER OK");
-        }, function(err) {
-            res.send("TWITTER AUTH VERIFIER OK, tweet error: ", err);
-        }
-    );
+        res.send("TWITTER AUTH VERIFIER OK, tweet error: ", err);
+    });
 
 });
 
@@ -281,9 +324,9 @@ app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
             providerAPI = dropboxAPI;
             break;
     }
-    
+
     console.log("Cloud provider: ", provider);
-    providerAPI.listFolder(myToken, folderId).then(function(files) {
+    providerAPI.listFiles(myToken, folderId).then(function(files) {
          res.send(files);
     }, function(err) {
          res.send("Google OAuth OK but GoogleDrive err: "+err);
@@ -295,14 +338,27 @@ app.post('/message', function(req, res) {
 
     //console.log("req.body: ",req.body);
     var providers = req.body.providers;
-    var message = req.body.message; 
-
-    postMessageToProviders(providers, message).then(function() {
-         res.send();
-    }, function(err) {
-         res.send("Cannot send message err: "+err);
-    });
+    var message = req.body.message;
+    var scheduledDate = req.body.scheduledDate;
+    
+    if(scheduledDate===undefined)
+        postMessageToProviders(providers, message).then(function() {
+             res.send();
+        }, function(err) {
+             res.send("Cannot send message err: "+err);
+        });
+    else {
+        //scheduled event
+        console.log("schedule event for ",scheduledDate);
+        scheduler.saveScheduledEvent(TEST_USER, scheduledDate, "message", [providers, message]).then(function(eventId) {
+            res.send(eventId);
+        }, function(err) {
+            console.log("err dans save Scheduled Event: ", err);
+            res.send("Cannot create or save scheduled event: "+err);
+        });
+    }
 });
+
 function postMessageToProviders(providers, message) {
     var results = [];
     for(var i=0; i< providers.length; i++) {
@@ -363,18 +419,35 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
         });
         
     } else {
-        // provider for fileupload
+        
+        var scheduledDate = req.body.scheduledDate;
         var providers = req.body.providers.split(',');
-        console.log('targeted providers: ', providers);
+        
+        
+        console.log('scheduledDate? ', scheduledDate);
+        
+        if(scheduledDate===undefined) {
+        
+            // provider for fileupload            
+            console.log('targeted providers: ', providers);
 
-        uploadToProviders(providers, req.file).then(function(results) {
-            console.log("uploadFile OK");
-            fs.unlinkSync(req.file.path);
-            res.send("uploadFile OK");
-        }, function(err) {
-            console.error("error in uploadFile: ", err);
-            res.send("uploadFile ERROR "+err);
-        });
+            uploadToProviders(providers, req.file).then(function(/*results*/) {
+                console.log("uploadFile OK");
+                fs.unlinkSync(req.file.path);
+                res.send("uploadFile OK");
+            }, function(err) {
+                console.error("error in uploadFile: ", err);
+                res.send("uploadFile ERROR "+err);
+            });
+            //scheduled event
+        } else {
+            scheduler.saveScheduledEvent(TEST_USER, scheduledDate, "uploadVideo", [providers, req.file]).then(function(eventId) {
+                res.send(eventId);
+            }, function(err) {
+                console.log("err dans save Scheduled Event: ", err);
+                res.send("Cannot create or save scheduled event: "+err);
+            });
+        }
     }
 });
 
@@ -385,7 +458,7 @@ function uploadToProviders(providers, file) {
         var provider = providers[i];
         results.push(uploadToProvider(provider, file));
     }
-   // console.log("waitig for "+results.length+" promises");
+    // console.log("waitig for "+results.length+" promises");
     return Q.all(results);
 }
 

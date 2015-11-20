@@ -2,7 +2,7 @@
 
 /*
 * DROP BOX WEB API
-* see https://www.dropbox.com/developers-v1/core/docs
+* see https://www.dropbox.com/developers-v1/core/docs, https://dropbox.github.io/dropbox-api-v2-explorer/
 */
 
 const DROPBOX_APP_KEY = process.env.DROPBOX_APP_KEY;
@@ -60,14 +60,23 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function listFolder(token, path) {
+function listFiles(token, path, typeFilter) {
     
-    var deferred = Q.defer();
     if(path===undefined || path ==='root')
         path='';
     else 
         path = decodeURI(path);
- 
+
+    if(typeFilter===undefined)
+        return listFolder(token, path);
+    else
+        return searchFiles(token, path, typeFilter);
+}
+
+function listFolder(token, path) {
+       
+    var deferred = Q.defer();
+  
     var post_data = {
         path: path,
         recursive: false,
@@ -103,16 +112,58 @@ function listFolder(token, path) {
     return deferred.promise;
 }
 
+function searchFiles(token, path, typeFilter) {
+    
+    var deferred = Q.defer();
+  
+    var post_data = {
+        path: path,
+        recursive: false,
+        include_media_info: false,
+        query : 'mp4',
+        mode : 'filename'
+    };
+
+    request({
+        uri: 'https://'+END_POINT+'/2/files/search',
+        auth: {
+            bearer: token.access_token
+        },
+        method: "POST",
+        json: true,
+        body: post_data
+    }, function (error, response, body){
+        //console.log(response);
+        if(error)
+            deferred.reject(new Error(error));
+        else {
+           // console.log("data? ", body.entries);
+            var results = [];
+            if(body.entries)
+                for( var i=0; i<body.entries.length; i++) {
+                   var entry = body.entries[i];
+                   results.push({
+                       name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
+                   });
+                }
+            deferred.resolve(results);
+        }
+    });
+    return deferred.promise;
+}
+
 function uploadDrive(tokens, file) {
     
     var deferred = Q.defer();
     
-/*    var post_data = querystring.stringify({
+    /* 
+    var post_data = querystring.stringify({
         'mode': 'overwrite',
         'autorename': true,
         'mute': false
-    });*/
-    // 
+    });
+    */
+
     request({
       /*  uri: 'https://content.dropboxapi.com/2/files/upload?arg='+post_data,*/
         uri : 'https://content.dropboxapi.com/1/files_put/auto/'+file.originalname,
@@ -148,5 +199,5 @@ function getOAuthURL() {
 
 exports.pushCode=pushCode;
 exports.getOAuthURL=getOAuthURL;
-exports.listFolder=listFolder;
+exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;

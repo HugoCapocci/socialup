@@ -34,10 +34,10 @@ function auth() {
         'https://www.googleapis.com/auth/youtube.force-ssl',
         'https://www.googleapis.com/auth/drive.file',
         'https://www.googleapis.com/auth/drive.appdata',
-        'https://www.googleapis.com/auth/drive.metadata.readonly'/*,
+        'https://www.googleapis.com/auth/drive.metadata.readonly',
         'https://www.googleapis.com/auth/plus.me',
         'https://www.googleapis.com/auth/plus.login',
-        'https://www.googleapis.com/auth/plus.stream.write'*/
+        'https://www.googleapis.com/auth/plus.stream.write'
     ];
     var url = oauth2Client.generateAuthUrl({
         access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
@@ -159,17 +159,32 @@ function uploadDrive(tokens, file) {
     return deferred.promise;
 }
 
-function listFolder(tokens, folderId) {
+function listFiles(tokens, folderId, typeFilter) {
 
     var deferred = Q.defer();
-    if(folderId===undefined)
+    var filter = 'trashed=false';
+    
+    console.log("folderId? ", folderId);
+    
+    if(folderId===undefined) 
         folderId='root';
+    
+    if(folderId!=='root')
+        filter+=' and "'+folderId+'" in parents';
+    
+    //image or video
+    if(typeFilter !== undefined) {
+        filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") ';
+    }
+    
+    console.log("filter ? ", filter);
 
     oauth2Client.setCredentials(tokens);
     // drive.files.list({maxResults: 100}, function(err, response) {
-    var filter = 'trashed=false';//'mimeType="application/vnd.google-apps.folder"'
+   //'mimeType="application/vnd.google-apps.folder"'
     //list only folders
-    drive.children.list({ folderId : folderId, q: filter }, function(err, response) {
+    //drive.children.list({ folderId : folderId, q: filter }, function(err, response) {
+    drive.files.list({ folderId : folderId, q: filter}, function(err, response) {
         if (err) {
           console.log('The API returned an error: ' + err);
           deferred.reject(new Error(err));
@@ -181,6 +196,7 @@ function listFolder(tokens, folderId) {
             console.log('No files found.');   
             deferred.resolve();
         } else {
+            console.log('Files found: ', files.length);
             deferred.resolve(checkFilesData(files));
         }
     });
@@ -191,16 +207,18 @@ function checkFilesData(files) {
     var results = [];
     for (var i = 0; i < files.length; i++) {
         var file = files[i];
-        results.push(checkFileData(file.id));  
+        results.push({
+            name:file.title, id: file.id, mimeType : file.mimeType, isFolder : file.mimeType === FOLDER_MIME_TYPE
+        });  
     }
     return Q.all(results);
 }
 
-function checkFileData(fileId) {
+/*function checkFileData(fileId) {
     var deferred = Q.defer();
     drive.files.get({fileId:fileId}, function(err, file) {
         if(err) {
-            console.log("cannot get data for fileId: ",fileId);
+            console.log("cannot get data for fileId: "+fileId+" error: ", err);
             deferred.reject(err);
         } else {
             //console.log('mimeType? ', file.mimeType);
@@ -210,11 +228,11 @@ function checkFileData(fileId) {
         }
     });
     return deferred.promise;
-}
+}*/
 
 exports.sendVideo=sendVideo;
 exports.auth=auth;
 exports.pushCode=pushCode;
 
-exports.listFolder=listFolder;
+exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;

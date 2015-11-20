@@ -13,4 +13,22 @@
         </li>
     </ul>
 
+    <h4>programmer envoit le </h4>
+    <div class="row">
+        
+        <div class="col-md-6 col-xs-12">
+            <p class="input-group">
+              <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="uploadFileData.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+        </div>
+        
+        <div class="col-md-3 col-xs-6">
+            <uib-timepicker ng-model="uploadFileData.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
+        </div>
+        
+    </div>
+
 </div>
