@@ -5,13 +5,15 @@ var request = require('request');
 var Q = require('q');
 var fs = require('fs');
 var querystring = require('querystring');
+var userDAO = require('./userDAO.js');
 
 //TODO externaliser dans variables denvironnement, git-ignored
 const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
-function pushCode(code) {
+// retrieve auth token from auth code
+function pushCode(code, userId) {
 
     var deferred = Q.defer();
     
@@ -38,7 +40,8 @@ function pushCode(code) {
     var post_req = https.request(post_options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
-            deferred.resolve(JSON.parse(chunk));
+            var tokens =JSON.parse(chunk);
+            deferred.resolve( saveTokensForUser(tokens, userId) );
         });       
     });
 
@@ -53,18 +56,90 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function sendVideo(token, file) {
+function saveTokensForUser(tokens, userId) {
+
+    tokens.expiration_time = Date.now() + tokens.expires_in;
+    delete tokens.expires_in;
+    userDAO.updateUserTokens(userId, 'dailymotion', tokens);
+    return tokens;
+}
+
+function checkAccessTokenValidity(tokens, userId) {
+  
+   // console.log("tokens? ", tokens);  
+    var deferred = Q.defer();
+    if(tokens.expiration_time <= Date.now() ) {
+        console.log("refresh dailymotion oauth token ");
+        return refreshTokens(tokens, userId);
+    } else {
+        deferred.resolve(tokens);
+        return deferred.promise;
+    }
+} 
+
+/*
+    see https://developer.dailymotion.com/api#using-refresh-tokens
+*/
+function refreshTokens(tokens, userId) {
     
     var deferred = Q.defer();
     
-    getUploadURL(token).then(function(urls) {
+    //ask for token
+    var post_data = querystring.stringify({
+        'grant_type' : 'refresh_token',
+        'client_id': DAILYMOTION_API_KEY,
+        'client_secret': DAILYMOTION_API_SECRET,
+       /* 'redirect_uri' : DAILYMOTION_REDIRECT_URL,*/
+        'refresh_token' : tokens.refresh_token
+    });
+    
+    var post_options = {
+        host: 'api.dailymotion.com',
+        port: 443,
+        path: '/oauth/token',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': post_data.length
+        }
+    };
+
+    var post_req = https.request(post_options, function(res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            var tokens = JSON.parse(chunk);
+            deferred.resolve( saveTokensForUser(tokens, userId) );
+        });       
+    });
+
+    post_req.on('error', function(e) {
+      deferred.reject(new Error(e));
+    });
+
+    // post the data
+    post_req.write(post_data);
+    post_req.end();
+    
+    return deferred.promise;
+}
+
+function sendVideo(tokens, file, userId, params) {
+    
+    var deferred = Q.defer();
+    //always check tokens validity before use
+    checkAccessTokenValidity(tokens, userId).then(function(validTokens) {
+
+        tokens=validTokens;
+        return getUploadURL(validTokens);
+    
+    }).then(function(urls) {
 
         //test with request API 
         request({
             method: 'POST',
             uri: urls.upload_url,
             auth: {
-                bearer: token.access_token
+                bearer: tokens.access_token
             },
             formData: {
                 file: fs.createReadStream(file.path)
@@ -78,27 +153,27 @@ function sendVideo(token, file) {
                 console.log("body ?", body);
                 var videoURL = JSON.parse(body).url;
                 console.log("video uploaded to URL: ", videoURL);
-                publishVideo(videoURL, token, deferred);
+                publishVideo(videoURL, tokens, params, deferred);
             }
         });
     });
     return deferred.promise;
 }
 
-function publishVideo(videoURL, token, deferred) {
-    
+function publishVideo(videoURL, tokens, params, deferred) {
+        
     request({
         method : 'POST',
         uri :  'https://api.dailymotion.com/me/videos',
         auth : {
-            bearer: token.access_token
+            bearer: tokens.access_token
         },
         form : {
             url: videoURL,
-            title : 'test',
+            title : params.title,
             channel : 'drhelmut',
-            description : 'test',
-            tags : ['popopo', 'WTC'],
+            description : params.description,
+            tags : params.tags,
             published : true
         }
     }, function(err, response, body) {
@@ -113,8 +188,8 @@ function publishVideo(videoURL, token, deferred) {
     });
 }
 
-function getUploadURL(token) {
-    
+function getUploadURL(tokens) {
+        
     var deferred = Q.defer();
 
     var req_options = {
@@ -123,7 +198,7 @@ function getUploadURL(token) {
         path: '/file/upload',
         method: 'GET',
         headers: {
-            'Authorization': 'Bearer '+token.access_token
+            'Authorization': 'Bearer '+tokens.access_token
         }
     };
 
@@ -135,7 +210,7 @@ function getUploadURL(token) {
             data+=chunk;
         });
         res.on('end', function() {
-            console.log("upload url? ",data);
+            console.log("dailymotion upload url? ",data);
             deferred.resolve(JSON.parse(data));
         });
     });

@@ -8,6 +8,7 @@ define([
     'angular-bootstrap-tpls',
     'angular-file-upload',
     'angular-tree-control',
+    'ng-tags-input',
     '../services/index',
     '../controllers/index' 
     ], function (angular) {
@@ -21,6 +22,7 @@ define([
             'ui.bootstrap.tpls',
             'angularFileUpload',
             'treeControl',
+            'ngTagsInput',
             'SocialUp.services',
             'SocialUp.controllers'
         ]);

@@ -46,11 +46,6 @@ function initiateUser(user) {
         tokens : {} 
     };
 }
-userDAO.retrieveUser(TEST_USER).then(function(user) {
-    console.log("retieved users: ", user);
-    if(user!==null)
-        users[TEST_USER]=user;
-});
 
 /*
 STEP 2
@@ -64,25 +59,42 @@ scheduler.addEventListerner("message", function(eventId, providers, message) {
    
     return postMessageToProviders(providers, message).then(function(result) {
         scheduler.updateEventAfterExecution(eventId, result);
-        console.log("message event listener OK");
+        console.log("message event OK");
     }, function(err) {
         console.log("Cannot send message err: "+err);
         scheduler.updateEventAfterExecution(eventId, err);
     });
 });
 //uploadToProviders(providers, file)
-scheduler.addEventListerner("uploadVideo", function(eventId, providers, file) {
+scheduler.addEventListerner("uploadVideo", function(eventId, providers, file, title, description, tags) {
    
-    uploadToProviders(providers, file).then(function(result) {
+    var params = {
+        title:title,
+        description:description,
+        tags:tags
+    };
+    uploadToProviders(providers, file, params).then(function(result) {
+        fs.unlinkSync(file.path);
         scheduler.updateEventAfterExecution(eventId, result);
-        console.log("message event listener OK");
+        console.log("upload video event OK");
     }, function(err) {
         console.log("Cannot send message err: "+err);
         scheduler.updateEventAfterExecution(eventId, err);
     });
 });
 
-scheduler.loadScheduledEvents();
+
+userDAO.retrieveUser(TEST_USER).then(function(user) {
+    console.log("retieved users: ", user);
+    if(user!==null)
+        users[TEST_USER]=user;
+    else 
+        initiateUser(TEST_USER);
+
+    scheduler.loadScheduledEvents();
+});
+
+
 
 //clean temp files if any    
 /*var path = './server/uploads/';
@@ -140,7 +152,6 @@ app.get('/oauthURL/:provider', function(req, res) {
                 url = "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists";
                 break;
             case 'google' :
-            case 'youtube' :
                 url = googleAPI.auth();
                 break;
             case 'facebook' :
@@ -152,6 +163,7 @@ app.get('/oauthURL/:provider', function(req, res) {
           
             default:
                 res.send("404");
+                return;
         }
         res.send(url);
         //console.log("oauth url for provider["+provider+"] -> ", url);
@@ -203,17 +215,22 @@ app.get('/dailymotion2callback', function(req, res) {
         initiateUser(user);
     
     //validate token
-    dailymotionAPI.pushCode(code).then(function(token) {
+    dailymotionAPI.pushCode(code, user.id).then(function(tokens) {
+     
+        //create expiration_time
+        tokens.expiration_time = Date.now() + tokens.expires_in;
+        delete tokens.expires_in;
+        
         //retrieve user infos
-        dailymotionAPI.getUserInfo(token).then(function(userInfo) {
+        dailymotionAPI.getUserInfo(tokens).then(function(userInfo) {
             console.log("user id: " + userInfo.id);            
-            users[user].tokens[TEST_DAILYMOTION]=token;
+            users[user].tokens[TEST_DAILYMOTION]=tokens;
             //userInfo.screenname
             console.log('stored token for dailymotion: ', users[user].tokens.dailymotion);
-            return userDAO.saveUser(users[user]);
+      /*      return userDAO.saveUser(users[user]);
 
         }).then(function(userSaved) {
-            users[user] = userSaved;
+            users[user] = userSaved;*/
             res.send("OK DAILYMOTION");
         }, function(err) {
             res.send("ERROR "+err);
@@ -395,6 +412,7 @@ function postMessageToProvider(provider, message) {
     return deffered.promise;
 }
 
+//sendvideo
 app.post('/uploadFile', upload.single('file'), function(req, res) {
     
     //dailymotion issue : need file extension
@@ -402,9 +420,6 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
     fs.renameSync(path, path+'_'+req.file.originalname);
     req.file.path = path+'_'+req.file.originalname;
     
-    console.log("file upload:");
-    console.log(req.file);
-
     if(req.body.isCloud) {
         
         var myToken = users[TEST_USER].tokens[TEST_DROPBOX];
@@ -423,15 +438,19 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
         var scheduledDate = req.body.scheduledDate;
         var providers = req.body.providers.split(',');
         
-        
         console.log('scheduledDate? ', scheduledDate);
         
+        var params = {
+            title : req.body.title,
+            description : req.body.description,
+            tags : req.body.tags.split(',')
+        };
+
         if(scheduledDate===undefined) {
         
             // provider for fileupload            
             console.log('targeted providers: ', providers);
-
-            uploadToProviders(providers, req.file).then(function(/*results*/) {
+            uploadToProviders(providers, req.file, params).then(function(/*results*/) {
                 console.log("uploadFile OK");
                 fs.unlinkSync(req.file.path);
                 res.send("uploadFile OK");
@@ -441,7 +460,9 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
             });
             //scheduled event
         } else {
-            scheduler.saveScheduledEvent(TEST_USER, scheduledDate, "uploadVideo", [providers, req.file]).then(function(eventId) {
+            scheduler.saveScheduledEvent(TEST_USER, scheduledDate, "uploadVideo", 
+                [providers, req.file, params.title, params.description, params.tags]
+            ).then(function(eventId) {
                 res.send(eventId);
             }, function(err) {
                 console.log("err dans save Scheduled Event: ", err);
@@ -451,18 +472,18 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
     }
 });
 
-function uploadToProviders(providers, file) {
+function uploadToProviders(providers, file, params) {
     
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(uploadToProvider(provider, file));
+        results.push(uploadToProvider(provider, file, params));
     }
     // console.log("waitig for "+results.length+" promises");
     return Q.all(results);
 }
 
-function uploadToProvider(provider, file) {
+function uploadToProvider(provider, file, params) {
     //console.log("curent provider "+provider); 
     var deffered = Q.defer();    
     var myToken = users[TEST_USER].tokens[provider];
@@ -471,14 +492,14 @@ function uploadToProvider(provider, file) {
         case 'dailymotion' :
             providerAPI = dailymotionAPI;
             break;
-        case 'youtube' :
+        case 'google' :
             providerAPI = googleAPI;
             break;
         case 'facebook' :
             providerAPI = facebookAPI;
             break;
     }
-    providerAPI.sendVideo(myToken, file).then(function() {
+    providerAPI.sendVideo(myToken, file, TEST_USER, params).then(function() {
       //  console.log("uploadFile OK with provider "+provider);
         deffered.resolve('ok promise '+provider);
     }, function(err) {

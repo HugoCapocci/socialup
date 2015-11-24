@@ -16,7 +16,7 @@ define(['./module'], function (appModule) {
             //authenticate user
 
             //oauth providers url
-            $scope.providers = ['dailymotion', 'youtube', 'facebook', 'dropbox', 'twitter'];
+            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter'];
             
             $scope.providers.forEach(function(provider) {
                 authService.getProviderURL(provider).then(function(url) {

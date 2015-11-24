@@ -48,8 +48,18 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function sendVideo(token, file) {
+function tagsAsHashtags(tags) {
 
+    //TODO /n
+    var hastags=" ";
+    for (var i=0; i<tags.length; i++) {
+       hastags+="#"+tags[i]+" ";   
+    }
+    return hastags;
+}
+
+function sendVideo(token, file, user, params) {
+    
     var deferred = Q.defer();
     var GROUP_ID = '334292563361295';
     // 'me'
@@ -58,7 +68,9 @@ function sendVideo(token, file) {
         uri: 'https://graph-video.facebook.com/v2.5/'+GROUP_ID+'/videos',
         formData: {
             access_token : token.access_token,
-            source: fs.createReadStream(file.path)
+            source: fs.createReadStream(file.path),
+            title : params.title,
+            description : params.description + tagsAsHashtags(params.tags)
         }
 
     }, function(err, response, body) {

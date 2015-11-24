@@ -52,7 +52,6 @@ function updateUser(user) {
     getDB(function(db) {
         //console.log('query: ', query);
         db.collection(collection).update(query, user, function(err/*, r*/) {
-    
             db.close();
             if(err) {
                 console.log("err: ", err);
@@ -62,6 +61,29 @@ function updateUser(user) {
         });
     });
     return deferred.promise;  
+}
+
+//asynch
+function updateUserTokens(userId, provider, tokens) {
+   
+    var query = {
+        id : userId
+    };
+    var fieldUpdate = {
+        $set : {}
+    };
+    fieldUpdate.$set["tokens."+provider]=tokens;
+    
+    getDB(function(db) {
+        db.collection(collection).update(query, fieldUpdate, {upsert:true}, function(err/*, r*/) {
+            db.close();
+            if(err) {
+                console.log("err: ", err);
+            } else
+                console.log("update token for provider "+provider+" OK");
+                
+        });
+    });
 }
 
 function retrieveUser(userId) {
@@ -83,3 +105,4 @@ function retrieveUser(userId) {
 
 exports.saveUser=saveUser;
 exports.retrieveUser=retrieveUser;
+exports.updateUserTokens=updateUserTokens;

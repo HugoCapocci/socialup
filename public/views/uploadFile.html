@@ -6,14 +6,21 @@
     
      <ul>
         <li ng-repeat="item in uploader.queue">
-            File Name: <span ng-bind="item.file.name"></span><br/>
-
-            <input type="text" ng-model="uploadFileData.title" value="Title"/><br/>
+            
+            Fichier : <span ng-bind="item.file.name"></span><br/>
+            Titre de la vidéo: <input type="text" ng-model="uploadFileData.title" value="Title"/><br/>
             <button ng-click="validateFieldsAndUpload(item)">upload</button>
         </li>
     </ul>
+     
+    <h4>Description de la vidéo</h4>
+    <textarea ng-model="uploadFileData.description"></textarea>
 
-    <h4>programmer envoit le </h4>
+    <h4>Tags de la vidéo</h4>
+    <tags-input ng-model="uploadFileData.tags" add-on-space="true"></tags-input>
+
+
+    <h4>Programmer envoi</h4>
     <div class="row">
         
         <div class="col-md-6 col-xs-12">

@@ -63,7 +63,8 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function sendVideo(tokens, file, fileData) {
+//todo replace tags by params.tags + param.title, params.description, categoryId ?
+function sendVideo(tokens, file, user, videoParams) {
 
     console.log('youtube UploadFile, file? ',file);
     var deferred = Q.defer();
@@ -72,9 +73,9 @@ function sendVideo(tokens, file, fileData) {
     
     var metaData = {
         snippet: {
-            title: 'test',
-            description: 'test',
-            tags: ['WTC', 'popopo'],
+            title: videoParams.title,
+            description: videoParams.description,
+            tags: videoParams.tags,
             categoryId: '22'
         },
         status: {
@@ -97,7 +98,7 @@ function sendVideo(tokens, file, fileData) {
 
     // https://developers.google.com/youtube/v3/docs/videos/insert
     var videoUploadRequest = youtubeAPI.videos.insert(params, function() {
-       // console.log("video uploaded on youtube on uri: ", videoUploadRequest.uri);
+        console.log("video uploaded on youtube on uri: ", videoUploadRequest.uri);
     });
 
     videoUploadRequest.on('complete', function(response) {

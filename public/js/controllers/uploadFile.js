@@ -5,9 +5,11 @@ define(['./module'], function (appModule) {
     appModule.controller('UploadFileController', ['$scope', 'FileUploader', function($scope, FileUploader) {
         
         $scope.uploadFileData = {
-            title : "titre par défaut",
+            title : "",
+            description : "",
             isCloud : false,
-            date : new Date()
+            date : new Date(),
+            tags : []
         };
         $scope.uploader = new FileUploader({url : '/uploadFile'});
         $scope.uploader.filters.push({
@@ -27,15 +29,24 @@ define(['./module'], function (appModule) {
         };
         
         $scope.validateFieldsAndUpload = function(item) {
+            
+            if($scope.uploadFileData.title.length<=3) {
+                console.log("le titre ne peut pas avoir moins de 3 caractères");
+                return;
+            }
+            
             item.formData = [
-                {'title' : $scope.uploadFileData.title}, 
-                {'providers' : ['youtube', 'dailymotion','facebook'] },
-                {'scheduledDate' : $scope.uploadFileData.date}
+                {'title' : $scope.uploadFileData.title},
+                {'description' : $scope.uploadFileData.description},
+                {'providers' : ['google', 'dailymotion','facebook'] },
+                {'scheduledDate' : $scope.uploadFileData.date},
+                {'tags' : processTags()}
             ];
             if($scope.uploadFileData.isCloud) {
                 console.log("add cloud option");
                 item.formData.push( {'isCloud' : true} );
             }
+            console.log("upload with formData ",item.formData);
             item.upload();
         };
         
@@ -81,6 +92,14 @@ define(['./module'], function (appModule) {
         $scope.changed = function () {
             console.log('Time changed to: ' + $scope.uploadFileData.date);
         };
+        
+        function processTags() {
+            var tags = [];
+            for(var i=0; i<$scope.uploadFileData.tags.length; i++) {
+                tags.push($scope.uploadFileData.tags[i].text);
+            }
+            return tags;
+        }
         
     }]);
 
