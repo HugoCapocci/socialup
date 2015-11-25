@@ -24,10 +24,10 @@ define(['angular', 'app'], function(angular, app) {
             reloadOnSearch : false
         });
         
-        /*  $routeProvider.when('/', {
-            templateUrl: 'views/home.html',
-            controller: 'HomeController'
-        });*/
+        $routeProvider.when('/login', {
+            templateUrl: 'views/login.html',
+            controller: 'LoginController'
+        });
         
 	}]
   );

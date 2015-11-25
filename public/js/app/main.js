@@ -8,7 +8,8 @@ require.config({
         'angular-bootstrap-tpls' : '../../bower_components/angular-bootstrap/ui-bootstrap-tpls',
         'angular-file-upload' : '../../bower_components/angular-file-upload/dist/angular-file-upload.min',
         'angular-tree-control' : '../../bower_components/angular-tree-control/angular-tree-control',
-        'ng-tags-input' : '../../bower_components/ng-tags-input/ng-tags-input'
+        'ng-tags-input' : '../../bower_components/ng-tags-input/ng-tags-input',
+        'sha1' : '../../bower_components/SHA-1/sha1'
     },
     shim : {
         'angular' : {

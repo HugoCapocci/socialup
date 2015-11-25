@@ -18,7 +18,10 @@ var dailymotionAPI = require('./dailymotionAPI.js');
 var facebookAPI = require('./facebookAPI.js');
 var dropboxAPI = require('./dropboxAPI.js');
 var twitterAPI = require('./twitterAPI.js');
+var linkedInAPI = require('./linkedInAPI.js');
+
 var userDAO = require('./userDAO.js');
+
 
 var app = express();
 
@@ -31,7 +34,7 @@ const TEST_DAILYMOTION = 'dailymotion';
 const TEST_FACEBOOK = 'facebook';
 const TEST_TWITTER = 'twitter';
 const TEST_DROPBOX = 'dropbox';
-const TEST_USER = 'user';
+const TEST_LINKEDIN = 'linkedin';
 
 /*
 STEP1
@@ -55,9 +58,9 @@ load existing scheduleEvents fromDataBase
 var scheduler = require('./scheduler.js');
 
 // add post message event
-scheduler.addEventListerner("message", function(eventId, providers, message) {
+scheduler.addEventListerner("message", function(eventId, userId, providers, message) {
    
-    return postMessageToProviders(providers, message).then(function(result) {
+    return postMessageToProviders(userId, providers, message).then(function(result) {
         scheduler.updateEventAfterExecution(eventId, result);
         console.log("message event OK");
     }, function(err) {
@@ -84,13 +87,11 @@ scheduler.addEventListerner("uploadVideo", function(eventId, providers, file, ti
 });
 
 
-userDAO.retrieveUser(TEST_USER).then(function(user) {
-    console.log("retieved users: ", user);
-    if(user!==null)
-        users[TEST_USER]=user;
-    else 
-        initiateUser(TEST_USER);
-
+userDAO.retrieveUsers().then(function(usersFound) {
+    console.log("retieved users: ", usersFound);
+    for(var i=0; i< usersFound.length;i++) {
+        users[usersFound[i]._id] = usersFound[i];        
+    }
     scheduler.loadScheduledEvents();
 });
 
@@ -124,21 +125,22 @@ var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 // returns URL for oauth authentication
-app.get('/oauthURL/:provider', function(req, res) {
+app.get('/oauthURL/:provider/:userId', function(req, res) {
     
     var provider = req.params.provider;
+    var userId = req.params.userId;
     var url;
     
     //twitter is more complicated and cannot give synch url
     if(provider==='twitter') {
         
-        twitterAPI.getTokens().then(function(tokens) {
+        twitterAPI.getTokens(userId).then(function(tokens) {
         
             //store token for user
-            if(users[TEST_USER]===undefined)
-                 initiateUser(TEST_USER);
+            if(users[userId]===undefined)
+                 initiateUser(userId);
             //save user token (step1)
-            users[TEST_USER].tokens[TEST_TWITTER]=tokens;
+            users[userId].tokens[TEST_TWITTER]=tokens;
             res.send(twitterAPI.getOAuthURL()+'?oauth_token='+tokens.oauth_token);
         }, function(err) {
             console.log("error when computing twitter oauth url for user: ", err);
@@ -160,7 +162,9 @@ app.get('/oauthURL/:provider', function(req, res) {
             case 'dropbox' :
                 url = dropboxAPI.getOAuthURL();
                 break;
-          
+            case 'linkedin' :
+                url = linkedInAPI.getOAuthURL();
+                break;
             default:
                 res.send("404");
                 return;
@@ -175,30 +179,33 @@ app.get('/google2callback', function(req, res) {
     var code = req.query.code;
 
     //TODO improve the way user info in retrieved/send in the 'state' parameter
-    var user = req.query.state;
-    if(users[user]===undefined)
-        initiateUser(user);
+    var userId = req.query.state;
+    if(users[userId]===undefined)
+        initiateUser(userId);
     
     // validate client
     googleAPI.pushCode(code).then(function(tokens) {
 
-        users[user].tokens[TEST_GOOGLE]=tokens;
+        users[userId].tokens[TEST_GOOGLE]=tokens;
         console.log('stored token for google: ', tokens /*users[user].tokens.google*/);
-
-       /* googleAPI.checkDrive(tokens).then(function(files) {
-             res.send(files);
-        }, function(err) {
-             res.send("Google OAuth OK but GoogleDrive err: "+err);
-        });*/
-        return userDAO.saveUser(users[user]);
+        return userDAO.saveUser(users[userId]);
 
     }).then(function(userSaved) {
-        users[user] = userSaved;
+        users[userId] = userSaved;
         console.log("userSaved: ", userSaved);
-        res.send("google auth OK");
+        
+        //check googlePlus data        
+        return googleAPI.getGooglePlusUser(users[userId].tokens[TEST_GOOGLE]);
+    
     }, function(err) {
         console.error("error in token validation: ", err);
         res.send("ERROR "+err);
+    }).then(function(googleplusUser) {
+        console.log("googleplusUser: ",googleplusUser);
+        res.send("google auth OK, google plus OK");
+    }, function(err) {
+        console.error("error googleplusUser: ", err);
+        res.send("google auth OK, google plus KO");
     });
    
 });
@@ -210,27 +217,25 @@ app.get('/dailymotion2callback', function(req, res) {
     console.log('dailymotion code ');
     
     //TODO improve the way user info in retrieved/send in the 'state' parameter
-    var user = req.query.state;
-    if(users[user]===undefined)
-        initiateUser(user);
+    var userId = req.query.state;
+    if(users[userId]===undefined)
+        initiateUser(userId);
     
     //validate token
-    dailymotionAPI.pushCode(code, user.id).then(function(tokens) {
-     
-        //create expiration_time
-        tokens.expiration_time = Date.now() + tokens.expires_in;
-        delete tokens.expires_in;
+    dailymotionAPI.pushCode(code, userId).then(function(tokens) {
         
+        console.log("DAILYMOTION OAUTH pushed, expiration_time: ",tokens.expiration_time);
+    
         //retrieve user infos
         dailymotionAPI.getUserInfo(tokens).then(function(userInfo) {
-            console.log("user id: " + userInfo.id);            
-            users[user].tokens[TEST_DAILYMOTION]=tokens;
+            console.log("dailymotion user id: " + userInfo.id);            
+            users[userId].tokens[TEST_DAILYMOTION]=tokens;
             //userInfo.screenname
-            console.log('stored token for dailymotion: ', users[user].tokens.dailymotion);
-      /*      return userDAO.saveUser(users[user]);
+            /*console.log('stored token for dailymotion: ', users[userId].tokens.dailymotion);
+            return userDAO.saveUser(users[userId]);
 
         }).then(function(userSaved) {
-            users[user] = userSaved;*/
+            users[userId] = userSaved;*/
             res.send("OK DAILYMOTION");
         }, function(err) {
             res.send("ERROR "+err);
@@ -245,20 +250,23 @@ app.get('/facebook2callback', function(req, res) {
     //console.log("FB code: ", req);
     console.log("res.statusCode", res.statusCode);
 
-    var user = req.query.state;
-    if(users[user]===undefined)
-        initiateUser(user);
+    var userId = req.query.state;
+    if(users[userId]===undefined)
+        initiateUser(userId);
     
     facebookAPI.pushCode(code).then(function(tokens) {
-       users[user].tokens[TEST_FACEBOOK]=tokens;
-       console.log('stored token for facebook: ', users[user].tokens.facebook);
-       return userDAO.saveUser(users[user]);
+
+        // expires_in is in milliseconds, should be around 2 hours
+        tokens.expiry_date = Date.now() + tokens.expires_in;
+        delete tokens.expires_in;
+        users[userId].tokens[TEST_FACEBOOK]=tokens;
+        return userDAO.saveUser(users[userId]);
 
     }).then(function(userSaved) {
-        users[user] = userSaved;
+        users[userId] = userSaved;
         res.send("FB AUTH OK");
     }, function(err) {
-        res.send("ERR AUTH");
+        res.send("ERR AUTH: "+err);
     });
 
 });
@@ -269,18 +277,18 @@ app.get('/dropbox2callback', function(req, res) {
     console.log("drop box code: ", code);
     console.log("res.statusCode", res.statusCode);
 
-    var user = req.query.state;
-    if(users[user]===undefined)
-        initiateUser(user);
+    var userId = req.query.state;
+    if(users[userId]===undefined)
+        initiateUser(userId);
     
     dropboxAPI.pushCode(code).then(function(tokens) {
-       users[user].tokens[TEST_DROPBOX]=tokens;
-       console.log('stored token for dropbox: ', users[user].tokens.dropbox);
+       users[userId].tokens[TEST_DROPBOX]=tokens;
+       console.log('stored token for dropbox: ', users[userId].tokens.dropbox);
         
-       return userDAO.saveUser(users[user]);
+       return userDAO.saveUser(users[userId]);
 
     }).then(function(userSaved) {
-        users[user] = userSaved;       
+        users[userId] = userSaved;       
        res.send("DROPBOX AUTH OK");
     }, function(err) {
         console.log("err auth dropbox: ",err);
@@ -294,31 +302,61 @@ app.get('/twitter2callback', function(req, res) {
 
     var oauth_token = req.query.oauth_token;
     var oauth_verifier = req.query.oauth_verifier;
-    var user = req.query.state;
+    var userId = req.query.state;
     
-    var tokens =  users[user].tokens[TEST_TWITTER];
+    var tokens =  users[userId].tokens[TEST_TWITTER];
     tokens.oauth_token=oauth_token;
     twitterAPI.getAccessToken(oauth_verifier, tokens).then(function(tokens2) {
-        users[user].tokens[TEST_TWITTER]=tokens2;
-        return userDAO.saveUser(users[user]);
+        users[userId].tokens[TEST_TWITTER]=tokens2;
+        return userDAO.saveUser(users[userId]);
 
     }).then(function(userSaved) {
-        users[user] = userSaved;
+        users[userId] = userSaved;
         res.send("TWITTER AUTH VERIFIER OK");
 
     }, function(err) {
-        res.send("TWITTER AUTH VERIFIER OK, tweet error: ", err);
+        res.send("TWITTER AUTH VERIFIER OK, tweet error: "+ err);
     });
 
 });
 
-/*app.post('/twitter/:oauthVerifier', function(req, res) { 
+app.get('/linkedin2callback', function(req, res) {
+    
+    console.log("linkedin2callback data ",req.query);
+    var code = req.query.code;
+
+    //TODO improve the way user info in retrieved/send in the 'state' parameter
+    var userId = req.query.state;
+    
+    linkedInAPI.pushCode(code).then(function(tokens) {
+        
+        //expires_in is in seconds
+        tokens.expiry_date = Date.now() + tokens.expires_in*1000;
+        delete tokens.expires_in;
+
+        users[userId].tokens[TEST_LINKEDIN]=tokens;        
+        console.log("linkedIn tokens: ",tokens);
+        return userDAO.saveUser(users[userId]);
+
+    }).then(function(userSaved) {
+        
+        users[userId] = userSaved;
+        res.send("LINKEDIN AUTH OK");
+
+    }, function(err) {        
+        res.send("LINKEDIN AUTH ERR: "+err);
+    });
+
+});
+
+/*app.post('/twitter/:oauthVerifier/:userId', function(req, res) { 
 
     var oauthVerifier = req.params.oauthVerifier;
     var user = TEST_USER;    
-    
-    twitterAPI.getAccessToken(oauthVerifier, users[user].tokens[TEST_TWITTER]).then(function(tokens) {
-       users[TEST_USER].tokens[TEST_TWITTER]=tokens;
+    var userId = req.params.userId;
+     
+    twitterAPI.getAccessToken(oauthVerifier, users[userId].tokens[TEST_TWITTER]).then(function(tokens) {
+       users[userId].tokens[TEST_TWITTER]=tokens;
        res.send("TWITTER AUTH VERIFIER OK");
     }, function(err) {
         res.send("ERR TWITTER AUTH VERIFIER");
@@ -326,12 +364,13 @@ app.get('/twitter2callback', function(req, res) {
     
 });*/
 
-app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
+app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
 
     var folderId = req.params.folderId;
     var provider = req.params.provider;
+    var userId = req.params.userId;
 
-    var myToken = users[TEST_USER].tokens[provider];
+    var myToken = users[userId].tokens[provider];
     var providerAPI;
     switch(provider) {
         case 'google':
@@ -351,15 +390,16 @@ app.get('/cloudExplorer/:provider/:folderId', function(req, res) {
     
 });
 
-app.post('/message', function(req, res) {
+app.post('/message/:userId', function(req, res) {
 
     //console.log("req.body: ",req.body);
     var providers = req.body.providers;
     var message = req.body.message;
     var scheduledDate = req.body.scheduledDate;
+    var userId = req.params.userId;
     
     if(scheduledDate===undefined)
-        postMessageToProviders(providers, message).then(function() {
+        postMessageToProviders(userId, providers, message).then(function() {
              res.send();
         }, function(err) {
              res.send("Cannot send message err: "+err);
@@ -367,7 +407,7 @@ app.post('/message', function(req, res) {
     else {
         //scheduled event
         console.log("schedule event for ",scheduledDate);
-        scheduler.saveScheduledEvent(TEST_USER, scheduledDate, "message", [providers, message]).then(function(eventId) {
+        scheduler.saveScheduledEvent(userId, scheduledDate, "message", [userId, providers, message]).then(function(eventId) {
             res.send(eventId);
         }, function(err) {
             console.log("err dans save Scheduled Event: ", err);
@@ -376,20 +416,20 @@ app.post('/message', function(req, res) {
     }
 });
 
-function postMessageToProviders(providers, message) {
+function postMessageToProviders(userId, providers, message) {
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(postMessageToProvider(provider, message));
+        results.push(postMessageToProvider(userId, provider, message));
     }
    // console.log("waitig for "+results.length+" promises");
     return Q.all(results);
 }
-function postMessageToProvider(provider, message) {
+function postMessageToProvider(userId, provider, message) {
     
     console.log("postMessageToProvider "+provider); 
     var deffered = Q.defer();    
-    var myToken = users[TEST_USER].tokens[provider];
+    var myToken = users[userId].tokens[provider];
     var providerAPI;
     switch(provider) {
         case 'twitter' :
@@ -413,16 +453,17 @@ function postMessageToProvider(provider, message) {
 }
 
 //sendvideo
-app.post('/uploadFile', upload.single('file'), function(req, res) {
+app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     
     //dailymotion issue : need file extension
     var path = req.file.path;
     fs.renameSync(path, path+'_'+req.file.originalname);
     req.file.path = path+'_'+req.file.originalname;
+    var userId = req.params.userId;
     
     if(req.body.isCloud) {
         
-        var myToken = users[TEST_USER].tokens[TEST_DROPBOX];
+        var myToken = users[userId].tokens[TEST_DROPBOX];
         //upload File to root folder
         dropboxAPI.uploadDrive(myToken, req.file).then(function(results) {
             console.log("uploadDrive OK on dropbox");
@@ -460,7 +501,7 @@ app.post('/uploadFile', upload.single('file'), function(req, res) {
             });
             //scheduled event
         } else {
-            scheduler.saveScheduledEvent(TEST_USER, scheduledDate, "uploadVideo", 
+            scheduler.saveScheduledEvent(userId, scheduledDate, "uploadVideo", 
                 [providers, req.file, params.title, params.description, params.tags]
             ).then(function(eventId) {
                 res.send(eventId);
@@ -483,10 +524,10 @@ function uploadToProviders(providers, file, params) {
     return Q.all(results);
 }
 
-function uploadToProvider(provider, file, params) {
+function uploadToProvider(userId, provider, file, params) {
     //console.log("curent provider "+provider); 
     var deffered = Q.defer();    
-    var myToken = users[TEST_USER].tokens[provider];
+    var myToken = users[userId].tokens[provider];
     var providerAPI;
     switch(provider) {
         case 'dailymotion' :
@@ -499,7 +540,7 @@ function uploadToProvider(provider, file, params) {
             providerAPI = facebookAPI;
             break;
     }
-    providerAPI.sendVideo(myToken, file, TEST_USER, params).then(function() {
+    providerAPI.sendVideo(myToken, file, userId, params).then(function() {
       //  console.log("uploadFile OK with provider "+provider);
         deffered.resolve('ok promise '+provider);
     }, function(err) {
@@ -508,6 +549,60 @@ function uploadToProvider(provider, file, params) {
     });
     return deffered.promise;
 }
+
+app.get('/user/authenticate', function(req, res) {
+    
+    var login = req.query.login;
+    var password= req.query.password;
+    
+    if (login !== undefined && password !== undefined) {
+        
+        userDAO.authenticate(login, password)
+        .then(function (data) {
+            res.send(data);
+        }, function (err) {
+            console.log(err);
+            res.status(404).end();
+        });
+   
+    } else {
+        console.log("social auth not yet implemented");
+        res.status(404).end();
+    }
+    
+});
+
+app.post('/user/create', function(req, res) {
+    
+    var firstName = req.body.firstName;
+    var lastName = req.body.lastName;
+    var login = req.body.login;
+    var password = req.body.password;
+
+    if (login !== undefined && password !== undefined && firstName !== undefined && lastName !== undefined) {
+        
+        var user = {
+            firstName:firstName,
+            lastName:lastName,
+            login:login,
+            password:password,
+            tokens : {}
+        };
+
+        userDAO.saveUser(user)
+        .then(function (data) {
+            res.send(data);
+        }, function (err) {
+            console.log(err);
+            res.status(404).end();
+        });
+        
+    } else {
+        console.log("social user registration not yet implemented");
+        res.status(404).end();
+    }
+    
+});
 
 var server = app.listen(app.get('port'), function() {
    console.log('Express server started on port %s', server.address().port);

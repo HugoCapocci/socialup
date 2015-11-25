@@ -4,7 +4,7 @@ Live: https://socialup.herokuapp.com
 
 ========
 
-Allow multiple operation from one entry proint, schedule publications, and so on...
+Allow multiple social networks operation from one entry point: schedule publications, explore cloud, and so on
 
 use config vars (process.env.<VAR>) on a localeConfig.js file (aleardy git-ignored)
 

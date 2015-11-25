@@ -1,6 +1,7 @@
 'use strict';
 var Q = require('q');
 var MongoClient = require('mongodb').MongoClient;
+var ObjectID = require('mongodb').ObjectID;
 
 var uri = process.env.MONGOLAB_URI;
 var collection = "users";
@@ -65,9 +66,9 @@ function updateUser(user) {
 
 //asynch
 function updateUserTokens(userId, provider, tokens) {
-   
+       
     var query = {
-        id : userId
+        _id : new ObjectID(userId)
     };
     var fieldUpdate = {
         $set : {}
@@ -75,23 +76,55 @@ function updateUserTokens(userId, provider, tokens) {
     fieldUpdate.$set["tokens."+provider]=tokens;
     
     getDB(function(db) {
-        db.collection(collection).update(query, fieldUpdate, {upsert:true}, function(err/*, r*/) {
+        db.collection(collection).updateOne(query, fieldUpdate, {upsert:false}, function(err/*, r*/) {
             db.close();
             if(err) {
                 console.log("err: ", err);
             } else
                 console.log("update token for provider "+provider+" OK");
-                
         });
     });
 }
 
-function retrieveUser(userId) {
+function retrieveUsers() {
     
     var deferred = Q.defer();
     getDB(function(db) {
         //console.log('update event '+eventId+' with result: ', result);
-        db.collection(collection).findOne({id:userId}, function(err, result) {
+        db.collection(collection).find({}).toArray(function(err, users) {
+            //console.log("user retrieved ?", result);
+            db.close();
+            if(err)
+                deferred.reject(new Error(err));
+            else
+                deferred.resolve(users);
+        });
+    });
+    return deferred.promise;     
+}
+
+function retrieveUserByLogin(login) {
+    
+    var deferred = Q.defer();
+    getDB(function(db) {
+        //console.log('update event '+eventId+' with result: ', result);
+        db.collection(collection).findOne({login:login}, function(err, user) {
+            //console.log("user retrieved ?", result);
+            db.close();
+            if(err)
+                deferred.reject(new Error(err));
+            else
+                deferred.resolve(user);
+        });
+    });
+    return deferred.promise;     
+}
+
+function authenticate(login, password) {
+     
+    var deferred = Q.defer();
+    getDB(function(db) {
+        db.collection(collection).findOne({login:login, password:password}, function(err, result) {
             //console.log("user retrieved ?", result);
             db.close();
             if(err)
@@ -100,9 +133,11 @@ function retrieveUser(userId) {
                 deferred.resolve(result);
         });
     });
-    return deferred.promise;     
+    return deferred.promise;   
 }
 
 exports.saveUser=saveUser;
-exports.retrieveUser=retrieveUser;
+exports.retrieveUsers=retrieveUsers;
 exports.updateUserTokens=updateUserTokens;
+exports.authenticate=authenticate;
+exports.retrieveUserByLogin=retrieveUserByLogin;

@@ -1,4 +1,8 @@
 'use strict';
+
+/*
+* DAILYMOTION WEB API
+*/
 var https = require('https');
 var http = require('http');
 var request = require('request');
@@ -58,7 +62,7 @@ function pushCode(code, userId) {
 
 function saveTokensForUser(tokens, userId) {
 
-    tokens.expiration_time = Date.now() + tokens.expires_in;
+    tokens.expiry_date = Date.now() + tokens.expires_in;
     delete tokens.expires_in;
     userDAO.updateUserTokens(userId, 'dailymotion', tokens);
     return tokens;
@@ -68,7 +72,7 @@ function checkAccessTokenValidity(tokens, userId) {
   
    // console.log("tokens? ", tokens);  
     var deferred = Q.defer();
-    if(tokens.expiration_time <= Date.now() ) {
+    if(tokens.expiry_date <= Date.now() ) {
         console.log("refresh dailymotion oauth token ");
         return refreshTokens(tokens, userId);
     } else {

@@ -5,6 +5,8 @@ define(['./module'], function (appModule) {
     appModule.service('cloudService', 
         ['$http', '$q', '$window',
         function cloudService($http, $q, $window) {
+            
+            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
 
             //authentication is made by provider callbacks
             this.getFolders = function(provider, folderId) {
@@ -17,7 +19,7 @@ define(['./module'], function (appModule) {
                     folderId = encodeURIComponent(folderId);
                     console.log("encoded path ", folderId);
                 }
-                $http.get('/cloudExplorer/'+provider+'/'+folderId)
+                $http.get('/cloudExplorer/'+provider+'/'+folderId+'/'+localData.user.id)
                 .then(function(response) {
                     console.log('response for folderId '+folderId+': ', response);
                     deferred.resolve(response.data);

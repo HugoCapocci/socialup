@@ -18,7 +18,7 @@ var crypto = require('crypto');
 const APP_KEY = process.env.TWITTER_APP_KEY; //PxmS6sGcO9ovTH7PqPTA
 const APP_SECRET = process.env.TWITTER_APP_SECRET;
 //const REDIRECT_URL = 'oob';
-const REDIRECT_URL = process.env.APP_URL + '/twitter2callback?state=user';
+const REDIRECT_URL = process.env.APP_URL + '/twitter2callback?state=';
 const TOKEN = process.env.TWITTER_ACCESS_TOKEN;
 const TOKEN_SECRET = process.env.TWITTER_ACCESS_TOKEN_SECRET;
 
@@ -27,11 +27,11 @@ function getOAuthURL() {
 }
 
 // request a token by post
-function getTokens() {
+function getTokens(userId) {
         
     var deferred = Q.defer();
     var headerParams = {
-        'oauth_callback' : REDIRECT_URL,
+        'oauth_callback' : REDIRECT_URL+userId,
         'oauth_consumer_key' : APP_KEY,
         'oauth_nonce' : oAuthNonce(),
         'oauth_signature_method' : 'HMAC-SHA1',

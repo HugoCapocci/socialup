@@ -5,9 +5,11 @@
 * Youtube see https://developers.google.com/youtube/v3/
 * GoogeDrive see https://developers.google.com/drive/web/about-sdk
 * Google+ see https://developers.google.com/+/domains/getting-started
+
+TODO check tokens.expiry_date and update user data in database if needed with refreshed tokens (automatically refresh by googleAPI)
 */
 
-var google = require('googleapis');
+var googleAPI = require('googleapis');
 var Q = require('q');
 var fs = require("fs");
 
@@ -17,11 +19,12 @@ const GOOGLE_REDIRECT_URL = process.env.APP_URL + '/google2callback';
 
 const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 
-var OAuth2 = google.auth.OAuth2;
+var OAuth2 = googleAPI.auth.OAuth2;
 var oauth2Client = new OAuth2(GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_URL);
-var youtubeAPI = google.youtube({version: 'v3', auth: oauth2Client});
-var drive = google.drive({version: 'v2', auth: oauth2Client});
-/*var googlePlus = google.plusDomains({version : 'v1', auth: oauth2Client});*/
+var youtubeAPI = googleAPI.youtube({version: 'v3', auth: oauth2Client});
+var drive = googleAPI.drive({version: 'v2', auth: oauth2Client});
+var googlePlus = googleAPI.plus({version : 'v1', auth: oauth2Client});
+/*var googlePlus = googleAPI.plusDomains({version : 'v1', auth: oauth2Client});*/
 
 //generate url for OAuth authentication URI
 function auth() {
@@ -36,7 +39,7 @@ function auth() {
         'https://www.googleapis.com/auth/drive.appdata',
         'https://www.googleapis.com/auth/drive.metadata.readonly',
         'https://www.googleapis.com/auth/plus.me',
-        'https://www.googleapis.com/auth/plus.login',
+/*        'https://www.googleapis.com/auth/plus.login',*/
         'https://www.googleapis.com/auth/plus.stream.write'
     ];
     var url = oauth2Client.generateAuthUrl({
@@ -215,6 +218,24 @@ function checkFilesData(files) {
     return Q.all(results);
 }
 
+function getGooglePlusUser(tokens) {
+    //id=103809399192041774467
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    googlePlus.people.get({userId:'me'}, function(err, response) {
+        
+        if (err) {
+            console.log('getGooglePlusUser error: ', err);
+            deferred.reject(new Error(err));
+        } else {
+            console.log('getGooglePlusUser response: ', response);
+            deferred.resolve(response);
+        }
+        
+    });
+    return deferred.promise;
+}
+
 /*function checkFileData(fileId) {
     var deferred = Q.defer();
     drive.files.get({fileId:fileId}, function(err, file) {
@@ -237,3 +258,5 @@ exports.pushCode=pushCode;
 
 exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;
+
+exports.getGooglePlusUser=getGooglePlusUser;

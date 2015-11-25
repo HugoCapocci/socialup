@@ -11,23 +11,31 @@ var userDAO = require('../js/userDAO.js');
 
 describe("userDAO tests", function() {
     
-    after(function(done) {
-
-        this.timeout(10000);
+    function deleteTestData(done) {
         // empty collection after tests
         var MongoClient = require('mongodb').MongoClient;      
         MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
-            db.collection("users").remove({id:'test'}, function() {
+            db.collection("users").remove({login:'test'}, function() {
                 db.close();
                 done();
             });
         });
+    }
+    
+    before(function(done) {
+        this.timeout(10000);
+        deleteTestData(done);
+    });
+    
+    after(function(done) {
+        this.timeout(10000);
+        deleteTestData(done);
     });
     
     it("create new User", function(done) {
         this.timeout(10000);
         var user = {
-            id: 'test'
+            login: 'test'
         };
         userDAO.saveUser(user).then(function(result) {
             should.exist(result._id);
@@ -37,8 +45,8 @@ describe("userDAO tests", function() {
     
     it("retrieve User", function(done) {
         this.timeout(10000);
-        userDAO.retrieveUser('test').then(function(result) {
-            ('test').should.equal(result.id);
+        userDAO.retrieveUserByLogin('test').then(function(result) {
+            ('test').should.equal(result.login);
             done();
         });
     });
@@ -46,12 +54,12 @@ describe("userDAO tests", function() {
     it("update User", function(done) {
         this.timeout(15000);
         var user = {
-            id: 'test',
+            login: 'test',
             newParam : 'newValue'
         };
-        userDAO.retrieveUser('test').then(function(result) {
+        userDAO.retrieveUserByLogin('test').then(function(result) {
            
-            ('test').should.equal(result.id);
+            ('test').should.equal(result.login);
             should.exist(result._id);
             user._id = result._id;
             userDAO.saveUser(user).then(function(result2) {

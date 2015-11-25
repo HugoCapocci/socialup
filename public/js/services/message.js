@@ -5,15 +5,14 @@ define(['./module'], function (appModule) {
     appModule.service('messageService', 
         ['$http', '$q',
         function messageService($http, $q) {
-            
-            
+                        
             this.postMessage = function(providers, message, scheduledDate) {
                 
                 var deferred = $q.defer();
                 console.log("messageService.postMessage "+message);
                 
                 //$http.post()
-                 $http.post('/message', 
+                $http.post('/message', 
                     {message: message, providers: providers, scheduledDate:scheduledDate})
                 .then(function(response) {
                     console.log('response for ', response);

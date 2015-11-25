@@ -14,14 +14,17 @@ define(['./module'], function (appModule) {
             $scope.oauthURLS = {};
             
             //authenticate user
+            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
+            console.log("localData found? ",localData);            
 
             //oauth providers url
-            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter'];
-            
+            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin'];
+
             $scope.providers.forEach(function(provider) {
                 authService.getProviderURL(provider).then(function(url) {
-                    console.log(provider+' url: ',url);
-                    $scope.oauthURLS[provider]=url+'&state=user';
+                    $scope.oauthURLS[provider]=url;
+                    if(localData !== undefined &&localData.user !== undefined)
+                        $scope.oauthURLS[provider] += '&state='+localData.user.id;
                 });
             });
             

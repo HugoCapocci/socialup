@@ -13,9 +13,8 @@
         <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control.css">
         <!-- link for CSS when using the tree as an attribute -->
         <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control-attribute.css">
-<link rel="stylesheet" href="bower_components/ng-tags-input/ng-tags-input.min.css">  
-                
-
+        <link rel="stylesheet" type="text/css" href="bower_components/ng-tags-input/ng-tags-input.min.css">  
+        
         <style>            
             .stripped div:nth-child(even){
                 background-color: #dcdcdc;
@@ -72,8 +71,7 @@
                 background-color: rgba(161, 187, 197, 0.50);
             }
             
-            /* tooltip */
-            
+            /* tooltip */            
             .black-tooltip + .tooltip > .tooltip-inner {background-color: #000 ;}
             .black-tooltip + .tooltip > .tooltip-arrow { border-bottom-color:#000; }
              
@@ -90,7 +88,7 @@
             } 
          
         </style>   
-                <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css.map" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css.map" />
@@ -104,8 +102,6 @@
                 <a ng-repeat="provider in providers" href="{{oauthURLS[provider]}}" target="_blank">
                     <img src="{{'images/'+provider+'.png'}}">
                 </a>
-                <!-- twitter authorization code 
-                 Twitter authorization code: <input type="text" ng-model="user.verificationCode" value="verificationCode"/> <button ng-click="verifyTwitter()">validate</button>-->
              </div>
         </div>
 

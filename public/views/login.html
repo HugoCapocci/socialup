@@ -1,0 +1,84 @@
+<div class="container">
+
+    <header class="jumbotron">
+        <h2>A Warm Welcome! Please log in</h2>
+    </header>
+
+    <div class="row">
+        <div class="col-lg-6 col-lg-offset-3">
+            <alert type="danger" ng-if="errorMessage!==''">{{errorMessage}}</alert>
+
+            <uib-tabset justified="true" class="panel panel-default">
+                <uib-tab heading="Créez un compte">
+                    <div class="panel-body">
+                        
+                         <div class="row">
+                             <div class="col-xs-5 col-md-5 col-lg-6">
+                                <form name="signIn" id="loginForm" class="form-signin" ng-submit="create()">
+                                    <fieldset>
+                                         <div class="form-group">
+                                            <input type="text" id="firstName" class="form-control" placeholder="Prénom" ng-model="form.firstName"/>
+                                        </div>
+                                         <div class="form-group">
+                                            <input type="text" id="lastName" class="form-control" placeholder="Nom" ng-model="form.lastName"/>
+                                        </div>                                    
+                                        <div class="form-group">
+                                            <input type="text" id="login" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
+                                        </div>
+                                        <div class="form-group" ng-if="!isSocialNetworkAuthenticated">
+                                            <input type="password" id="password" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
+                                        </div>
+                                         <div class="form-group" ng-if="!isSocialNetworkAuthenticated">
+                                            <input type="password" id="repeatedPassword" class="form-control" placeholder="Répétez vore mot de passe" ng-model="form.repeatedPassword"/>
+                                        </div>
+                                        
+                                        <!-- captcha pour éviter les bots -->
+                                        <div vc-recaptcha key="'6LdYdAUTAAAAACh8N-aW_9k1dPMg0I-u5uWnULnW'" ></div>
+                                        
+                                        <button id="login-butt" class="btn btn-primary" type="submit">inscrivez-vous</button>
+                                        
+                                    </fieldset>
+                                </form>
+                             
+                            </div>
+                             
+                            <div class="col-xs-5 col-md-5 col-lg-6">
+                                <pan>TODO</pan>
+                               <!-- <img src="images/facebook-connect-button.png" ng-click="socialSubscribe('facebook')">
+                                <img src="images/google-connect-button.png" ng-click="socialSubscribe('google')">
+                                <img src="images/twitter-connect-button.png" ng-click="socialSubscribe('twitter')">-->
+                            </div>
+                             
+                        </div>
+                    </div>
+                </uib-tab>
+                <uib-tab heading="Connectez-vous" active="true">
+
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-5 col-md-5 col-lg-6">
+                                <form name="signIn" id="login" class="form-signin" ng-submit="authenticate()">
+		                            <fieldset>
+                                        <div class="form-group">
+                                            <input type="text" id="log" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
+                                        </div>
+                                        <div class="form-group">
+		                                    <input type="password" id="pswd" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
+		                                </div>
+                                        <button id="login-butt" class="btn btn-primary" type="submit">connectez-vous</button>
+	                                </fieldset>
+                                </form>
+                            </div>
+                            <div class="col-xs-5 col-md-5 col-lg-6">
+                                TODO
+                                <!--<img src="images/facebook-connect-button.png" ng-click="socialConnect('facebook')">
+                                <img src="images/google-connect-button.png" ng-click="socialConnect('google')">
+                                <img src="images/twitter-connect-button.png" ng-click="socialConnect('twitter')">-->
+                            </div>
+                        </div>
+                    </div>
+                </uib-tab>
+            </uib-tabset>
+        </div>
+    </div>
+</div>

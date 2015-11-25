@@ -50,8 +50,7 @@ function pushCode(code) {
 
 function tagsAsHashtags(tags) {
 
-    //TODO /n
-    var hastags=" ";
+    var hastags="\n\n";
     for (var i=0; i<tags.length; i++) {
        hastags+="#"+tags[i]+" ";   
     }
