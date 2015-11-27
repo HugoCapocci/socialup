@@ -16,6 +16,11 @@ const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
+function getOAuthURL() {
+    
+    return "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists";
+}
+
 // retrieve auth token from auth code
 function pushCode(code, userId) {
 
@@ -261,7 +266,8 @@ function getUserInfo(token)  {
     req.end();
     return deferred.promise;
 }
-    
+
+exports.getOAuthURL=getOAuthURL;
 exports.sendVideo=sendVideo;
 exports.pushCode=pushCode;
 exports.getUserInfo=getUserInfo;

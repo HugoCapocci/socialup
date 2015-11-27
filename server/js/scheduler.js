@@ -2,6 +2,7 @@
 var schedule = require('node-schedule');
 var Q = require('q');
 var MongoClient = require('mongodb').MongoClient;
+var ObjectID = require('mongodb').ObjectID;
 
 //stocke les évènement programmés, 2 max par user
 const MAX_EVENTS = 2;
@@ -18,57 +19,36 @@ exports.addEventListerner = function(event, listener) {
 };
 
 // returned job can be canceled : job.cancel()
-function scheduleEvent(user, date, event, eventParams, callback) {
+function scheduleEvent(userId, date, event, eventParams, callback) {
 
-    var eventId = user + '|' + Date.now();
+    var eventId = userId + '|' + Date.now();
 
     //job pushed to schedule.scheduledJobs[eventId]
-    addEventToSchedule(user, date, event, eventParams, eventId, callback);
+    addEventToSchedule(userId, date, event, eventParams, eventId, callback);
 
     return eventId;
 }
 
-function addEventToSchedule(user, date, eventName, eventParams, eventId, callback) {
+function addEventToSchedule(userId, date, eventName, eventParams, eventId, callback) {
     
     //iso database
-    if(scheduleEvents[user]===undefined)
-        scheduleEvents[user] = new Array(MAX_EVENTS);
+    if(scheduleEvents[userId]===undefined)
+        scheduleEvents[userId] = new Array(MAX_EVENTS);
     
     schedule.scheduleJob(eventId, date, function() {
 
-        deleteEventFromUser(user, eventId);
+        deleteEventFromUser(userId, eventId);
         // console.log("eventName found? ", eventName);            
-        var args = [eventName, eventId];
+        var args = [eventName, eventId, userId];
         args = args.concat(eventParams);
         // console.log("args? ", args);
 
         var hasListeners = eventEmitter.emit.apply(eventEmitter, args);
         if(!hasListeners) {
-            console.log("pas de listener pour l'event ", event);
+            console.log("pas de listener pour l'event ", eventName);
         }
-        
-        /*var result = event.apply(null, eventParams);
-        if(callback!==undefined && callback instanceof Function)
-            callback(result);
-        
-        if(result!==undefined)
-            // Promises case
-            if(result.then !== undefined && result.then instanceof Function) {
-                result.then(function(result) {
-                    console.log("scheduled event async result: ",result);
-                    // process job execution notes in database
-                    updateEventAfterExecution(eventId, result);
-                }, function(err) {
-                     console.log("scheduled event async err: ",err);
-                    //process error in database
-                });
-            } else {
-                console.log("scheduled event sync result: ",result);
-                updateEventAfterExecution(eventId, result);
-            }*/
-
     });
-    scheduleEvents[user].push(eventId);
+    scheduleEvents[userId].push(eventId);
 }
 
 function cancelEvent(eventId) {
@@ -82,12 +62,12 @@ function cancelEvent(eventId) {
     }
 }
 
-function deleteEventFromUser(user, eventId) {
+function deleteEventFromUser(userId, eventId) {
  
     //console.log("delete event "+eventId+" for user "+user);
-    for(var i=0; i<scheduleEvents[user].length; i++) {
-        if(scheduleEvents[user][i] === eventId) {
-            delete scheduleEvents[user][i];
+    for(var i=0; i<scheduleEvents[userId].length; i++) {
+        if(scheduleEvents[userId][i] === eventId) {
+            delete scheduleEvents[userId][i];
             return true;
         }
     }
@@ -95,19 +75,18 @@ function deleteEventFromUser(user, eventId) {
 }
 
 // db key -> eventId
-function saveScheduledEvent(user, date, event, eventParams) {
+function saveScheduledEvent(userId, date, type, params) {
 
     var deferred = Q.defer();
-    
     var eventToSave = {
-        user : user,
-        date : date,
-        event : event,
-        eventParams: eventParams
+        user : userId,
+        dateTime : (new Date(date)).getTime(),
+        event : type,
+        eventParams: params
     };
 
     getDB(function(db) {
-        var eventId = eventToSave.eventId = scheduleEvent(user, date, event, eventParams);
+        var eventId = eventToSave.eventId = scheduleEvent(userId, date, type, params);
         //console.log("eventToSave? ", eventToSave);
         db.collection(collection).insert(eventToSave, function (err/*, result*/) {
             db.close();
@@ -186,13 +165,29 @@ function retrieveEvents() {
     return deferred.promise;
 }
 
-function loadScheduledEvents() {
+function retrieveEventsByUser(userId) {
+    var deferred = Q.defer();
 
+    getDB(function(db) {
+        db.collection(collection).find({user:userId}).toArray(function(err, results) { 
+            db.close();
+            if (err)
+                deferred.reject(new Error(err));
+            else {
+                console.log("results: ",results);
+                deferred.resolve(results);
+            }
+        });
+    });
+    return deferred.promise;
+}
+
+function loadScheduledEvents() {
     retrieveEvents().then(function(results) {
         console.log("events to be scheduled: ",results);
         if(results!==undefined)
             results.forEach(function(result) {
-                addEventToSchedule(result.user, result.date, result.event, result.eventParams, result.eventId);
+                addEventToSchedule(result.user, new Date(result.date), result.event, result.eventParams, result.eventId);
             });
     }, function(err) {
         console.log("cannot load events, error occurs: ", err);
@@ -204,4 +199,5 @@ exports.cancelEvent=cancelEvent;
 exports.saveScheduledEvent=saveScheduledEvent;
 exports.deleteScheduledEvent=deleteScheduledEvent;
 exports.loadScheduledEvents=loadScheduledEvents;
+exports.retrieveEventsByUser=retrieveEventsByUser;
 exports.updateEventAfterExecution=updateEventAfterExecution;

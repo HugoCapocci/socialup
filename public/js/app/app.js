@@ -9,6 +9,7 @@ define([
     'angular-file-upload',
     'angular-tree-control',
     'ng-tags-input',
+    'angular-smart-table',
     '../services/index',
     '../controllers/index' 
     ], function (angular) {
@@ -23,6 +24,7 @@ define([
             'angularFileUpload',
             'treeControl',
             'ngTagsInput',
+            'smart-table',
             'SocialUp.services',
             'SocialUp.controllers'
         ]);

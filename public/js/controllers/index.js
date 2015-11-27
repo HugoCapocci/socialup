@@ -3,5 +3,8 @@ define([
     './login',
     './uploadFile',
     './cloudExplorer',
-    './postMessage'
+    './postMessage',
+    './scheduledEvents',
+    './manageSocialNetworks'
+    
 ], function () {});

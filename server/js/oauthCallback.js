@@ -25,10 +25,6 @@ var userDAO = require('./userDAO.js');
 
 var app = express();
 
-const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
-const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
-const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
-
 const TEST_GOOGLE = 'google';
 const TEST_DAILYMOTION = 'dailymotion';
 const TEST_FACEBOOK = 'facebook';
@@ -69,14 +65,14 @@ scheduler.addEventListerner("message", function(eventId, userId, providers, mess
     });
 });
 //uploadToProviders(providers, file)
-scheduler.addEventListerner("uploadVideo", function(eventId, providers, file, title, description, tags) {
+scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, file, title, description, tags) {
    
     var params = {
         title:title,
         description:description,
         tags:tags
     };
-    uploadToProviders(providers, file, params).then(function(result) {
+    uploadToProviders(userId, providers, file, params).then(function(result) {
         fs.unlinkSync(file.path);
         scheduler.updateEventAfterExecution(eventId, result);
         console.log("upload video event OK");
@@ -86,7 +82,6 @@ scheduler.addEventListerner("uploadVideo", function(eventId, providers, file, ti
     });
 });
 
-
 userDAO.retrieveUsers().then(function(usersFound) {
     console.log("retieved users: ", usersFound);
     for(var i=0; i< usersFound.length;i++) {
@@ -94,8 +89,6 @@ userDAO.retrieveUsers().then(function(usersFound) {
     }
     scheduler.loadScheduledEvents();
 });
-
-
 
 //clean temp files if any    
 /*var path = './server/uploads/';
@@ -135,7 +128,6 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
     if(provider==='twitter') {
         
         twitterAPI.getTokens(userId).then(function(tokens) {
-        
             //store token for user
             if(users[userId]===undefined)
                  initiateUser(userId);
@@ -151,10 +143,10 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
         
         switch(provider) {
             case 'dailymotion' : 
-                url = "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists";
+                url = dailymotionAPI.getOAuthURL();
                 break;
             case 'google' :
-                url = googleAPI.auth();
+                url = googleAPI.getOAuthURL();
                 break;
             case 'facebook' :
                 url = facebookAPI.getOAuthURL();
@@ -166,19 +158,16 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
                 url = linkedInAPI.getOAuthURL();
                 break;
             default:
-                res.send("404");
+                res.send('404');
                 return;
         }
         res.send(url);
-        //console.log("oauth url for provider["+provider+"] -> ", url);
     }
 });
 
 app.get('/google2callback', function(req, res) {
 
     var code = req.query.code;
-
-    //TODO improve the way user info in retrieved/send in the 'state' parameter
     var userId = req.query.state;
     if(users[userId]===undefined)
         initiateUser(userId);
@@ -192,20 +181,20 @@ app.get('/google2callback', function(req, res) {
 
     }).then(function(userSaved) {
         users[userId] = userSaved;
-        console.log("userSaved: ", userSaved);
-        
+        console.log("userSaved: ", userSaved);        
         //check googlePlus data        
         return googleAPI.getGooglePlusUser(users[userId].tokens[TEST_GOOGLE]);
     
     }, function(err) {
         console.error("error in token validation: ", err);
-        res.send("ERROR "+err);
+        res.send(err);
+        
     }).then(function(googleplusUser) {
         console.log("googleplusUser: ",googleplusUser);
         res.send("google auth OK, google plus OK");
     }, function(err) {
         console.error("error googleplusUser: ", err);
-        res.send("google auth OK, google plus KO");
+        res.send(err);
     });
    
 });
@@ -238,7 +227,7 @@ app.get('/dailymotion2callback', function(req, res) {
             users[userId] = userSaved;*/
             res.send("OK DAILYMOTION");
         }, function(err) {
-            res.send("ERROR "+err);
+            res.send(err);
         });
     });
     
@@ -247,7 +236,6 @@ app.get('/dailymotion2callback', function(req, res) {
 app.get('/facebook2callback', function(req, res) {
 
     var code = req.query.code;
-    //console.log("FB code: ", req);
     console.log("res.statusCode", res.statusCode);
 
     var userId = req.query.state;
@@ -255,7 +243,6 @@ app.get('/facebook2callback', function(req, res) {
         initiateUser(userId);
     
     facebookAPI.pushCode(code).then(function(tokens) {
-
         // expires_in is in milliseconds, should be around 2 hours
         tokens.expiry_date = Date.now() + tokens.expires_in;
         delete tokens.expires_in;
@@ -266,7 +253,7 @@ app.get('/facebook2callback', function(req, res) {
         users[userId] = userSaved;
         res.send("FB AUTH OK");
     }, function(err) {
-        res.send("ERR AUTH: "+err);
+        res.send(err);
     });
 
 });
@@ -292,7 +279,7 @@ app.get('/dropbox2callback', function(req, res) {
        res.send("DROPBOX AUTH OK");
     }, function(err) {
         console.log("err auth dropbox: ",err);
-        res.send("ERR AUTH");
+        res.send(err);
     });
 });
 
@@ -315,7 +302,7 @@ app.get('/twitter2callback', function(req, res) {
         res.send("TWITTER AUTH VERIFIER OK");
 
     }, function(err) {
-        res.send("TWITTER AUTH VERIFIER OK, tweet error: "+ err);
+        res.send(err);
     });
 
 });
@@ -324,8 +311,6 @@ app.get('/linkedin2callback', function(req, res) {
     
     console.log("linkedin2callback data ",req.query);
     var code = req.query.code;
-
-    //TODO improve the way user info in retrieved/send in the 'state' parameter
     var userId = req.query.state;
     
     linkedInAPI.pushCode(code).then(function(tokens) {
@@ -336,20 +321,32 @@ app.get('/linkedin2callback', function(req, res) {
 
         users[userId].tokens[TEST_LINKEDIN]=tokens;        
         console.log("linkedIn tokens: ",tokens);
+
+        return linkedInAPI.getUserInfo(tokens);
+    
+    }, function(err) {        
+        res.send("LINKEDIN AUTH ERR: "+err);
+        
+    }).then(function(userInfo) {
+
+        console.log("LINKEDIN userInfo: ",userInfo);        
         return userDAO.saveUser(users[userId]);
 
+    }, function(err) {        
+        res.send(err);
+        
     }).then(function(userSaved) {
         
         users[userId] = userSaved;
         res.send("LINKEDIN AUTH OK");
-
     }, function(err) {        
-        res.send("LINKEDIN AUTH ERR: "+err);
+        res.send(err);
     });
 
 });
 
-/*app.post('/twitter/:oauthVerifier/:userId', function(req, res) { 
+/*
+app.post('/twitter/:oauthVerifier/:userId', function(req, res) { 
 
     var oauthVerifier = req.params.oauthVerifier;
     var user = TEST_USER;    
@@ -362,16 +359,46 @@ app.get('/linkedin2callback', function(req, res) {
         res.send("ERR TWITTER AUTH VERIFIER");
     });
     
-});*/
+});
+*/
+
+app.get('/events/:userId', function(req, res) {
+
+    var userId = req.params.userId;
+    
+    scheduler.retrieveEventsByUser(userId).then(function(events) {
+         res.send(events);
+    }, function(err) {
+         res.send(err);
+    });
+    
+});
+
+app.delete('/event/:eventId', function(req, res) {
+
+    var eventId = req.params.eventId;
+    
+    scheduler.deleteScheduledEvent(eventId).then(function(result) {
+        var statusCode;
+        if(result===1)
+            statusCode=200;
+        else
+            statusCode=404;
+        res.status(statusCode).end();
+    }, function(err) {
+        res.send(err);
+    });
+
+});
 
 app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
 
     var folderId = req.params.folderId;
     var provider = req.params.provider;
     var userId = req.params.userId;
-
     var myToken = users[userId].tokens[provider];
     var providerAPI;
+    
     switch(provider) {
         case 'google':
             providerAPI = googleAPI;
@@ -380,26 +407,25 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
             providerAPI = dropboxAPI;
             break;
     }
-
     console.log("Cloud provider: ", provider);
     providerAPI.listFiles(myToken, folderId).then(function(files) {
          res.send(files);
     }, function(err) {
          res.send("Google OAuth OK but GoogleDrive err: "+err);
     });
-    
+
 });
 
 app.post('/message/:userId', function(req, res) {
 
-    //console.log("req.body: ",req.body);
     var providers = req.body.providers;
     var message = req.body.message;
     var scheduledDate = req.body.scheduledDate;
     var userId = req.params.userId;
     
-    if(scheduledDate===undefined)
-        postMessageToProviders(userId, providers, message).then(function() {
+    if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now())
+        postMessageToProviders(userId, providers, message).then(function(results) {
+            console.log("message to providers results: ",results);
              res.send();
         }, function(err) {
              res.send("Cannot send message err: "+err);
@@ -407,7 +433,7 @@ app.post('/message/:userId', function(req, res) {
     else {
         //scheduled event
         console.log("schedule event for ",scheduledDate);
-        scheduler.saveScheduledEvent(userId, scheduledDate, "message", [userId, providers, message]).then(function(eventId) {
+        scheduler.saveScheduledEvent(userId, scheduledDate, "message", [providers, message]).then(function(eventId) {
             res.send(eventId);
         }, function(err) {
             console.log("err dans save Scheduled Event: ", err);
@@ -422,12 +448,10 @@ function postMessageToProviders(userId, providers, message) {
         var provider = providers[i];
         results.push(postMessageToProvider(userId, provider, message));
     }
-   // console.log("waitig for "+results.length+" promises");
     return Q.all(results);
 }
 function postMessageToProvider(userId, provider, message) {
     
-    console.log("postMessageToProvider "+provider); 
     var deffered = Q.defer();    
     var myToken = users[userId].tokens[provider];
     var providerAPI;
@@ -435,18 +459,22 @@ function postMessageToProvider(userId, provider, message) {
         case 'twitter' :
             providerAPI = twitterAPI;
             break;
-        case 'google' :
+            //FIXME googleplus API messages issues
+       /* case 'google' :
             providerAPI = googleAPI;
-            break;
+            break;*/
         case 'facebook' :
             providerAPI = facebookAPI;
             break;
+        case 'linkedin' :
+            providerAPI = linkedInAPI;
+            break;
+        default:
+            deffered.reject(new Error("unknow provider "+provider));
     }
-    providerAPI.postMessage(myToken, message).then(function() {
-      //  console.log("uploadFile OK with provider "+provider);
-        deffered.resolve('ok promise '+provider);
+    providerAPI.postMessage(myToken, message).then(function(result) {
+        deffered.resolve(result);
     }, function(err) {
-        //console.error("error in uploadFile: ", err);
         deffered.reject(new Error(err));
     });
     return deffered.promise;
@@ -468,33 +496,32 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
         dropboxAPI.uploadDrive(myToken, req.file).then(function(results) {
             console.log("uploadDrive OK on dropbox");
             fs.unlinkSync(req.file.path);
-            res.send("uploadDrive OK");
+            res.send(results);
         }, function(err) {
             console.error("error in uploadDrive: ", err);
             res.send("uploadDrive ERROR "+err);
         });
-        
+
     } else {
         
         var scheduledDate = req.body.scheduledDate;
         var providers = req.body.providers.split(',');
         
         console.log('scheduledDate? ', scheduledDate);
-        
         var params = {
             title : req.body.title,
             description : req.body.description,
             tags : req.body.tags.split(',')
         };
 
-        if(scheduledDate===undefined) {
+        if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now()) {
         
             // provider for fileupload            
             console.log('targeted providers: ', providers);
-            uploadToProviders(providers, req.file, params).then(function(/*results*/) {
+            uploadToProviders(userId, providers, req.file, params).then(function(results) {
                 console.log("uploadFile OK");
                 fs.unlinkSync(req.file.path);
-                res.send("uploadFile OK");
+                res.send(results);
             }, function(err) {
                 console.error("error in uploadFile: ", err);
                 res.send("uploadFile ERROR "+err);
@@ -513,19 +540,18 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     }
 });
 
-function uploadToProviders(providers, file, params) {
+function uploadToProviders(userId, providers, file, params) {
     
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(uploadToProvider(provider, file, params));
+        results.push(uploadToProvider(userId, provider, file, params));
     }
-    // console.log("waitig for "+results.length+" promises");
     return Q.all(results);
 }
 
 function uploadToProvider(userId, provider, file, params) {
-    //console.log("curent provider "+provider); 
+
     var deffered = Q.defer();    
     var myToken = users[userId].tokens[provider];
     var providerAPI;
@@ -540,11 +566,9 @@ function uploadToProvider(userId, provider, file, params) {
             providerAPI = facebookAPI;
             break;
     }
-    providerAPI.sendVideo(myToken, file, userId, params).then(function() {
-      //  console.log("uploadFile OK with provider "+provider);
-        deffered.resolve('ok promise '+provider);
+    providerAPI.sendVideo(myToken, file, userId, params).then(function(result) {
+        deffered.resolve(result);
     }, function(err) {
-        //console.error("error in uploadFile: ", err);
         deffered.reject(new Error(err));
     });
     return deffered.promise;
@@ -557,19 +581,18 @@ app.get('/user/authenticate', function(req, res) {
     
     if (login !== undefined && password !== undefined) {
         
-        userDAO.authenticate(login, password)
-        .then(function (data) {
+        userDAO.authenticate(login, password).then(function (data) {
             res.send(data);
         }, function (err) {
             console.log(err);
             res.status(404).end();
         });
-   
+
     } else {
         console.log("social auth not yet implemented");
         res.status(404).end();
     }
-    
+
 });
 
 app.post('/user/create', function(req, res) {
@@ -588,9 +611,7 @@ app.post('/user/create', function(req, res) {
             password:password,
             tokens : {}
         };
-
-        userDAO.saveUser(user)
-        .then(function (data) {
+        userDAO.saveUser(user).then(function (data) {
             res.send(data);
         }, function (err) {
             console.log(err);
@@ -601,7 +622,7 @@ app.post('/user/create', function(req, res) {
         console.log("social user registration not yet implemented");
         res.status(404).end();
     }
-    
+
 });
 
 var server = app.listen(app.get('port'), function() {

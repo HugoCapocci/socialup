@@ -1,34 +1,23 @@
 define(['angular', 'app'], function(angular, app) {
     
     'use strict';
-    
-    console.log('routes.js, app: ',app);
+
+    function generateRouteProviders($routeProvider, route) {
+
+        $routeProvider.when('/'+route, {
+            templateUrl: 'views/'+route+'.html',
+            controller: route.substring(0,1).toUpperCase()+route.substring(1)+'Controller',
+            reloadOnSearch : false
+        });
+
+    }
 
 	return app.config(['$routeProvider', function($routeProvider) {
-	    
-        $routeProvider.when('/uploadFile', {
-            templateUrl: 'views/uploadFile.html',
-            controller: 'UploadFileController',
-            reloadOnSearch : false
+
+        var routes = ['uploadFile', 'cloudExplorer', 'postMessage', 'login', 'scheduledEvents', 'manageSocialNetworks'];
+        routes.forEach(function(route) {
+            generateRouteProviders($routeProvider, route);
         });
-        
-        $routeProvider.when('/cloudExplorer', {
-            templateUrl: 'views/cloudExplorer.html',
-            controller: 'CloudExplorerController',
-            reloadOnSearch : false
-        });
-        
-        $routeProvider.when('/postMessage', {
-            templateUrl: 'views/postMessage.html',
-            controller: 'PostMessageController',
-            reloadOnSearch : false
-        });
-        
-        $routeProvider.when('/login', {
-            templateUrl: 'views/login.html',
-            controller: 'LoginController'
-        });
-        
 	}]
   );
 

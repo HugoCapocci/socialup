@@ -3,8 +3,10 @@ define(['./module'], function (appModule) {
     'use strict';
     
     appModule.service('messageService', 
-        ['$http', '$q',
-        function messageService($http, $q) {
+        ['$http', '$q', '$window',
+        function messageService($http, $q, $window) {
+            
+             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
                         
             this.postMessage = function(providers, message, scheduledDate) {
                 
@@ -12,7 +14,7 @@ define(['./module'], function (appModule) {
                 console.log("messageService.postMessage "+message);
                 
                 //$http.post()
-                $http.post('/message', 
+                $http.post('/message/'+localData.user.id, 
                     {message: message, providers: providers, scheduledDate:scheduledDate})
                 .then(function(response) {
                     console.log('response for ', response);

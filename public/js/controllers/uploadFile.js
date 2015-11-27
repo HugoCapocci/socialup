@@ -2,8 +2,10 @@ define(['./module'], function (appModule) {
     
     'use strict';
     
-    appModule.controller('UploadFileController', ['$scope', 'FileUploader', function($scope, FileUploader) {
+    appModule.controller('UploadFileController', ['$scope', '$window', 'FileUploader', function($scope, $window, FileUploader) {
         
+        var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
+    
         $scope.uploadFileData = {
             title : "",
             description : "",
@@ -11,7 +13,7 @@ define(['./module'], function (appModule) {
             date : new Date(),
             tags : []
         };
-        $scope.uploader = new FileUploader({url : '/uploadFile'});
+        $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
             name: 'videoFilter',
             fn: function(item) {

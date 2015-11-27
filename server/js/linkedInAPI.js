@@ -63,5 +63,72 @@ function pushCode(code) {
     return deferred.promise;
 }
 
+function getUserInfo(tokens) {
+
+    var deferred = Q.defer();
+
+    var req_options = {
+        host: 'api.linkedin.com',
+        port: 443,
+        path: '/v1/people/~?format=json',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer '+tokens.access_token
+        }
+    };
+
+    var req = https.request(req_options, function(res) {
+
+        var data='';
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+            deferred.resolve(JSON.parse(data));
+        });
+    });
+    
+    req.on('error', function(e) {         
+        console.log('get user infos error: ', e);
+        deferred.reject(new Error(e));
+    });
+    
+    req.end();
+    return deferred.promise;
+}
+
+function postMessage(tokens, message) {
+
+    var deferred = Q.defer();
+    var post_data = {
+        comment: message,
+        visibility: {
+            code: 'anyone'
+        }
+    };
+
+    request({
+        uri: 'https://api.linkedin.com/v1/people/~/shares?format=json',
+        auth: {
+            bearer: tokens.access_token
+        },
+        method: 'POST',
+        json: true,
+        body: post_data
+    }, function (error, response, body){
+        if(error)
+            deferred.reject(new Error(error));
+        else {
+            if(body.status===400)   
+                deferred.reject(new Error(body.message));
+            else
+                deferred.resolve(body);
+        }
+    });
+    return deferred.promise;
+}
+
 exports.getOAuthURL=getOAuthURL;
 exports.pushCode=pushCode;
+exports.getUserInfo=getUserInfo;
+exports.postMessage=postMessage;

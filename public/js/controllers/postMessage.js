@@ -36,7 +36,7 @@ define(['./module'], function (appModule) {
                 console.log("message to send ? ", $scope.postMessage.message);
                 
                 if($scope.postMessage.message.length>0) {
-                    messageService.postMessage(['twitter', 'facebook'], $scope.postMessage.message, $scope.postMessage.date);
+                    messageService.postMessage(['twitter', 'facebook', 'linkedin'], $scope.postMessage.message, $scope.postMessage.date);
                 } else
                     console.log("empty message :p");
             },

@@ -27,7 +27,7 @@ var googlePlus = googleAPI.plus({version : 'v1', auth: oauth2Client});
 /*var googlePlus = googleAPI.plusDomains({version : 'v1', auth: oauth2Client});*/
 
 //generate url for OAuth authentication URI
-function auth() {
+function getOAuthURL() {
 
     // generate a url that asks permissions for Google+ and Google Calendar scopes
     var scopes = [
@@ -253,10 +253,8 @@ function getGooglePlusUser(tokens) {
 }*/
 
 exports.sendVideo=sendVideo;
-exports.auth=auth;
+exports.getOAuthURL=getOAuthURL;
 exports.pushCode=pushCode;
-
 exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;
-
 exports.getGooglePlusUser=getGooglePlusUser;

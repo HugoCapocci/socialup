@@ -9,7 +9,8 @@ require.config({
         'angular-file-upload' : '../../bower_components/angular-file-upload/dist/angular-file-upload.min',
         'angular-tree-control' : '../../bower_components/angular-tree-control/angular-tree-control',
         'ng-tags-input' : '../../bower_components/ng-tags-input/ng-tags-input',
-        'sha1' : '../../bower_components/SHA-1/sha1'
+        'sha1' : '../../bower_components/SHA-1/sha1',
+        'angular-smart-table' : '../../bower_components/angular-smart-table/dist/smart-table'
     },
     shim : {
         'angular' : {
@@ -33,8 +34,11 @@ require.config({
         },
         'ng-tags-input' : {
              deps : ['angular']
+        },
+        'angular-smart-table' : {
+             deps : ['angular']
         }
     },
-     // kick start application
+    // kick start application
     deps: ['./bootstrap']
 });

@@ -31,12 +31,12 @@ describe("schedule events service", function() {
     it("schedule event with 1 parameter only", function(done) {
         // old date so job will be executed directly
         var date = new Date(2012, 10, 29, 10, 30, 0);
-        var event = function(eventId, param) {
+        var event = function(eventId, userId, param) {
             console.log("event avec param: ", param);
             should(param).be.exactly("test");
             done();
         };
-        
+        //function scheduleEvent(userId, date, event, eventParams, callback) {
         scheduler.addEventListerner("event1", event);
         var eventId = scheduler.scheduleEvent(USER, date, "event1", "test");
         console.log("eventId: ",eventId);
@@ -45,7 +45,7 @@ describe("schedule events service", function() {
     it("schedule event with 3 parameters", function(done) {
         // old date so job will be executed directly
         var date = new Date(2012, 10, 29, 10, 30, 0);
-        var event = function(eventId, param1, param2, param3) {
+        var event = function(eventId, userId, param1, param2, param3) {
             should(param1).be.exactly("test1");
             should(param2).be.exactly("test2");
             should(param3).be.exactly("test3");
@@ -61,7 +61,7 @@ describe("schedule events service", function() {
         // newer date        
         var date = new Date(Date.now() + 1500);
         var eventId;
-        var event = function(eventId, param) {
+        var event = function(eventId, userId, param) {
             console.log("late event");
             should(param).be.exactly("late test");
             //event cannot be cancelled anymore, since it has been executed
@@ -104,7 +104,7 @@ describe("schedule events service", function() {
      
         var date = new Date(Date.now() + 3000);
         var eventId;
-        var event = function(eventId, param) {
+        var event = function(eventId, userId, param) {
             finish(param);
         };
 

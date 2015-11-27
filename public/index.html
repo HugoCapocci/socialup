@@ -89,35 +89,31 @@
          
         </style>   
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css.map" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
-        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css.map" />
         
     </head>
     <body ng-controller="MainController">
         
          <div class="container">             
-             <div>{{value}}</div>        
-             <div>                 
-                <a ng-repeat="provider in providers" href="{{oauthURLS[provider]}}" target="_blank">
-                    <img src="{{'images/'+provider+'.png'}}">
-                </a>
-             </div>
-        </div>
+            
+             <div>{{value}}</div>
+        
+            <a href="#/uploadFile">upload a file</a><br/>
+            <a href="#/cloudExplorer">explore drive</a><br/>
+            <a href="#/postMessage">post a message</a><br/>
+            <a href="#/scheduledEvents">manage scheduled events</a><br/>
+            <a href="#/manageSocialNetworks">manage social networks authentication</a><br/>
+             
 
-        <a href="#/uploadFile">upload a file</a><br/>
-        <a href="#/cloudExplorer">explore drive</a><br/>
-        <a href="#/postMessage">post a message</a><br/>
+            <div ng-view></div>
 
-        <div ng-view></div>
-
-         <footer>
-            <div class="row text-center">
-                <div class="col-lg-12">
-                    <p>Copyright &copy; Social Up 2015</p>
+             <footer>
+                <div class="row text-center">
+                    <div class="col-lg-12">
+                        <p>Copyright &copy; Social Up 2015</p>
+                    </div>
                 </div>
-            </div>
-        </footer>
-
+            </footer>
+    </div>
     </body>
 </html>
