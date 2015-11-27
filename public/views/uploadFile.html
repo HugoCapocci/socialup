@@ -3,6 +3,12 @@
      <input type="file" nv-file-select uploader="uploader"/><br/>
      
      <input type="checkbox" ng-model="uploadFileData.isCloud" /> cloud? <br/>
+
+    <div class="row">
+        <label ng-repeat="provider in uploadFileData.providers">
+          <input type="checkbox" checklist-model="uploadFileData.selectedProviders" checklist-value="provider"> {{provider}}
+        </label>
+    </div>
     
      <ul>
         <li ng-repeat="item in uploader.queue">

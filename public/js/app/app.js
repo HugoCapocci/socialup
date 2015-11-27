@@ -10,6 +10,7 @@ define([
     'angular-tree-control',
     'ng-tags-input',
     'angular-smart-table',
+    'checklist-model',
     '../services/index',
     '../controllers/index' 
     ], function (angular) {
@@ -25,6 +26,7 @@ define([
             'treeControl',
             'ngTagsInput',
             'smart-table',
+            'checklist-model',
             'SocialUp.services',
             'SocialUp.controllers'
         ]);

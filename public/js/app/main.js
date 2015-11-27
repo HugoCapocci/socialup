@@ -10,7 +10,8 @@ require.config({
         'angular-tree-control' : '../../bower_components/angular-tree-control/angular-tree-control',
         'ng-tags-input' : '../../bower_components/ng-tags-input/ng-tags-input',
         'sha1' : '../../bower_components/SHA-1/sha1',
-        'angular-smart-table' : '../../bower_components/angular-smart-table/dist/smart-table'
+        'angular-smart-table' : '../../bower_components/angular-smart-table/dist/smart-table',
+        'checklist-model' : '../../bower_components/checklist-model/checklist-model'
     },
     shim : {
         'angular' : {
@@ -36,6 +37,9 @@ require.config({
              deps : ['angular']
         },
         'angular-smart-table' : {
+             deps : ['angular']
+        },
+        'checklist-model' : {
              deps : ['angular']
         }
     },

@@ -191,7 +191,8 @@ app.get('/google2callback', function(req, res) {
         
     }).then(function(googleplusUser) {
         console.log("googleplusUser: ",googleplusUser);
-        res.send("google auth OK, google plus OK");
+        //res.send("google auth OK, google plus OK");
+        res.redirect('/#?close=true');
     }, function(err) {
         console.error("error googleplusUser: ", err);
         res.send(err);
@@ -225,7 +226,8 @@ app.get('/dailymotion2callback', function(req, res) {
 
         }).then(function(userSaved) {
             users[userId] = userSaved;*/
-            res.send("OK DAILYMOTION");
+            //res.send("OK DAILYMOTION");
+            res.redirect('/#?close=true');
         }, function(err) {
             res.send(err);
         });
@@ -251,7 +253,8 @@ app.get('/facebook2callback', function(req, res) {
 
     }).then(function(userSaved) {
         users[userId] = userSaved;
-        res.send("FB AUTH OK");
+        //res.send("FB AUTH OK");
+        res.redirect('/#?close=true');
     }, function(err) {
         res.send(err);
     });
@@ -261,8 +264,8 @@ app.get('/facebook2callback', function(req, res) {
 app.get('/dropbox2callback', function(req, res) {
 
     var code = req.query.code;
-    console.log("drop box code: ", code);
-    console.log("res.statusCode", res.statusCode);
+/*    console.log("drop box code: ", code);
+    console.log("res.statusCode", res.statusCode);*/
 
     var userId = req.query.state;
     if(users[userId]===undefined)
@@ -276,7 +279,8 @@ app.get('/dropbox2callback', function(req, res) {
 
     }).then(function(userSaved) {
         users[userId] = userSaved;       
-       res.send("DROPBOX AUTH OK");
+/*       res.send("DROPBOX AUTH OK");*/
+        res.redirect('/#?close=true');
     }, function(err) {
         console.log("err auth dropbox: ",err);
         res.send(err);
@@ -299,8 +303,8 @@ app.get('/twitter2callback', function(req, res) {
 
     }).then(function(userSaved) {
         users[userId] = userSaved;
-        res.send("TWITTER AUTH VERIFIER OK");
-
+        // res.send("TWITTER AUTH VERIFIER OK");
+        res.redirect('/#?close=true');
     }, function(err) {
         res.send(err);
     });
@@ -318,10 +322,8 @@ app.get('/linkedin2callback', function(req, res) {
         //expires_in is in seconds
         tokens.expiry_date = Date.now() + tokens.expires_in*1000;
         delete tokens.expires_in;
-
         users[userId].tokens[TEST_LINKEDIN]=tokens;        
         console.log("linkedIn tokens: ",tokens);
-
         return linkedInAPI.getUserInfo(tokens);
     
     }, function(err) {        
@@ -338,7 +340,8 @@ app.get('/linkedin2callback', function(req, res) {
     }).then(function(userSaved) {
         
         users[userId] = userSaved;
-        res.send("LINKEDIN AUTH OK");
+        res.redirect('/#?close=true');
+        //res.send("LINKEDIN AUTH OK");
     }, function(err) {        
         res.send(err);
     });
@@ -390,6 +393,36 @@ app.delete('/event/:eventId', function(req, res) {
     });
 
 });
+
+app.delete('/token/:provider/:userId', function(req, res) {
+
+    var provider = req.params.provider;
+    var userId = req.params.userId;
+        
+    userDAO.deleteToken(provider, userId).then(function(result) {
+        var statusCode;
+        if(result===1)
+            statusCode=200;
+        else
+            statusCode=404;
+        res.status(statusCode).end();
+    }, function(err) {
+        res.send(err);
+    });
+
+});
+
+app.get('/user/:userId', function(req, res) {
+
+    var userId = req.params.userId;
+    userDAO.retrieveUserById(userId).then(function(user) {
+        res.send(user);
+    }, function(err) {
+        res.send(err);
+    });
+
+});
+
 
 app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
 

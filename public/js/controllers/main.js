@@ -4,9 +4,12 @@ define(['./module'], function (appModule) {
     
     appModule.controller(
         'MainController',
-        ['$scope', '$window', 'authService',
-        function mainController($scope, $window, authService) {
-        
+        ['$scope', '$location', '$window',
+        function mainController($scope, $location, $window) {
+            
+            var parameters= $location.search();
+            if(parameters.close)
+                $window.close();
             $scope.value="Hello World!";
 
         }]

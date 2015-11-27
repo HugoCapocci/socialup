@@ -30,13 +30,15 @@ define(['./module'], function (appModule) {
         };
         
         $scope.postMessage = {
+            providers : ['twitter', 'facebook', 'linkedin'],
+            selectedProviders : [],
             message : '',
             date : new Date(),
             send : function() {
                 console.log("message to send ? ", $scope.postMessage.message);
                 
                 if($scope.postMessage.message.length>0) {
-                    messageService.postMessage(['twitter', 'facebook', 'linkedin'], $scope.postMessage.message, $scope.postMessage.date);
+                    messageService.postMessage($scope.postMessage.selectedProviders, $scope.postMessage.message, $scope.postMessage.date);
                 } else
                     console.log("empty message :p");
             },

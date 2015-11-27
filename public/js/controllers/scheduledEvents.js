@@ -75,7 +75,6 @@ define(['./module'], function(appModule) {
         
         $scope.parseDate = function(dateString) {
             var date = new Date(dateString);
-            console.log("date.getTime()", date.getTime());
             return date.getTime();
         };
         

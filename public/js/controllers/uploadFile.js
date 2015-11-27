@@ -11,7 +11,9 @@ define(['./module'], function (appModule) {
             description : "",
             isCloud : false,
             date : new Date(),
-            tags : []
+            tags : [],
+            providers : ['google', 'dailymotion','facebook'],
+            selectedProviders : [],
         };
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
@@ -40,7 +42,7 @@ define(['./module'], function (appModule) {
             item.formData = [
                 {'title' : $scope.uploadFileData.title},
                 {'description' : $scope.uploadFileData.description},
-                {'providers' : ['google', 'dailymotion','facebook'] },
+                {'providers' : $scope.uploadFileData.selectedProviders},
                 {'scheduledDate' : $scope.uploadFileData.date},
                 {'tags' : processTags()}
             ];

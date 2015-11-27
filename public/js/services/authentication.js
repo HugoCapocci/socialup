@@ -50,15 +50,15 @@ define(['./module'], function (appModule) {
                         firstName :  response.data.firstName,
                         lastName :  response.data.lastName,
                         login :  response.data.login,
-                        id : response.data._id
+                        id : response.data._id,
+                        tokens : response.data.tokens
                     };
-                    $window.localStorage.setItem('SocialUp', JSON.stringify({ user: userData, timestamp : new Date().getTime()}));
+                    $window.localStorage.setItem('SocialUp', JSON.stringify({user: userData, timestamp : new Date().getTime()}));
                     deferred.resolve(userData);
                 }, function (err) {
                     deferred.reject(err);
                 });
-                return deferred.promise;
-                
+                return deferred.promise;                
             };
             
             this.createUser = function(firstName, lastName, login, hashedPassword) {
@@ -72,6 +72,44 @@ define(['./module'], function (appModule) {
                     deferred.resolve(response.data);
                 }, function (err) {
                     console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.getUserTokens = function() {
+                return localData.user.tokens;
+            };
+            
+            this.deleteToken = function(provider) {
+                
+                var deferred = $q.defer();
+                $http.delete('/token/'+provider+'/'+localData.user.id).then(function(response) {
+                    console.log('response for eventService.deleteEvent: ', response);
+                    deferred.resolve();
+                }, function (err) {
+                    console.log('err in eventService.deleteEvent: ', err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.getUserData = function() {
+                
+                var deferred = $q.defer();
+                $http.get('/user/'+localData.user.id).then(function (response) {
+                    
+                    console.log("authenticated user data: ", response.data);       
+                    var userData = {
+                        firstName :  response.data.firstName,
+                        lastName :  response.data.lastName,
+                        login :  response.data.login,
+                        id : response.data._id,
+                        tokens : response.data.tokens
+                    };
+                    $window.localStorage.setItem('SocialUp', JSON.stringify({user: userData, timestamp : new Date().getTime()}));
+                    deferred.resolve(userData);
+                }, function (err) {
                     deferred.reject(err);
                 });
                 return deferred.promise;

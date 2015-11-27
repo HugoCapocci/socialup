@@ -104,12 +104,29 @@ function retrieveUsers() {
 }
 
 function retrieveUserByLogin(login) {
+
+    var query = {
+        login:login
+    };
+    return retrieveUser(query);
+}
+
+function retrieveUserById(userId) {
     
+    console.log("retrive user by id: ", userId);
+
+    var query = {
+        _id : new ObjectID(userId)            
+    };
+    return retrieveUser(query);     
+}
+
+function retrieveUser(query) {
+
     var deferred = Q.defer();
     getDB(function(db) {
-        //console.log('update event '+eventId+' with result: ', result);
-        db.collection(collection).findOne({login:login}, function(err, user) {
-            //console.log("user retrieved ?", result);
+        db.collection(collection).findOne(query, function(err, user) {
+
             db.close();
             if(err)
                 deferred.reject(new Error(err));
@@ -136,8 +153,35 @@ function authenticate(login, password) {
     return deferred.promise;   
 }
 
+function deleteToken(provider, userId) {
+ 
+    var deferred = Q.defer();
+    getDB(function(db) {
+        var query = {
+            _id : new ObjectID(userId)            
+        };
+        var unset = {
+            $unset: {}
+        };
+        unset.$unset["tokens."+provider] = '';
+        // console.log("delete object? ", eventToDelete);
+         db.collection(collection).update(query, unset, function(err, r) {
+            db.close();
+            if (err)
+                deferred.reject(new Error(err));
+            else {
+                console.log("deleteTokens: ",r.result);
+                deferred.resolve(r.result.n);
+            }
+        });
+    });
+    return deferred.promise;
+}
+
 exports.saveUser=saveUser;
 exports.retrieveUsers=retrieveUsers;
 exports.updateUserTokens=updateUserTokens;
 exports.authenticate=authenticate;
 exports.retrieveUserByLogin=retrieveUserByLogin;
+exports.retrieveUserById=retrieveUserById;
+exports.deleteToken=deleteToken;

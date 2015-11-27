@@ -7,6 +7,7 @@ define(['./module'], function (appModule) {
         ['$scope', '$window', 'authService',
         function manageSocialNetworksController($scope, $window, authService) {
         
+            $scope.socialTokens = authService.getUserTokens();
 
             $scope.oauthURLS = {};
             
@@ -35,6 +36,34 @@ define(['./module'], function (appModule) {
                      console.log("verification KO, err? ", err);
                 });
             };
+            
+            $scope.deleteToken = function(provider) {
+                authService.deleteToken(provider).then(function() {
+                    getUserData();
+                }, function(err) {
+                    console.log("delete token error: ", err);
+                });
+            };
+            
+            $scope.generateToken = function(provider) {
+                
+                 authService.getProviderURL(provider).then(function(url) {
+                     var oauthWindow = $window.open(url+'&state='+localData.user.id, 'C-Sharpcorner', 'width=500,height=400');
+                     //oauthWindow.onload = function() {
+                        oauthWindow.onbeforeunload = function() {
+                            console.log("token generated");
+                            getUserData();
+                        };
+                    //};
+                 });
+                
+            };
+            
+            function getUserData() {                
+                authService.getUserData().then(function(userData) {
+                    $scope.socialTokens=userData.tokens;
+                });
+            }
 
         }]
     );

@@ -3,7 +3,13 @@
     <div class="row">
         <textarea ng-model="postMessage.message"></textarea>
     </div>
-
+    
+    <div class="row">
+        <label ng-repeat="provider in postMessage.providers">
+          <input type="checkbox" checklist-model="postMessage.selectedProviders" checklist-value="provider"> {{provider}}
+        </label>
+    </div>
+    
     <h4>DatePicker</h4>
     <div class="row">
         

@@ -18,7 +18,7 @@
 		<tbody>
 			<tr ng-repeat="event in displayedCollection">
 				<td>{{event.type}}</td>
-				<td>{{event.date | date:"dd/MM/yyyy 'à' h'h'mm" }}</td>
+				<td>{{event.date | date:"dd/MM/yyyy 'à' HH'h'mm" }}</td>
                 <td>{{event.providers}}</td>
 				<td>
                     <p ng-repeat="param in event.params">
@@ -30,9 +30,8 @@
                     <img src="images/attachment.png" height="24" width="24" uib-tooltip="{{event.attachment.originalFileName}} - {{displayFileSize(event.attachment.size)}}" ng-if="event.attachment">
                 </td>
                 <td>
-                    <button type="button" ng-click="delete(event)" class="btn btn-sm btn-danger">
-                        <i class="glyphicon glyphicon-remove-circle">
-                        </i>
+                    <button type="button" ng-click="delete(event)" class="btn btn-sm btn-danger" uib-tooltip="delete event">
+                        <i class="glyphicon glyphicon-trash"></i>
                     </button>
 				</td>
 			</tr>
