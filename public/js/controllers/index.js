@@ -5,6 +5,5 @@ define([
     './cloudExplorer',
     './postMessage',
     './scheduledEvents',
-    './manageSocialNetworks'
-    
+    './manageSocialNetworks'    
 ], function () {});

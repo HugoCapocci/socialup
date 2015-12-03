@@ -12,7 +12,7 @@ define([
     'angular-smart-table',
     'checklist-model',
     '../services/index',
-    '../controllers/index' 
+    '../controllers/index'
     ], function (angular) {
     
     'use strict';

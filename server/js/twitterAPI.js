@@ -230,6 +230,42 @@ function getTweets(tokens) {
 
 }
 
+function getUserInfo(tokens) {
+
+    var deferred = Q.defer();
+    
+    var headerParams = {
+        'oauth_consumer_key' : APP_KEY,
+        'oauth_nonce' : oAuthNonce(),
+        'oauth_signature_method' : 'HMAC-SHA1',
+        'oauth_timestamp' : Math.round(new Date() / 1000),
+        'oauth_token' : tokens.oauth_token,
+        'oauth_version' : '1.0'
+    };
+    var globalParams=headerParams; 
+    
+    var url= 'https://api.twitter.com/1.1/account/settings.json';
+    headerParams.oauth_signature = getSignature(globalParams, 'get', url, tokens.oauth_token_secret, APP_SECRET);
+
+    request({
+        uri : url,
+        headers : {
+            'Authorization' : 'OAuth '+inLineParams(headerParams)
+        },
+        method: "GET"
+    }, function(error, response, body){
+ 
+        //client error
+        if(error)
+            deferred.reject(new Error(error));
+        else {           
+            var userInfo = JSON.parse(body);
+            deferred.resolve({userName:userInfo.screen_name});
+        }
+    });
+    return deferred.promise;
+}
+
 function bodyToTokens(body) {
     
     var tokenArray = body.split('&');
@@ -241,6 +277,7 @@ function bodyToTokens(body) {
     return tokens;    
 }
 
+exports.getUserInfo=getUserInfo;
 exports.getOAuthURL=getOAuthURL;
 exports.getTokens=getTokens;
 exports.createSignatureBaseString=createSignatureBaseString;

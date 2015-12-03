@@ -83,8 +83,10 @@ function getUserInfo(tokens) {
         res.on('data', function(chunk) {
             data+=chunk;
         });
-        res.on('end', function() {
-            deferred.resolve(JSON.parse(data));
+        res.on('end', function() {            
+            var userInfo = JSON.parse(data);
+            deferred.resolve({userName:userInfo.firstName+' '+userInfo.lastName});
+            //deferred.resolve(userInfo);
         });
     });
     

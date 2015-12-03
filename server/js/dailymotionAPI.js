@@ -69,7 +69,7 @@ function saveTokensForUser(tokens, userId) {
 
     tokens.expiry_date = Date.now() + tokens.expires_in;
     delete tokens.expires_in;
-    userDAO.updateUserTokens(userId, 'dailymotion', tokens);
+    //userDAO.updateUserTokens(userId, 'dailymotion', tokens);
     return tokens;
 }
 
@@ -98,7 +98,6 @@ function refreshTokens(tokens, userId) {
         'grant_type' : 'refresh_token',
         'client_id': DAILYMOTION_API_KEY,
         'client_secret': DAILYMOTION_API_SECRET,
-       /* 'redirect_uri' : DAILYMOTION_REDIRECT_URL,*/
         'refresh_token' : tokens.refresh_token
     });
     
@@ -169,6 +168,7 @@ function sendVideo(tokens, file, userId, params) {
     return deferred.promise;
 }
 
+// resolve videoUrl
 function publishVideo(videoURL, tokens, params, deferred) {
         
     request({
@@ -190,9 +190,16 @@ function publishVideo(videoURL, tokens, params, deferred) {
         if(err) {
             console.log("cannot publish the video. Err: ",err);
             deferred.reject(new Error(err));
-        } else { 
-            console.log("video published with response body ?", body);
-            deferred.resolve();
+        } else {
+            
+            var results = JSON.parse(body);
+            console.log('video published on dailymotion with results ?', results);
+            //{ id: 'x3godf5', title: 'chat', channel: 'news', owner: 'xglgo' }
+            if(results.error) {
+                deferred.reject(new Error(results.error.message));
+            } else {
+                deferred.resolve('http://www.dailymotion.com/video/'+results.id+'_'+results.title+'_'+results.channel);
+            }
         }
     });
 }
@@ -254,7 +261,8 @@ function getUserInfo(token)  {
             data+=chunk;
         });
         res.on('end', function() {
-            deferred.resolve(JSON.parse(data));
+            var userInfo = JSON.parse(data);
+            deferred.resolve({userName:userInfo.screename});
         });
     });
     
@@ -271,3 +279,4 @@ exports.getOAuthURL=getOAuthURL;
 exports.sendVideo=sendVideo;
 exports.pushCode=pushCode;
 exports.getUserInfo=getUserInfo;
+exports.refreshTokens=refreshTokens;

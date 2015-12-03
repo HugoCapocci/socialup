@@ -73,7 +73,7 @@ function updateUserTokens(userId, provider, tokens) {
     var fieldUpdate = {
         $set : {}
     };
-    fieldUpdate.$set["tokens."+provider]=tokens;
+    fieldUpdate.$set["providers."+provider+".tokens"]=tokens;
     
     getDB(function(db) {
         db.collection(collection).updateOne(query, fieldUpdate, {upsert:false}, function(err/*, r*/) {
@@ -113,8 +113,7 @@ function retrieveUserByLogin(login) {
 
 function retrieveUserById(userId) {
     
-    console.log("retrive user by id: ", userId);
-
+    //console.log("retrieve user by id: ", userId);
     var query = {
         _id : new ObjectID(userId)            
     };
@@ -126,7 +125,6 @@ function retrieveUser(query) {
     var deferred = Q.defer();
     getDB(function(db) {
         db.collection(collection).findOne(query, function(err, user) {
-
             db.close();
             if(err)
                 deferred.reject(new Error(err));
@@ -146,6 +144,8 @@ function authenticate(login, password) {
             db.close();
             if(err)
                 deferred.reject(new Error(err));
+            else if(result === null)
+                deferred.reject('no user found');
             else
                 deferred.resolve(result);
         });
@@ -163,14 +163,13 @@ function deleteToken(provider, userId) {
         var unset = {
             $unset: {}
         };
-        unset.$unset["tokens."+provider] = '';
-        // console.log("delete object? ", eventToDelete);
+        unset.$unset["providers."+provider] = '';
          db.collection(collection).update(query, unset, function(err, r) {
             db.close();
             if (err)
                 deferred.reject(new Error(err));
             else {
-                console.log("deleteTokens: ",r.result);
+                //console.log("deleteTokens: ",r.result);
                 deferred.resolve(r.result.n);
             }
         });

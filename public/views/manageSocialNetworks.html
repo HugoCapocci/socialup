@@ -1,11 +1,6 @@
-<div class="container">
-    
-    <div class="row">
-        
-       <!-- <a ng-repeat="provider in providers" href="{{oauthURLS[provider]}}" target="_blank">
-            <img src="{{'images/'+provider+'.png'}}">
-        </a>-->
+<div>
 
+    <div class="row">
         <table st-table="socialTokens" class="table table-striped">
             <thead>
                 <tr>
@@ -26,18 +21,20 @@
                         </a>
                     </td>
                     <td>
-                        <i ng-if="socialTokens[provider]" class="alert-success glyphicon glyphicon-ok-sign"></i></td>
-                    <td></td>
+                        <i ng-if="socialTokens[provider] && socialTokens[provider].tokens" class="alert-success glyphicon glyphicon-ok-sign"></i></td>
+                    <td>
+                        <p ng-if="socialTokens[provider]">{{socialTokens[provider].userName}}</p>
+                    </td>
                    
-                    <td><p ng-if="socialTokens[provider] && socialTokens[provider].expiry_date">{{socialTokens[provider].expiry_date | date:"dd/MM/yyyy 'à' HH'h'mm" }}</p></td>
+                    <td><p ng-if="socialTokens[provider] && socialTokens[provider].tokens && socialTokens[provider].tokens.expiry_date">{{socialTokens[provider].tokens.expiry_date}}</p></td>
                    
-                    <td><p ng-if="socialTokens[provider].refresh_token">true</p></td>
+                    <td><p ng-if="socialTokens[provider] && socialTokens[provider].tokens && (socialTokens[provider].tokens.refresh_token || !socialTokens[provider].tokens.expiry_date)">true</p></td>
                     
                     <td>
-                        <button ng-if="socialTokens[provider] && socialTokens[provider].expiry_date" type="button" class="btn btn-sm btn-info" uib-tooltip="refresh token">
+                        <button ng-if="socialTokens[provider] && socialTokens[provider].tokens && socialTokens[provider].tokens.refresh_token" ng-click="refreshToken(provider)" type="button" class="btn btn-sm btn-info" uib-tooltip="refresh token">
                             <i class="glyphicon glyphicon-refresh"></i>
                         </button>
-                        <button ng-if="socialTokens[provider] && !socialTokens[provider].expiry_date" ng-click="generateToken(provider)" type="button" class="btn btn-sm btn-info" uib-tooltip="regenerate token">
+                        <button ng-if="socialTokens[provider] && socialTokens[provider].tokens && !socialTokens[provider].tokens.refresh_token" ng-click="generateToken(provider)" type="button" class="btn btn-sm btn-info" uib-tooltip="regenerate token">
                             <i class="glyphicon glyphicon-repeat"></i>
                         </button>
                         <button ng-if="!socialTokens[provider]" type="button" ng-click="generateToken(provider)" class="btn btn-sm btn-warning" uib-tooltip="generate token">
@@ -45,7 +42,7 @@
                         </button>
                     </td>     
                     <td>
-                        <button ng-if="socialTokens[provider]" type="button" ng-click="deleteToken(provider)" class="btn btn-sm btn-danger" uib-tooltip="revoke token">
+                        <button ng-if="socialTokens[provider] && socialTokens[provider].tokens" type="button" ng-click="deleteToken(provider)" class="btn btn-sm btn-danger" uib-tooltip="revoke token">
                             <i class="glyphicon glyphicon-trash"></i>
                         </button>
                     </td>              
@@ -53,5 +50,5 @@
             </tbody>
         </table>
     </div>
-    
+
 </div>

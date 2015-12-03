@@ -9,10 +9,12 @@ const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 const FACEBOOK_REDIRECT_URI = process.env.APP_URL + '/facebook2callback';
 
+var querystring = require('querystring');
 var https = require('https');
 var Q = require('q');
 var request = require('request');
 var fs = require("fs");
+var userDAO = require('./userDAO.js');
 
 function pushCode(code) {
 
@@ -48,6 +50,47 @@ function pushCode(code) {
     return deferred.promise;
 }
 
+function refreshTokens(tokens, userId) {
+    
+    var deferred = Q.defer();
+    var req_options = {
+        host: 'graph.facebook.com',
+        port: 443,
+        path: '/v2.3/oauth/access_token?grant_type=fb_exchange_token&client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&client_secret='+FACEBOOK_APP_SECRET+'&fb_exchange_token='+tokens.access_token,
+        method: 'GET'
+    };
+
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+            console.log("code validated ?  ",data);
+            var refreshedToken = JSON.parse(data);
+            deferred.resolve( saveTokensForUser(refreshedToken, userId) );
+        });
+    });
+    
+    req.on('error', function(e) {         
+        console.log('upload url error: ', e);
+        deferred.reject(new Error(e));
+    });
+    
+    req.end();
+
+    return deferred.promise;
+}
+
+function saveTokensForUser(tokens, userId) {
+
+    tokens.expiry_date = Date.now() + tokens.expires_in;
+    delete tokens.expires_in;
+    userDAO.updateUserTokens(userId, 'facebook', tokens);
+    return tokens;
+}
+
 function tagsAsHashtags(tags) {
 
     var hastags="\n\n";
@@ -77,8 +120,9 @@ function sendVideo(token, file, user, params) {
         if(err)
             deferred.reject(new Error(err));
         else {
-            console.log('FB Video Upload Response: ' + response);
-            deferred.resolve(body);  
+            //console.log('FB Video Upload Response: ', response);
+            //return url to the video
+            deferred.resolve('https://www.facebook.com/'+JSON.parse(body).id);  
         }
     });
     
@@ -105,10 +149,45 @@ function postMessage(tokens, message) {
         if(err)
             deferred.reject(new Error(err));
         else {
-            console.log('FB Message Response: ' + response);
             deferred.resolve(body);  
         }
     });
+    return deferred.promise;
+}
+
+function getUserInfo(tokens)  {
+    
+    var deferred = Q.defer();
+
+    var req_options = {
+        host: 'graph.facebook.com',
+        port: 443,
+        path: '/v2.5/me',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer '+tokens.access_token
+        }
+    };
+
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+
+            var userInfo = JSON.parse(data);
+            deferred.resolve({userName:userInfo.name});
+        });
+    });
+    
+    req.on('error', function(e) {         
+        console.log('get user infos error: ', e);
+        deferred.reject(new Error(e));
+    });
+    
+    req.end();
     return deferred.promise;
 }
 
@@ -116,3 +195,5 @@ exports.pushCode=pushCode;
 exports.sendVideo=sendVideo;
 exports.getOAuthURL=getOAuthURL;
 exports.postMessage=postMessage;
+exports.refreshTokens=refreshTokens;
+exports.getUserInfo=getUserInfo;

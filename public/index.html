@@ -2,8 +2,10 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta lang="fr" >
+        <meta lang="fr">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <title>Social Up</title>        
         
         <!-- use require.js for dependeny injections -->
@@ -86,7 +88,25 @@
                 border-radius: 32px;
                 color: black;
             } 
-         
+            .btn-file {
+                position: relative;
+                overflow: hidden;
+            }
+            .btn-file input[type=file] {
+                position: absolute;
+                top: 0;
+                right: 0;
+                min-width: 100%;
+                min-height: 100%;
+                font-size: 100px;
+                text-align: right;
+                filter: alpha(opacity=0);
+                opacity: 0;
+                outline: none;
+                background: white;
+                cursor: inherit;
+                display: block;
+            }
         </style>   
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
@@ -94,16 +114,40 @@
     </head>
     <body ng-controller="MainController">
         
-         <div class="container">             
-
-            <a href="#/uploadFile">upload a file</a><br/>
-            <a href="#/cloudExplorer">explore drive</a><br/>
-            <a href="#/postMessage">post a message</a><br/>
-            <a href="#/scheduledEvents">manage scheduled events</a><br/>
-            <a href="#/manageSocialNetworks">manage social networks authentication</a><br/>
-
-            <div ng-view></div>
-             
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Social Up</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#/uploadFile">Upload a file</a></li>
+                    <li><a href="#/cloudExplorer">Explore drive</a></li>
+                    <li><a href="#/postMessage">Post a message</a></li>
+                    <li><a href="#/scheduledEvents">Manage scheduled events</a></li>
+                    <li><a href="#/manageSocialNetworks">Manage social networks authentication</a></li>
+                    <li class="active"><a href="#/login">Login / Registration</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+    
+        <div class="container" style="width:100%">             
+            <div class="row">
+                <div class="col-lg-2 col-md-1"></div>
+                <div class="col-lg-7 col-md-9">
+                    <div ng-view></div>
+                </div>
+                <div class="col-lg-3 col-md-2">
+                    <uib-alert ng-if="$root.alert" type="{{$root.alert.type}}" style="opacity:{{$root.alert.opacity}};" close="closeAlert()">{{$root.alert.msg}}</uib-alert>
+                </div>
+            </div>
             <footer>
                 <div class="row text-center">
                     <div class="col-lg-12">

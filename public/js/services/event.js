@@ -21,6 +21,19 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
+
+            this.retrieveOne = function(eventId) {
+
+                var deferred = $q.defer();
+                $http.get('/event/'+eventId).then(function(response) {
+                    console.log('response for eventService.retrieveOne: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    console.log('err in eventService.retrieveOne: ', err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
             
             this.deleteEvent = function(eventId) {
                 

@@ -25,7 +25,7 @@ define(['./module'], function (appModule) {
                 return deferred.promise;
             };
         
-            this.getTwitterAccessToken = function(oauthVerifier) {
+/*            this.getTwitterAccessToken = function(oauthVerifier) {
                 var deferred = $q.defer();
                 $http.post('/twitter/'+oauthVerifier+'/'+localData.user.id)
                 .then(function (response) {
@@ -37,21 +37,20 @@ define(['./module'], function (appModule) {
                     deferred.reject(err);
                 });
                 return deferred.promise;
-            };
+            };*/
 
             this.authenticate = function(login, hashedPassword) {
 
                 var deferred = $q.defer();
-                $http.get('/user/authenticate/?login='+login+"&password="+hashedPassword)
+                $http.get('/authenticate/?login='+login+"&password="+hashedPassword)
                 .then(function (response) {
-                    
-                    console.log("authenticated user data: ", response.data);       
+                       
                     var userData = {
                         firstName :  response.data.firstName,
                         lastName :  response.data.lastName,
                         login :  response.data.login,
                         id : response.data._id,
-                        tokens : response.data.tokens
+                        providers : response.data.providers
                     };
                     $window.localStorage.setItem('SocialUp', JSON.stringify({user: userData, timestamp : new Date().getTime()}));
                     deferred.resolve(userData);
@@ -94,18 +93,30 @@ define(['./module'], function (appModule) {
                 return deferred.promise;
             };
             
+            this.refreshToken =function(provider) {
+                
+                var deferred = $q.defer();
+                $http.get('/refreshToken/'+provider+'/'+localData.user.id).then(function(response) {
+                    console.log('response for eventService.refreshToken: ', response);
+                    deferred.resolve();
+                }, function (err) {
+                    console.log('err in eventService.refreshToken: ', err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
             this.getUserData = function() {
                 
                 var deferred = $q.defer();
                 $http.get('/user/'+localData.user.id).then(function (response) {
-                    
-                    console.log("authenticated user data: ", response.data);       
+     
                     var userData = {
                         firstName :  response.data.firstName,
                         lastName :  response.data.lastName,
                         login :  response.data.login,
                         id : response.data._id,
-                        tokens : response.data.tokens
+                        providers : response.data.providers
                     };
                     $window.localStorage.setItem('SocialUp', JSON.stringify({user: userData, timestamp : new Date().getTime()}));
                     deferred.resolve(userData);

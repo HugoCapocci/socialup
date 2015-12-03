@@ -1,33 +1,30 @@
-<div class="container">
-    
+<div>
+   
     <div class="row">
-        <textarea ng-model="postMessage.message"></textarea>
+
+        <div class="col-lg-4"><textarea ng-model="postMessage.message"></textarea></div>
+
+        <div class="col-lg-4">
+            <p class="input-group">
+                <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="postMessage.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                </span>  
+            </p>
+        </div>
+        <div class="col-lg-4">
+            <uib-timepicker ng-model="postMessage.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
+        </div>
     </div>
-    
+
     <div class="row">
         <label ng-repeat="provider in postMessage.providers">
           <input type="checkbox" checklist-model="postMessage.selectedProviders" checklist-value="provider"> {{provider}}
         </label>
     </div>
-    
-    <h4>DatePicker</h4>
-    <div class="row">
-        
-        <div class="col-md-6 col-xs-12">
-            <p class="input-group">
-              <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="postMessage.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
-              <span class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-              </span>
-            </p>
+    <div class="row" style="text-align:center">
+        <div class="col-lg-4">
+            <button ng-click="postMessage.send()">Send</button>
         </div>
-        
-        <div class="col-md-3 col-xs-6">
-            <uib-timepicker ng-model="postMessage.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
-        </div>
-        
     </div>
-    
-    <button ng-click="postMessage.send()">Send</button>
-    
 </div>

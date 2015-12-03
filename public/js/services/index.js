@@ -2,5 +2,6 @@ define([
     './authentication',
     './cloud',
     './message',
-    './event'
+    './event',
+    './alerts'
 ], function () {});

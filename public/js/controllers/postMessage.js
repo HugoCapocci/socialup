@@ -1,22 +1,17 @@
-define(['./module'], function (appModule) {
+define(['./module', 'moment'], function (appModule, moment) {
     
     'use strict';
     
-    appModule.controller('PostMessageController', ['$scope', 'messageService', function($scope, messageService) {
+    appModule.controller('PostMessageController', ['$scope', '$location', 'messageService', 'alertsService', 'eventService', 
+        function($scope, $location, messageService, alertsService, eventService) {
         
         var tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         var afterTomorrow = new Date();
         afterTomorrow.setDate(tomorrow.getDate() + 2);
         var events = [
-          {
-            date: tomorrow,
-            status: 'full'
-          },
-          {
-            date: afterTomorrow,
-            status: 'partially'
-          }
+          { date: tomorrow, status: 'full' },
+          { date: afterTomorrow, status: 'partially' }
         ];
         
         $scope.dateOptions = {
@@ -33,19 +28,24 @@ define(['./module'], function (appModule) {
             providers : ['twitter', 'facebook', 'linkedin'],
             selectedProviders : [],
             message : '',
-            date : new Date(),
+            date : moment(new Date()),
             send : function() {
-                console.log("message to send ? ", $scope.postMessage.message);
+                if($scope.postMessage.selectedProviders.length===0)
+                    alertsService.warn("Aucun provider n'est sélectionné");
+                else if($scope.postMessage.message.length>0) {
+                    messageService.postMessage($scope.postMessage.selectedProviders, $scope.postMessage.message, $scope.postMessage.date).then(function(results) {
+                        console.log("results: ",results);
+                        alertsService.success("Message publié avec succès");
+                    }, function(err) {
+                        alertsService.error("Erreur dans l'envoit de message. Err: "+err);
+                    });
+                } else {
+                    alertsService.warn("Le message est vide"); 
+                }
                 
-                if($scope.postMessage.message.length>0) {
-                    messageService.postMessage($scope.postMessage.selectedProviders, $scope.postMessage.message, $scope.postMessage.date);
-                } else
-                    console.log("empty message :p");
             },
             getDayClass : function(date) {
-                
-                var dayToCheck = new Date(date).setHours(0,0,0,0);
-                
+                var dayToCheck = new Date(date).setHours(0,0,0,0);                
                 for (var i=0;i<events.length;i++) {
                     var currentDay = new Date(events[i].date).setHours(0,0,0,0);
                     if (dayToCheck === currentDay) {
@@ -55,14 +55,29 @@ define(['./module'], function (appModule) {
                 return '';
             }           
         };
-        
+        var modifyParams = $location.search();
+        console.log("url params ?", modifyParams);
+        if(modifyParams.eventId) {
+
+            eventService.retrieveOne(modifyParams.eventId).then(function(messageEvent) {
+                console.log("event retrieved ", messageEvent);  
+                $scope.postMessage.date = new Date(messageEvent.dateTime);
+                $scope.postMessage.selectedProviders=messageEvent.eventParams[0];
+                $scope.postMessage.message=messageEvent.eventParams[1];
+                $scope.postMessage.eventId=messageEvent.eventId;
+            });            
+        } else {
+           $scope.postMessage.date = moment($scope.postMessage.date).add(1, 'hours').minutes(0).seconds(0).format();
+        }
+
         $scope.clear = function () {
             $scope.postMessage.date = null;
         };
 
         // Disable weekend selection
         $scope.disabled = function(date) {
-            return ( date.getDay() === 0 || date.getDay() === 6 );
+            return date.getTime() < Date.now();
+            //return ( date.getDay() === 0 || date.getDay() === 6 );
         };
 
         $scope.toggleMin = function() {
@@ -79,21 +94,13 @@ define(['./module'], function (appModule) {
         $scope.setDate = function(year, month, day) {
             $scope.postMessage.date = new Date(year, month, day);
         };
-        
+
         //timepicker
-        $scope.hstep = 1;         
+        $scope.hstep = 1;
         $scope.mstep = 5;
-       /* $scope.options = {
-            hstep: [1, 2, 3],
-            mstep: [1, 5, 10, 15, 25, 30]
-        };*/
         $scope.ismeridian = false;
-        $scope.postMessage.date.setHours(14);
-        $scope.postMessage.date.setMinutes(0);       
         $scope.changed = function () {
             console.log('Time changed to: ' + $scope.postMessage.date);
         };
-
     }]);
-    
 });

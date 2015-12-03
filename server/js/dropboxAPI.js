@@ -197,7 +197,30 @@ function getOAuthURL() {
     return 'https://www.dropbox.com/1/oauth2/authorize?client_id='+DROPBOX_APP_KEY+'&redirect_uri='+DROPBOX_REDIRECT_URI+'&response_type=code';
 }
 
+function getUserInfo(tokens) {    
+       
+    var deferred = Q.defer();
+ 
+    request({
+        uri: 'https://'+END_POINT+'/1/account/info',
+        auth: {
+            bearer: tokens.access_token
+        },
+        method: "GET"
+    }, function (error, response, body){
+        //console.log(response);
+        if(error)
+            deferred.reject(new Error(error));
+        else {
+            var userInfo = JSON.parse(body);
+            deferred.resolve({userName:userInfo.display_name});
+        }
+    });
+    return deferred.promise;
+}
+
 exports.pushCode=pushCode;
 exports.getOAuthURL=getOAuthURL;
 exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;
+exports.getUserInfo=getUserInfo;

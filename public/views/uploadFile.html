@@ -1,47 +1,72 @@
- <div class="container">
-    
-     <input type="file" nv-file-select uploader="uploader"/><br/>
-     
-     <input type="checkbox" ng-model="uploadFileData.isCloud" /> cloud? <br/>
+ <div >
 
     <div class="row">
-        <label ng-repeat="provider in uploadFileData.providers">
-          <input type="checkbox" checklist-model="uploadFileData.selectedProviders" checklist-value="provider"> {{provider}}
+        <div class="col-md-2">
+            <span class="btn btn-default btn-file">
+                Browse video <input type="file"  nv-file-select uploader="uploader"/>
+            </span>
+        </div>
+        <div class="col-md-2">
+            <input  type="checkbox" ng-model="uploadFileData.isCloud"/> cloud? <br/>
+        </div>
+        <div class="col-md-8">
+            Providers: 
+            <label ng-repeat="provider in uploadFileData.providers">
+              <input type="checkbox" checklist-model="uploadFileData.selectedProviders" checklist-value="provider"> {{provider}}
+            </label>
+        </div>
+
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-7">                  
+                    <h4>Titre de la vidéo</h4>
+                    <input type="text" ng-model="uploadFileData.title" value="Title"/><br/>
+
+                    <h4>Description de la vidéo</h4>
+                    <textarea ng-model="uploadFileData.description" style="min-width:530px;min-height:250px;"></textarea>
+
+                    <h4>Tags de la vidéo</h4>
+                    <tags-input  ng-model="uploadFileData.tags" add-on-space="true" style="max-width:600px"></tags-input>
+
+                </div>
+                <div class="col-md-4 col-md-offset-1">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4>Programmer envoit</h4>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Le </span>
+                                <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="uploadFileData.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" style="max-width:200px;"/>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">à </span>
+                                <uib-timepicker ng-model="uploadFileData.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
+                            </div>
+                        </div>                       
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="uploadFileData.isFile" class="col-md-5 col-md-offset-7">
+            <button class="btn btn-default" ng-click="validateFieldsAndUpload(uploader.queue[0])">Upload Video</button>
+        </div>
+        
+     </div>
+     
+     <div class="row">
+        <input type="checkbox" ng-model="uploadFileData.isMessageAfter"> Envoyer message une fois la vidéo publiée
+     </div>
+     <div class="row" ng-if="uploadFileData.isMessageAfter">
+        Envoyer message Providers: 
+        <label ng-repeat="messageProvider in uploadFileData.messageProviders">
+          <input type="checkbox" checklist-model="uploadFileData.selectedMessageProviders" checklist-value="messageProvider"> {{messageProvider}}
         </label>
-    </div>
-    
-     <ul>
-        <li ng-repeat="item in uploader.queue">
-            
-            Fichier : <span ng-bind="item.file.name"></span><br/>
-            Titre de la vidéo: <input type="text" ng-model="uploadFileData.title" value="Title"/><br/>
-            <button ng-click="validateFieldsAndUpload(item)">upload</button>
-        </li>
-    </ul>
-     
-    <h4>Description de la vidéo</h4>
-    <textarea ng-model="uploadFileData.description"></textarea>
-
-    <h4>Tags de la vidéo</h4>
-    <tags-input ng-model="uploadFileData.tags" add-on-space="true"></tags-input>
-
-
-    <h4>Programmer envoi</h4>
-    <div class="row">
-        
-        <div class="col-md-6 col-xs-12">
-            <p class="input-group">
-              <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="uploadFileData.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
-              <span class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-              </span>
-            </p>
-        </div>
-        
-        <div class="col-md-3 col-xs-6">
-            <uib-timepicker ng-model="uploadFileData.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
-        </div>
-        
-    </div>
-
+     </div>
 </div>

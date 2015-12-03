@@ -2,7 +2,7 @@ define(['./module'], function (appModule) {
 
     'use strict';
     
-    appModule.service('messageService', 
+    appModule.service('messageService',
         ['$http', '$q', '$window',
         function messageService($http, $q, $window) {
             
@@ -25,7 +25,7 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
-        }
-        ]
+
+        }]
     );
 });

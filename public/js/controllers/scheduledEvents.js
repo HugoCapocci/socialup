@@ -1,8 +1,9 @@
-define(['./module'], function(appModule) {
+define(['./module', 'moment'], function(appModule, moment) {
     
     'use strict';
     
-    appModule.controller('ScheduledEventsController', ['$scope', 'eventService', function($scope, eventService) {
+    appModule.controller('ScheduledEventsController', ['$scope', '$location', 'eventService', 'alertsService', 
+                                                       function($scope, $location, eventService, alertsService) {
         
         $scope.events = [];
         $scope.displayedCollection = [].concat($scope.events);
@@ -12,10 +13,12 @@ define(['./module'], function(appModule) {
             events.forEach(function(event) {
                 var row = { 
                     type : event.event, 
-                    date : event.dateTime,
+                    date : moment(event.dateTime).format("dddd D MMMM YYYY à HH:mm"),
                     providers : event.eventParams[0],
                     params : parseParams(event.eventParams, event.event), 
-                    id: event.eventId
+                    id : event.eventId,
+                    results : event.results,
+                    error : event.error
                 };                
                 if(event.event === 'uploadVideo') {
                     row.attachment = {
@@ -29,48 +32,46 @@ define(['./module'], function(appModule) {
            // $scope.events=events;
             $scope.displayedCollection = [].concat($scope.events);
         }, function(err) {
-           console.log("err retrieving events: ", err); 
+            alertsService.error("Impossible de récupérer les évènements enregistrés. Err: "+err);
         });
         
         $scope.displayFileSize = function(sizeInBytes) {
             
             var sizeInKiloBytes = sizeInBytes/1024;
             if(sizeInKiloBytes<1) {
-                return sizeInBytes+" O";
-           
+                return sizeInBytes+" o";           
             } else {                
                 var sizeInMegaBytes = sizeInKiloBytes/1024;                
                 if(sizeInMegaBytes<1) {
-                     return Number(sizeInKiloBytes).toFixed(2)+" kO";
+                     return Number(sizeInKiloBytes).toFixed(2)+" ko";
                 } else {
                     var sizeInGigaBytes = sizeInMegaBytes/1024;                    
-                    if(sizeInGigaBytes<1) {
-                        return Number(sizeInMegaBytes).toFixed(2)+" MO";
-                    } else {
-                         return Number(sizeInMegaBytes).toFixed(2)+" GO";
-                    }
+                    return Number(sizeInMegaBytes).toFixed(2) + (sizeInGigaBytes<1 ? " Mo": " Go");
                 }
             }
         };
         
-        $scope.delete = function(event) {
+        $scope.deleteEvent = function(event) {
+            console.log("delete event: ", event);
             //TODO open modal window with loading gif, and close it after
             eventService.deleteEvent(event.id).then(function() {
-
                 var index = $scope.events.indexOf(event);
                 if (index !== -1) {
                     $scope.events.splice(index, 1);
                 }
-                
             }, function(err) {
-                console.log("err in seventService.delete ", err);
-                
+                alertsService.error("Impossible d'effacer l'évènement. Err: "+err);
             });
         };
         
         $scope.modify = function(event) {
             //TODO
             //open modal popup with form data and save button
+            if(event.type==='message') {
+                $location.url('/postMessage?eventId='+event.id);
+            }else if(event.type ==='uploadVideo') {
+                $location.url('/uploadFile?eventId='+event.id);
+            }
         };
         
         $scope.parseDate = function(dateString) {
@@ -79,7 +80,7 @@ define(['./module'], function(appModule) {
         };
         
         function parseParams(params, eventType) {
-            
+
             var parsedParams = [];
             console.log(typeof eventType);
             switch(eventType) {
@@ -101,13 +102,12 @@ define(['./module'], function(appModule) {
                     });
                     parsedParams.push({
                         name : 'tags',
-                        value : params[4]
+                        value : params[4].toString()
                     });
                     break;
             }
             return parsedParams;
         }
-
     }]);
-    
+
 });

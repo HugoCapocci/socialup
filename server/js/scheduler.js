@@ -101,21 +101,31 @@ function saveScheduledEvent(userId, date, type, params) {
     return deferred.promise;
 }
 
-function updateEventAfterExecution(eventId, result) {
-    
+function updateEventAfterExecution(eventId, results) {
+    return updateEvent(eventId, {results:results});
+}
+
+function updateEventAfterError(eventId, error) { 
+    return updateEvent(eventId, {error:error.toString()});
+}
+
+function updateEvent(eventId, update) {
+
     var deferred = Q.defer();
     getDB(function(db) {
-        //console.log('update event '+eventId+' with result: ', result);
-        db.collection(collection).update({eventId:eventId}, {$set:{result:result} }, function(err, r) {
-            //console.log("event updated ?", r);
+        console.log('update event '+eventId+' with update: ', update);
+        db.collection(collection).update({eventId:eventId}, {$set:update}, function(err, r) {
+          
             db.close();
             if(err)
                 deferred.reject(new Error(err));
-            else
+            else {
+                console.log("event updated ?", r.result);
                 deferred.resolve(r.result.nModified);
+            }                
         });
     });
-    return deferred.promise;       
+    return deferred.promise;   
 }
 
 function getDB(callback) {
@@ -152,12 +162,11 @@ function retrieveEvents() {
     var deferred = Q.defer();
 
     getDB(function(db) {
-        db.collection(collection).find({result: {$exists:false}}).toArray(function(err, results) { 
+        db.collection(collection).find({results: {$exists:false}}).toArray(function(err, results) { 
             db.close();
             if (err)
                 deferred.reject(new Error(err));
             else {
-                console.log("results: ",results);
                 deferred.resolve(results);
             }
         });
@@ -169,12 +178,29 @@ function retrieveEventsByUser(userId) {
     var deferred = Q.defer();
 
     getDB(function(db) {
-        db.collection(collection).find({user:userId}).toArray(function(err, results) { 
+        db.collection(collection).find({user:userId}, {sort:'dateTime'}).toArray(function(err, results) { 
             db.close();
             if (err)
                 deferred.reject(new Error(err));
             else {
-                console.log("results: ",results);
+                //console.log("results: ",results);
+                deferred.resolve(results);
+            }
+        });
+    });
+    return deferred.promise;
+}
+
+function retrieveEvent(eventId) {
+    var deferred = Q.defer();
+
+    getDB(function(db) {
+        db.collection(collection).findOne({eventId:eventId}, function(err, results) { 
+            db.close();
+            if (err)
+                deferred.reject(new Error(err));
+            else {
+                //console.log("results: ",results);
                 deferred.resolve(results);
             }
         });
@@ -187,7 +213,7 @@ function loadScheduledEvents() {
         console.log("events to be scheduled: ",results);
         if(results!==undefined)
             results.forEach(function(result) {
-                addEventToSchedule(result.user, new Date(result.date), result.event, result.eventParams, result.eventId);
+                addEventToSchedule(result.user, new Date(result.dateTime), result.event, result.eventParams, result.eventId);
             });
     }, function(err) {
         console.log("cannot load events, error occurs: ", err);
@@ -201,3 +227,5 @@ exports.deleteScheduledEvent=deleteScheduledEvent;
 exports.loadScheduledEvents=loadScheduledEvents;
 exports.retrieveEventsByUser=retrieveEventsByUser;
 exports.updateEventAfterExecution=updateEventAfterExecution;
+exports.updateEventAfterError=updateEventAfterError;
+exports.retrieveEvent=retrieveEvent;

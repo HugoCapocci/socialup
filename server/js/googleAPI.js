@@ -56,6 +56,17 @@ function pushCode(code) {
     oauth2Client.getToken(code, function(err, tokens) {
         // Now tokens contains an access_token and an optional refresh_token. Save them.
         if(!err) {
+
+            oauth2Client.setCredentials(tokens);
+            console.log("google refresh_tokens retrieved : ", tokens.refresh_token);
+
+            //refresh token is set only first tie user use google oauth for this app
+            var credentials = {
+              access_token: tokens.access_token
+            };
+            if(tokens.refresh_token)
+                credentials.refresh_token=tokens.refresh_token;
+            oauth2Client.setCredentials(credentials);
             //console.log("credentials set !");
             deferred.resolve(tokens);
         } else {
@@ -63,6 +74,40 @@ function pushCode(code) {
             deferred.reject(new Error(err));
         }
     });    
+    return deferred.promise;
+}
+
+function refreshTokens(tokens, userId) {
+    
+    var deferred = Q.defer();
+
+    var credentials = {
+      access_token: tokens.access_token
+    };
+    if(tokens.refresh_token)
+        credentials.refresh_token=tokens.refresh_token;
+    oauth2Client.setCredentials(credentials);
+
+    oauth2Client.refreshAccessToken(function(err, tokens) {
+    
+         if(!err) {
+
+            oauth2Client.setCredentials(tokens);
+            console.log("google refreshed tokens retrieved : ", tokens);
+
+            //refresh token is set only first tie user use google oauth for this app
+/*            oauth2Client.setCredentials({
+              access_token: tokens.access_token,
+              refresh_token: tokens.refresh_token
+            });*/
+            //console.log("credentials set !");
+            deferred.resolve(tokens);
+        } else {
+            console.log("unable to set credentials, err: ", err);
+            deferred.reject(new Error(err));
+        }
+        
+    });
     return deferred.promise;
 }
 
@@ -105,8 +150,12 @@ function sendVideo(tokens, file, user, videoParams) {
     });
 
     videoUploadRequest.on('complete', function(response) {
-        //console.log("video upload request complete with response: ", response);
-        deferred.resolve(response);
+        console.log("video upload request complete with response.body: ", response.body);
+        try {
+            deferred.resolve('https://www.youtube.com/watch?v='+JSON.parse(response.body).id);
+        } catch(err) {
+            deferred.reject(err);
+        }
     });
  
     videoUploadRequest.on('error', function(err) {
@@ -258,3 +307,4 @@ exports.pushCode=pushCode;
 exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;
 exports.getGooglePlusUser=getGooglePlusUser;
+exports.refreshTokens=refreshTokens;
