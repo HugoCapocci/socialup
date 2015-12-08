@@ -174,46 +174,46 @@ function sendVideo(tokens, file, user, videoParams) {
     return deferred.promise;
 }
 
-function uploadDrive(tokens, file) {
+// see https://developers.google.com/drive/v2/reference/files/insert
+function uploadDrive(tokens, file, parent) {
     var deferred = Q.defer();
+    
+    console.log("upload to parent? ",parent);
     
     oauth2Client.setCredentials(tokens);
 
     var metaData = {
-        snippet: {
-            title: 'test',
-            description: 'test',
-            tags: ['WTC', 'popopo'],
-            categoryId: '22'
-        },
-        status: {
-          privacyStatus: 'private'
-        }
+        uploadType : 'media', 
+        visibility: 'PRIVATE',
+        title : file.originalname
     };
     
     var buf = fs.readFileSync(file.path);
     if(buf === undefined) 
         deferred.reject(new Error('cannot load file from path: '+file.path));
 
-    var  params = {
+    var params = {
         part : Object.keys(metaData).join(','),
         media : {
             mimeType : file.mimetype,
-            body : buf
+            body : buf,
+            title : file.originalname
         },
         resource : metaData
     };
     
+    if(parent!==undefined)
+        params.media.parents = [parent];
     var videoUploadRequest = drive.files.insert(params, function() {
          //
     });
-     videoUploadRequest.on('complete', function(response) {
-        //console.log("video upload request complete with response: ", response);
-        deferred.resolve(response);
+    videoUploadRequest.on('complete', function(response) {
+        console.log("google video upload request complete with response: ", response.body);
+        deferred.resolve(JSON.parse(response.body));
     });
  
     videoUploadRequest.on('error', function(err) {
-        //console.log("video upload request failed: ", err);
+        console.log("video upload request failed: ", err);
         deferred.reject(new Error(err));
     });
     return deferred.promise;

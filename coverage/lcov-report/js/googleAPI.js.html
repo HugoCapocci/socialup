@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">28.13% </span>
+        <span class="strong">27.07% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>36/128</span>
+        <span class='fraction'>36/133</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">3.85% </span>
+        <span class="strong">3.57% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/26</span>
+        <span class='fraction'>1/28</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">16.67% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>3/18</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">28.13% </span>
+        <span class="strong">27.07% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>36/128</span>
+        <span class='fraction'>36/133</span>
       </div>
     </div>
   </div>
@@ -537,6 +537,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -544,11 +545,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -567,16 +564,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -855,46 +855,46 @@ function pushCode(code) {
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
 }
 &nbsp;
-<span class="fstat-no" title="function not covered" >function uploadDrive(tokens, file) {</span>
+// see https://developers.google.com/drive/v2/reference/files/insert
+<span class="fstat-no" title="function not covered" >function uploadDrive(tokens, file, parent) {</span>
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
+    
+<span class="cstat-no" title="statement not covered" >    console.log("upload to parent? ",parent);</span>
     
 <span class="cstat-no" title="statement not covered" >    oauth2Client.setCredentials(tokens);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    var metaData = {</span>
-        snippet: {
-            title: 'test',
-            description: 'test',
-            tags: ['WTC', 'popopo'],
-            categoryId: '22'
-        },
-        status: {
-          privacyStatus: 'private'
-        }
+        uploadType : 'media', 
+        visibility: 'PRIVATE',
+        title : file.originalname
     };
     
 <span class="cstat-no" title="statement not covered" >    var buf = fs.readFileSync(file.path);</span>
 <span class="cstat-no" title="statement not covered" >    if(buf === undefined) </span>
 <span class="cstat-no" title="statement not covered" >        deferred.reject(new Error('cannot load file from path: '+file.path));</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    var  params = {</span>
+<span class="cstat-no" title="statement not covered" >    var params = {</span>
         part : Object.keys(metaData).join(','),
         media : {
             mimeType : file.mimetype,
-            body : buf
+            body : buf,
+            title : file.originalname
         },
         resource : metaData
     };
     
+<span class="cstat-no" title="statement not covered" >    if(parent!==undefined)</span>
+<span class="cstat-no" title="statement not covered" >        params.media.parents = [parent];</span>
 <span class="cstat-no" title="statement not covered" >    var videoUploadRequest = drive.files.insert(params, <span class="fstat-no" title="function not covered" >function() {</span></span>
          //
     });
-<span class="cstat-no" title="statement not covered" >     videoUploadRequest.on('complete', <span class="fstat-no" title="function not covered" >function(response) {</span></span>
-        //console.log("video upload request complete with response: ", response);
-<span class="cstat-no" title="statement not covered" >        deferred.resolve(response);</span>
+<span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('complete', <span class="fstat-no" title="function not covered" >function(response) {</span></span>
+<span class="cstat-no" title="statement not covered" >        console.log("google video upload request complete with response: ", response.body);</span>
+<span class="cstat-no" title="statement not covered" >        deferred.resolve(JSON.parse(response.body));</span>
     });
  
 <span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('error', <span class="fstat-no" title="function not covered" >function(err) {</span></span>
-        //console.log("video upload request failed: ", err);
+<span class="cstat-no" title="statement not covered" >        console.log("video upload request failed: ", err);</span>
 <span class="cstat-no" title="statement not covered" >        deferred.reject(new Error(err));</span>
     });
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
@@ -1003,7 +1003,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 08 2015 16:58:55 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 08 2015 20:10:34 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

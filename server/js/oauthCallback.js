@@ -462,7 +462,7 @@ app.post('/event/:eventId', function(req, res) {
          res.send(err);
     }); 
 });
-
+//create or update chainedEvent
 app.post('/event/chained/:provider/:eventId/:userId', function(req, res) {
  
     var eventId = req.params.eventId;
@@ -470,7 +470,7 @@ app.post('/event/chained/:provider/:eventId/:userId', function(req, res) {
     var provider= req.params.provider;
     var scheduledEvent = req.body;
 
-    console.log("chainedEvent: ", scheduledEvent);
+    //console.log("chainedEvent: ", scheduledEvent);
     //res.send(scheduledEvent);
     eventsDAO.createChainedEvent(eventId, userId, scheduledEvent.eventType, [provider], scheduledEvent.eventParams).then(function(result) {
          res.send(result);

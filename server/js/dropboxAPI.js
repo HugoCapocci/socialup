@@ -166,7 +166,7 @@ function uploadDrive(tokens, file, path) {
     */
     var url='https://content.dropboxapi.com/1/files_put/auto';
     if(path!==undefined)
-        url+=path;
+        url+=encodeURIComponent(path);
     url+='/'+file.originalname;
 
     request({
@@ -183,7 +183,10 @@ function uploadDrive(tokens, file, path) {
             deferred.reject(error);
         else {
             //console.log("dropbox API upload response body? ", body);
-            deferred.resolve(body);
+            var results ={
+                url : 'https://www.dropbox.com/home/Camera%C2%A0Uploads?preview='+file.originalname
+            };            
+            deferred.resolve(results);
         }
     });    
     return deferred.promise;    
