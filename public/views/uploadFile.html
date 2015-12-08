@@ -32,8 +32,10 @@
                 <div class="col-md-4 col-md-offset-1">
                     <div class="row">
                         <div class="col-md-12">
-                            <h4>Programmer envoit</h4>
+                            <h4><input type="checkbox" ng-model="uploadFileData.isScheduled"> Programmer envoit</h4>
                         </div>
+                    </div>
+                    <div class="row" ng-if="uploadFileData.isScheduled">
                         <div class="col-md-12">
                             <div class="input-group">
                                 <span class="input-group-addon">Le </span>
@@ -55,18 +57,31 @@
         </div>
 
         <div ng-if="uploadFileData.isFile" class="col-md-5 col-md-offset-7">
-            <button class="btn btn-default" ng-click="validateFieldsAndUpload(uploader.queue[0])">Upload Video</button>
+            <button class="btn btn-default" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
+            <button class="btn btn-default" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
+                {{(uploadFileData.isScheduled ? 'programmer envoit de la vidéo' : 'Publier Vidéo')}}
+            </button>
         </div>
         
      </div>
      
-     <div class="row">
+<!--     <div class="row">
         <input type="checkbox" ng-model="uploadFileData.isMessageAfter"> Envoyer message une fois la vidéo publiée
      </div>
      <div class="row" ng-if="uploadFileData.isMessageAfter">
-        Envoyer message Providers: 
-        <label ng-repeat="messageProvider in uploadFileData.messageProviders">
-          <input type="checkbox" checklist-model="uploadFileData.selectedMessageProviders" checklist-value="messageProvider"> {{messageProvider}}
-        </label>
-     </div>
+        <div class="col-md-12">
+            Envoyer message Providers: 
+            <label ng-repeat="messageProvider in uploadFileData.messageProviders">
+                <input type="checkbox" checklist-model="uploadFileData.selectedMessageProviders" checklist-value="messageProvider"> {{messageProvider}}
+            </label>
+         </div>
+         <div class="col-md-12" ng-if="uploadFileData.selectedMessageProviders.indexOf('facebook')>-1">
+             
+             FB Visibility : <select class="form-control" ng-model="uploadFileData.selectedmessageProvidersOptions.facebook.visibility" ng-options="option for option in uploadFileData.messageProvidersOptions.facebook.visibilities"></select> <br/>
+             
+         </div>
+         <div class="col-md-12">
+            <textarea ng-model="uploadFileData.chainedMessage" style="min-width:530px;min-height:250px;"></textarea>
+         </div>
+     </div>-->
 </div>

@@ -156,5 +156,25 @@
                 </div>
             </footer>
         </div>
+        
+        <script type="text/ng-template" id="modalContent.html">
+            <div class="modal-header">
+                <h3 class="modal-title">{{modal.title}}</h3>            
+            </div>
+            <div class="modal-body">
+                <ng-include ng-if="!modal.isLoading" src="modal.url"></ng-include>
+                <div ng-if="modal.isLoading">
+                    <uib-progressbar class="progress-striped active" value="modal.progress" type="{{modal.type}}">{{modal.progress}} %</uib-progressbar>
+                    <!--<uib-progressbar max="max" value="dynamic"><span style="color:white; white-space:nowrap;">{{dynamic}} / {{max}}</span></uib-progressbar>-->
+                </div>
+                {{modal.message}}
+            </div>
+            <div class="modal-footer" ng-if="!modal.isLoading">
+                <button class="btn btn-primary" type="button" ng-click="modal.ok()">OK</button>
+                <button class="btn btn-warning" type="button" ng-click="modal.cancel()">Cancel</button>
+            </div>
+            <uib-alert ng-if="$root.alert" type="{{$root.alert.type}}" style="opacity:{{$root.alert.opacity}};" close="closeAlert()">{{$root.alert.msg}}</uib-alert>
+        </script>
+        
     </body>
 </html>

@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">29.03% </span>
+        <span class="strong">28.13% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>36/124</span>
+        <span class='fraction'>36/128</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">4.17% </span>
+        <span class="strong">3.85% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/24</span>
+        <span class='fraction'>1/26</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">16.67% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>3/18</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">29.03% </span>
+        <span class="strong">28.13% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>36/124</span>
+        <span class='fraction'>36/128</span>
       </div>
     </div>
   </div>
@@ -352,7 +352,16 @@
 307
 308
 309
-310</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -509,6 +518,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -577,10 +593,12 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -814,11 +832,18 @@ function pushCode(code) {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('complete', <span class="fstat-no" title="function not covered" >function(response) {</span></span>
 <span class="cstat-no" title="statement not covered" >        console.log("video upload request complete with response.body: ", response.body);</span>
-<span class="cstat-no" title="statement not covered" >        try {</span>
-<span class="cstat-no" title="statement not covered" >            deferred.resolve('https://www.youtube.com/watch?v='+JSON.parse(response.body).id);</span>
-        } catch(err) {
-<span class="cstat-no" title="statement not covered" >            deferred.reject(err);</span>
-        }
+<span class="cstat-no" title="statement not covered" >        if(response.body.error)</span>
+<span class="cstat-no" title="statement not covered" >            deferred.reject(response.body);</span>
+        else
+<span class="cstat-no" title="statement not covered" >            try {</span>
+<span class="cstat-no" title="statement not covered" >                var body = JSON.parse(response.body);</span>
+<span class="cstat-no" title="statement not covered" >                deferred.resolve({</span>
+                    url : 'https://www.youtube.com/watch?v='+body.id,
+                    thumbnail : body.snippet.thumbnails.high.url
+                });
+            } catch(err) {
+<span class="cstat-no" title="statement not covered" >                deferred.reject(err);</span>
+            }
     });
  
 <span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('error', <span class="fstat-no" title="function not covered" >function(err) {</span></span>
@@ -885,12 +910,14 @@ function pushCode(code) {
 <span class="cstat-no" title="statement not covered" >    if(folderId===undefined) </span>
 <span class="cstat-no" title="statement not covered" >        folderId='root';</span>
     
-<span class="cstat-no" title="statement not covered" >    if(folderId!=='root')</span>
-<span class="cstat-no" title="statement not covered" >        filter+=' and "'+folderId+'" in parents';</span>
+<span class="cstat-no" title="statement not covered" >    filter+=' and "'+folderId+'" in parents';</span>
     
     //image or video
 <span class="cstat-no" title="statement not covered" >    if(typeFilter !== undefined) {</span>
-<span class="cstat-no" title="statement not covered" >        filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") ';</span>
+<span class="cstat-no" title="statement not covered" >        if(typeFilter==='folder')</span>
+<span class="cstat-no" title="statement not covered" >            filter+=' and mimeType="application/vnd.google-apps.folder" ';</span>
+        else
+<span class="cstat-no" title="statement not covered" >            filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") ';</span>
     }
     
 <span class="cstat-no" title="statement not covered" >    console.log("filter ? ", filter);</span>
@@ -976,7 +1003,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Dec 03 2015 17:47:03 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 08 2015 16:58:55 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

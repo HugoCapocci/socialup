@@ -1,5 +1,4 @@
 <div>
-    <!--st-table="displayedCollection" st-safe-src="events"-->
     <table st-table="displayedCollection"  st-safe-src="events" class="table table-striped">
         <thead>
 			<tr>
@@ -11,19 +10,19 @@
                 <th><img src="images/attachment.png" height="24" width="24"></th>
                 <th></th>
                 <th></th>
+                <th></th>                
 			</tr>
-			<!--<tr>
-				<th colspan="5"><input st-search="" class="form-control" placeholder="global search ..." type="text"/></th>
-			</tr>-->
 		</thead>
 		<tbody>
 			<tr ng-repeat="event in displayedCollection">
 				<td>{{event.type}}</td>
 				<td>{{event.date | date:"dd/MM/yyyy 'à' HH'h'mm" }}</td>
-                <td>  
-                    <button type="button" class="btn btn-sm" uib-tooltip="{{event.providers.toString()}}">
-                        <i class="glyphicon glyphicon-th-list"></i>
-                    </button>
+                <td> 
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm" uib-tooltip="{{event.providers.toString()}}">
+                            <i class="glyphicon glyphicon-th-list"></i>
+                        </button>
+                    </div>
                 </td>
 				<td>
                     <p ng-repeat="param in event.params">
@@ -31,25 +30,48 @@
                     </p>           
                 </td>
 				<td>   
-                    <span class="label label-success" ng-repeat="result in event.results">{{result.provider}} : <a href="{{result.url}}" target="_blank" class="success">lien de la vidéo</a></span>
+                    <span class="label label-success" ng-repeat="result in event.results">
+                        {{result.provider}} : <a href="{{result.url}}" target="_blank" class="success">lien {{event.type==='message' ? 'du post' : 'de la vidéo'}}</a>
+                    </span>
                     <span class="label label-danger" ng-if="event.error">{{event.error}}</span>
                 </td>             
                 <td>
                     <img src="images/attachment.png" height="24" width="24" uib-tooltip="{{event.attachment.originalFileName}} - {{displayFileSize(event.attachment.size)}}" ng-if="event.attachment">
                 </td>
-
+                 <td>
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-info" uib-dropdown-toggle>
+                            <span class="caret"></span>
+                            <span class="sr-only"></span>
+                        </button>
+                        <ul class="uib-dropdown-menu" role="menu" aria-labelledby="split-button">
+                            <li role="menuitem">
+                                <a href="" ng-click="modify(event)">Editer</a>                          
+                            </li>
+                           <!-- <li class="divider"></li>-->
+                            <li role="menuitem" ng-repeat="contextMenu in contextMenus">
+                                <a href="" ng-if="contextMenu.allowed.indexOf(event.type)>-1" ng-click="executeAction(contextMenu.type, event)">{{contextMenu.name}}</a>                          
+                            </li>
+                        </ul>
+                    </div>
+                </td>
                 <td>
-                    <button type="button" ng-click="modify(event)" class="btn btn-sm btn-info" uib-tooltip="Modifier l'évènement">
-                        <i class="glyphicon glyphicon-edit"></i>
-                    </button>
+                    <div class="btn-group">                   
+                        <!-- see chained events -->
+                        <button ng-if="event.chainedEventsCounts>0" type="button" ng-click="displayChainedEvents(event.id)" class="btn btn-sm btn-success" uib-tooltip="Voir les évènements chainés">
+                            <i class="glyphicon glyphicon-th-list"></i>
+                        </button>
+                     </div>
 				</td>
                 <td>
-                    <button type="button" ng-click="deleteEvent(event)" class="btn btn-sm btn-danger" uib-tooltip="Effacer l'évènement">
-                        <i class="glyphicon glyphicon-trash"></i>
-                    </button>
+                    <div class="btn-group">
+                        <button type="button" ng-click="deleteEvent(event)" class="btn btn-sm btn-danger" uib-tooltip="Effacer l'évènement">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </button>
+                    </div>
 				</td>
 			</tr>
         </tbody>
     </table>
-    
+
 </div>

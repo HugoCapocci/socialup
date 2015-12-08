@@ -67,7 +67,7 @@ function listFiles(token, path, typeFilter) {
     else 
         path = decodeURI(path);
 
-    if(typeFilter===undefined)
+    if(typeFilter===undefined || typeFilter==='folder')
         return listFolder(token, path);
     else
         return searchFiles(token, path, typeFilter);
@@ -102,9 +102,10 @@ function listFolder(token, path) {
                 for( var i=0; i<body.entries.length; i++) {
                    var entry = body.entries[i];
                   // console.log('add entry: ', entry);
-                   results.push({
-                       name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
-                   });
+                   if(entry['.tag'] === 'folder')
+                       results.push({
+                           name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
+                       });
                 }
             deferred.resolve(results);
         }
@@ -152,7 +153,7 @@ function searchFiles(token, path, typeFilter) {
     return deferred.promise;
 }
 
-function uploadDrive(tokens, file) {
+function uploadDrive(tokens, file, path) {
     
     var deferred = Q.defer();
     
@@ -163,10 +164,14 @@ function uploadDrive(tokens, file) {
         'mute': false
     });
     */
+    var url='https://content.dropboxapi.com/1/files_put/auto';
+    if(path!==undefined)
+        url+=path;
+    url+='/'+file.originalname;
 
     request({
       /*  uri: 'https://content.dropboxapi.com/2/files/upload?arg='+post_data,*/
-        uri : 'https://content.dropboxapi.com/1/files_put/auto/'+file.originalname,
+        uri : url,
         auth: {
             bearer: tokens.access_token
         },
@@ -175,21 +180,18 @@ function uploadDrive(tokens, file) {
     }, function (error, response, body){
       
         if(error)
-            deferred.reject(new Error(error));
+            deferred.reject(error);
         else {
-            //console.log("data? ", body);
-            console.log("response? ", response);
-            deferred.resolve();
+            //console.log("dropbox API upload response body? ", body);
+            deferred.resolve(body);
         }
-    });
-    
-    return deferred.promise;
-    
+    });    
+    return deferred.promise;    
 }
 
-function downloadFile() {
+/*function downloadFile() {
     
-}
+}*/
 
 function getOAuthURL() {
 

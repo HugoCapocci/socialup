@@ -72,15 +72,47 @@ define(['./module', 'moment'], function (appModule, moment) {
                 $window.close();
             }  
             var localData = $window.localStorage.getItem('SocialUp');
-            console.log("localData found: ",localData);
+            //console.log("localData found: ",localData);
             if(!localData)
                 $location.path('/login');
             $scope.closeAlert=function() {
                 delete $rootScope.alert;
             };
-            $scope.value="Hello World!";
             //MENU
 
         }]
     );
+    
+    appModule.controller('WaitingModalController', ['$scope', '$rootScope', '$location', '$uibModalInstance', 
+    function($scope, $rootScope, $location, $uibModalInstance) {
+       
+        $scope.modal = {
+            title : 'Traitement en cours',
+            ok : function() {
+                $uibModalInstance.close();
+            },
+            cancel : function () {
+                $uibModalInstance.dismiss('cancel');
+            },
+            isLoading : true,
+            type : 'warning',
+            progress : 0
+        };
+        
+        $rootScope.stopProgress = function(message) {
+            $scope.modal.type='success';
+            $scope.modal.message = message;
+            $scope.modal.progress=100;
+        };
+        $rootScope.doProgress = function(progress) {
+            if(progress<=25)
+                $scope.modal.type='danger';
+            else if(progress<=60)
+                $scope.modal.type='warning';
+            else
+                $scope.modal.type='info';
+            $scope.modal.progress = progress;
+        };
+        
+    }]);
 });

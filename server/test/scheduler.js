@@ -45,10 +45,10 @@ describe("schedule events service", function() {
     it("schedule event with 3 parameters", function(done) {
         // old date so job will be executed directly
         var date = new Date(2012, 10, 29, 10, 30, 0);
-        var event = function(eventId, userId, param1, param2, param3) {
-            should(param1).be.exactly("test1");
-            should(param2).be.exactly("test2");
-            should(param3).be.exactly("test3");
+        var event = function(eventId, userId, params) {
+            should(params[0]).be.exactly("test1");
+            should(params[1]).be.exactly("test2");
+            should(params[2]).be.exactly("test3");
             done();
         };
         scheduler.addEventListerner("event2", event);
@@ -61,9 +61,9 @@ describe("schedule events service", function() {
         // newer date        
         var date = new Date(Date.now() + 1500);
         var eventId;
-        var event = function(eventId, userId, param) {
+        var event = function(eventId, userId, params) {
             console.log("late event");
-            should(param).be.exactly("late test");
+            should(params[0]).be.exactly("late test");
             //event cannot be cancelled anymore, since it has been executed
             scheduler.cancelEvent(eventId).should.equal(false);
             done();            
@@ -104,13 +104,13 @@ describe("schedule events service", function() {
      
         var date = new Date(Date.now() + 3000);
         var eventId;
-        var event = function(eventId, userId, param) {
-            finish(param);
+        var event = function(eventId, userId, params) {
+            finish(params);
         };
 
-        function finish(param) {
+        function finish(params) {
             console.log("late event, eventId: ", eventId);
-            should(param).be.exactly("late test");   
+            should(params[0]).be.exactly("late test");   
             done();
         }
         scheduler.addEventListerner("event5", event);
@@ -123,7 +123,7 @@ describe("schedule events service", function() {
         
     });
     
-    it("save  complex scheduled event in database (then execute it)", function(done) {
+    it("save complex scheduled event in database (then execute it)", function(done) {
 
         var facebookAPI = require('../js/facebookAPI.js');
         var event = facebookAPI.getOAuthURL;

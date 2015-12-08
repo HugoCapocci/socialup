@@ -3,8 +3,8 @@ define(['./module', 'moment'], function (appModule, moment) {
     'use strict';
     
     appModule.controller('UploadFileController', 
-    ['$scope', '$window', '$location', 'FileUploader', 'alertsService', 'eventService', 'messageService',
-    function($scope, $window, $location, FileUploader, alertsService, eventService, messageService) {
+    ['$scope', '$rootScope', '$window', '$location', '$uibModal', 'FileUploader', 'alertsService', 'eventService', 'messageService',
+    function($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService) {
         
         var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
     
@@ -16,10 +16,22 @@ define(['./module', 'moment'], function (appModule, moment) {
             tags : [],
             providers : ['google', 'dailymotion','facebook'],
             selectedProviders : [],
+            isScheduled : false,
             isFile:false,
             isMessageAfter : false,
             messageProviders : ['twitter', 'facebook', 'linkedin'],
-            selectedMessageproviders : []
+            selectedMessageProviders : [],
+            messageProvidersOptions : {
+                facebook : {
+                    visibilities : ['EVERYONE', 'ALL_FRIENDS', 'FRIENDS_OF_FRIENDS', /*'CUSTOM', */'SELF']
+                    
+                }
+            },
+            selectedmessageProvidersOptions: {
+                facebook : {
+                    visibility : 'SELF'
+                }
+            }
         };
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
@@ -33,39 +45,102 @@ define(['./module', 'moment'], function (appModule, moment) {
                 return isFileOk;
             }
         });
+        
+        var modalInstance;
+        function openLoading() {
+            modalInstance = $uibModal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'modalContent.html',
+                controller: 'WaitingModalController',
+                size: 'lg',
+                resolve: {
+                    items: function () {
+                        return $scope.items;
+                    }
+                }
+            });
+            modalInstance.result.then(function(selectedItem) {
+                $scope.selected = selectedItem;
+                console.log("Modal executed");
+            }, function () {
+                console.log('Modal dismissed at: ' + new Date());
+            });
+        }
 
          //loading data ?
         var modifyParams = $location.search();
         console.log("url params ?", modifyParams);
         if(modifyParams.eventId) {
-
             eventService.retrieveOne(modifyParams.eventId).then(function(uploadFileEvent) {
-                console.log("event retrieved ", uploadFileEvent);  
+                console.log("event retrieved ", uploadFileEvent);
                 $scope.uploadFileData.date = new Date(uploadFileEvent.dateTime);
-                $scope.uploadFileData.selectedProviders=uploadFileEvent.eventParams[0];
-                $scope.uploadFileData.title=uploadFileEvent.eventParams[2];
-                $scope.uploadFileData.description=uploadFileEvent.eventParams[3];
-                $scope.uploadFileData.tags=uploadFileEvent.eventParams[4];
+                $scope.uploadFileData.selectedProviders=uploadFileEvent.providers;
+                $scope.uploadFileData.title=uploadFileEvent.eventParams[1];
+                $scope.uploadFileData.description=uploadFileEvent.eventParams[2];
+                $scope.uploadFileData.tags=uploadFileEvent.eventParams[3];
                 $scope.uploadFileData.eventId=uploadFileEvent.eventId;
                 $scope.uploadFileData.isFile=true;
+                $scope.uploadFileData.isScheduled=true;
             });
         } else {
            $scope.uploadFileData.date = moment(new Date()).add(1, 'hours').minutes(0).seconds(0).format();
         }
+        
+        $scope.uploader.onProgressItem =function(item, progress) {
+            if(progress===100)
+                $rootScope.stopProgress("Fichier téléchargé sur le serveur SocialUp, traitement en cours.");
+            else
+                $rootScope.doProgress(progress);
+        };
+        
+       $scope.uploader.onErrorItem = function(item, response, status, headers) {
+           //console.log('error: ', response);
+           alertsService.error("Erreur dans l'envoit de message. Erreur : "+response.error_description, 5000);
+           modalInstance.close();
+       };
 
-        $scope.uploader.onSuccessItem = function(item, response, status, headers) {
-            alertsService.success('video successfully uploaded', 5000);
-            console.log("reponse", response);
-            console.log("item", item);
+       $scope.uploader.onSuccessItem = function(item, response, status, headers) {
+           
+            alertsService.success('video successfully ' + ($scope.uploadFileData.isScheduled ? 'scheduled' : 'published') , 5000);
+           /* console.log("reponse", response);
+            console.log("item", item);*/
             if($scope.uploadFileData.isMessageAfter && $scope.uploadFileData.selectedMessageProviders.length>0) {
-                messageService.postMessage($scope.uploadFileData.selectedMessageProviders, response[0].url).then(function(results) {
-                    console.log("results: ",results);
-                    alertsService.success("Message publié avec succès");
-                }, function(err) {
-                    alertsService.error("Erreur dans l'envoit de message. Err: "+err);
-                });
-            }
+
+                if(!$scope.uploadFileData.isScheduled)
+                    messageService.postMessage($scope.uploadFileData.selectedMessageProviders, response[0].url).then(function(results) {
+                        console.log("results: ",results);
+                        alertsService.success("Message publié avec succès");
+                        modalInstance.close();
+                    }, function(err) {
+                        alertsService.error("Erreur dans l'envoit de message. Err: "+err);
+                        modalInstance.dismiss('cancel');
+                    });
+                else
+                    messageService.postChainedMessage(
+                        response, 
+                        $scope.uploadFileData.selectedMessageProviders, 
+                        $scope.uploadFileData.description,
+                        $scope.uploadFileData.selectedmessageProvidersOptions
+                    ).then(function(results) {
+                        console.log("postChainedMessage results: ",results);
+                        alertsService.success("Evènement chainé créé");
+                        modalInstance.close();
+                    }, function(err) {
+                        alertsService.error("Erreur dans la création de l'évènement chainé. Err: "+err);
+                        modalInstance.dismiss('cancel');
+                    });
+            } else
+                 modalInstance.close();
          };
+        
+        $scope.update = function(item) {
+            
+            if(item!==undefined) {
+                console.log("update file");
+            } else {
+                //eventService.update();
+            }
+        };
         
         $scope.validateFieldsAndUpload = function(item) {
             
@@ -81,14 +156,20 @@ define(['./module', 'moment'], function (appModule, moment) {
             item.formData = [
                 {'title' : $scope.uploadFileData.title},
                 {'description' : $scope.uploadFileData.description},
-                {'providers' : $scope.uploadFileData.selectedProviders},
-                {'scheduledDate' : $scope.uploadFileData.date},
-                {'tags' : processTags()}
+                {'providers' : $scope.uploadFileData.selectedProviders}
             ];
+            var tags = processTags();
+            if(tags.length>0)
+                item.formData.tags = tags;
+            if($scope.uploadFileData.isScheduled) {
+                item.formData.push({'scheduledDate' : $scope.uploadFileData.date});
+            } else
             if($scope.uploadFileData.isCloud) {
                 //console.log("add cloud option");
                 item.formData.push( {'isCloud' : true} );
             }
+            
+            openLoading();
             //console.log("upload with formData ",item.formData);
             item.upload();            
         };

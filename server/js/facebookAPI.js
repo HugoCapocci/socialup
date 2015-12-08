@@ -92,7 +92,9 @@ function saveTokensForUser(tokens, userId) {
 }
 
 function tagsAsHashtags(tags) {
-
+    if(tags===undefined)
+        return "";
+    
     var hastags="\n\n";
     for (var i=0; i<tags.length; i++) {
        hastags+="#"+tags[i]+" ";   
@@ -120,35 +122,97 @@ function sendVideo(token, file, user, params) {
         if(err)
             deferred.reject(new Error(err));
         else {
-            //console.log('FB Video Upload Response: ', response);
-            //return url to the video
-            deferred.resolve('https://www.facebook.com/'+JSON.parse(body).id);  
+            console.log('FB Video Upload Response body: ', body);
+            var videoId = JSON.parse(body).id;
+            /*getVideoData(videoId, token).then(function(videoData) {
+                console.log("videoData: ",videoData);
+                  //return url to the video*/
+                deferred.resolve( {
+                    url : 'https://www.facebook.com/'+videoId
+                });  
+            /*},function(err) {
+                deferred.reject(err);
+            });*/
         }
     });
     
     return deferred.promise;
 }
 
+///v2.5/{video-id}
+function getVideoData(videoId, tokens) {
+    
+    var deferred = Q.defer();
+    var req_options = {
+        host: 'graph.facebook.com',
+        port: 443,
+        path: '/v2.5/'+videoId+'/thumbnails', //optional /thumbnails
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer '+tokens.access_token
+        }
+    };
+    
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+
+            var videoData = JSON.parse(data);
+            deferred.resolve(videoData);
+        });
+    });
+    
+    req.on('error', function(err) {         
+        console.log('get user infos error: ', err);
+        deferred.reject(err);
+    });
+    
+    req.end();
+    return deferred.promise;
+}
+
+//https://developers.facebook.com/docs/facebook-login/permissions
 function getOAuthURL() {
-    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=publish_actions+user_managed_groups';//+'&response_type=token';
+    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups';//+'&response_type=token'
 }
 
 function postMessage(tokens, message) {
+    return publishOnFeed(tokens, {message : message});
+}
+exports.postMediaLink = function(tokens, message, url, title, description, messageProviderOptions ) {
+    
+    console.log("FB postMediaLink, messageProviderOptions: ",messageProviderOptions);
+    var privacy;
+    if(messageProviderOptions===undefined)
+        privacy = {'value':'SELF', 'allow':'', 'deny':''};
+    else
+        privacy = {'value':messageProviderOptions.visibility, 'allow':'', 'deny':''};
+    console.log("privacy object stringified: ",privacy);
+    return publishOnFeed(tokens, {message:message, link:url, name: title, caption:description, description:description, privacy: privacy});
+};
+function publishOnFeed(tokens, data) {
+
+    data.access_token = tokens.access_token;
+    //console.log("publishOnFeed data: ", data);
 
     var deferred = Q.defer();
     request({
         method: 'POST',
         uri: 'https://graph.facebook.com/me/feed',
-        formData: {
-            access_token : tokens.access_token,
-            message: message
-        }
-
+        json: true,
+        body: data
     }, function(err, response, body) {
 
         if(err)
-            deferred.reject(new Error(err));
+            deferred.reject(err);
         else {
+            console.log("publishOnFeed response body: ", body);
+            var id = body.id;
+            body.url= 'https://www.facebook.com/yug357/posts/'+id.split('_')[1];
             deferred.resolve(body);  
         }
     });
@@ -197,3 +261,4 @@ exports.getOAuthURL=getOAuthURL;
 exports.postMessage=postMessage;
 exports.refreshTokens=refreshTokens;
 exports.getUserInfo=getUserInfo;
+exports.getVideoData=getVideoData;

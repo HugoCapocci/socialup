@@ -1,0 +1,42 @@
+<div>
+
+    <table st-table="chainedEvents" class="table table-striped">
+        <thead>
+			<tr>
+				<th>event type</th>
+                <th>providers</th>
+				<th>parameters</th>
+				<th>results</th>                
+                <th></th>
+                <th></th>
+                <th></th>
+			</tr>
+			<!--<tr>
+				<th colspan="5"><input st-search="" class="form-control" placeholder="global search ..." type="text"/></th>
+			</tr>-->
+		</thead>
+        
+        <tbody>
+			<tr ng-repeat="event in chainedEvents">
+                
+                <td>{{event.eventType}}</td>
+                <td>{{event.providers.toString()}}</td>
+                <td>
+                    <p ng-repeat="param in event.params">
+                        {{param.name}} : {{param.value}} 
+                    </p>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button type="button" ng-click="deleteEvent(event)" class="btn btn-sm btn-danger" uib-tooltip="Effacer l'évènement">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            
+        </tbody>
+    </table>
+    
+</div>

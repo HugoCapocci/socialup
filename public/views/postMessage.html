@@ -1,30 +1,49 @@
 <div>
    
-    <div class="row">
-
-        <div class="col-lg-4"><textarea ng-model="postMessage.message"></textarea></div>
-
-        <div class="col-lg-4">
-            <p class="input-group">
-                <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="postMessage.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-                </span>  
-            </p>
+    <div class="row">  
+        <div class="col-md-7 col-lg-7">
+            <textarea ng-model="postMessage.message" style="min-width:530px;min-height:250px;"></textarea>
         </div>
-        <div class="col-lg-4">
-            <uib-timepicker ng-model="postMessage.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
+        <div class="col-md-4 col-md-offset-1 col-lg4 col-lg-offset-1" ng-if="!modal">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h4><input type="checkbox" ng-model="postMessage.isScheduled"> Programmer envoit</h4>
+                </div>
+            </div>    
+            <div class="row" ng-if="postMessage.isScheduled">
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">Le </span>
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="postMessage.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" style="max-width:200px;"/>   
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">à </span>
+                        <uib-timepicker ng-model="postMessage.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
+                    </div>
+                </div>                       
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6">
+            <label ng-repeat="provider in postMessage.providers">
+              <input type="checkbox" checklist-model="postMessage.selectedProviders" checklist-value="provider"> {{provider}}
+            </label>
+        </div>
+        <div class="col-md-3 col-lg-3 col-md-offset-4 col-lg-offset-4" ng-if="postMessage.selectedProviders.indexOf('facebook')>-1">
+             FB Visibility : <select class="form-control" ng-model="postMessage.selectedProvidersOptions.facebook.visibility" ng-options="option for option in postMessage.providersOptions.facebook.visibilities"></select> <br/>
         </div>
     </div>
 
-    <div class="row">
-        <label ng-repeat="provider in postMessage.providers">
-          <input type="checkbox" checklist-model="postMessage.selectedProviders" checklist-value="provider"> {{provider}}
-        </label>
-    </div>
-    <div class="row" style="text-align:center">
-        <div class="col-lg-4">
-            <button ng-click="postMessage.send()">Send</button>
+    <div class="row" style="text-align:center" ng-if="!modal">
+        <div class="col-md-4 col-lg-4 col-md-offset-4 col-lg-offset-4">
+            <button ng-click="postMessage.send()">{{(postMessage.isScheduled ? 'Programmer la publication du message' : 'Publier le message')}}</button>
         </div>
     </div>
 </div>

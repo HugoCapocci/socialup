@@ -9,7 +9,7 @@ define(['./module'], function (appModule) {
             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
 
             //authentication is made by provider callbacks
-            this.getFolders = function(provider, folderId) {
+            this.getFolders = function(provider, folderId, typeFilter) {
 
                 var deferred = $q.defer();
                 if(folderId===undefined)
@@ -19,8 +19,22 @@ define(['./module'], function (appModule) {
                     folderId = encodeURIComponent(folderId);
                     console.log("encoded path ", folderId);
                 }
-                $http.get('/cloudExplorer/'+provider+'/'+folderId+'/'+localData.user.id)
-                .then(function(response) {
+                var path = '/cloudExplorer/'+provider+'/'+folderId+'/'+localData.user.id;
+                if(typeFilter)
+                    path+='/?typeFilter='+typeFilter;
+                $http.get(path).then(function(response) {
+                    console.log('response for folderId '+folderId+': ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.uploadChained = function(provider, eventId, folderId) {
+                var deferred = $q.defer();
+                $http.post('/event/chained/'+provider+'/'+eventId+'/'+localData.user.id, {eventParams : [folderId], eventType: 'uploadCloud'}).then(function(response) {
                     console.log('response for folderId '+folderId+': ', response);
                     deferred.resolve(response.data);
                 }, function (err) {

@@ -198,7 +198,10 @@ function publishVideo(videoURL, tokens, params, deferred) {
             if(results.error) {
                 deferred.reject(new Error(results.error.message));
             } else {
-                deferred.resolve('http://www.dailymotion.com/video/'+results.id+'_'+results.title+'_'+results.channel);
+                deferred.resolve({
+                    url :'http://www.dailymotion.com/video/'+results.id+'_'+results.title+'_'+results.channel,
+                    thumbnail : 'http://www.dailymotion.com/thumbnail/video/'+results.id
+                });
             }
         }
     });

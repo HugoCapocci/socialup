@@ -151,11 +151,18 @@ function sendVideo(tokens, file, user, videoParams) {
 
     videoUploadRequest.on('complete', function(response) {
         console.log("video upload request complete with response.body: ", response.body);
-        try {
-            deferred.resolve('https://www.youtube.com/watch?v='+JSON.parse(response.body).id);
-        } catch(err) {
-            deferred.reject(err);
-        }
+        if(response.body.error)
+            deferred.reject(response.body);
+        else
+            try {
+                var body = JSON.parse(response.body);
+                deferred.resolve({
+                    url : 'https://www.youtube.com/watch?v='+body.id,
+                    thumbnail : body.snippet.thumbnails.high.url
+                });
+            } catch(err) {
+                deferred.reject(err);
+            }
     });
  
     videoUploadRequest.on('error', function(err) {
@@ -222,12 +229,14 @@ function listFiles(tokens, folderId, typeFilter) {
     if(folderId===undefined) 
         folderId='root';
     
-    if(folderId!=='root')
-        filter+=' and "'+folderId+'" in parents';
+    filter+=' and "'+folderId+'" in parents';
     
     //image or video
     if(typeFilter !== undefined) {
-        filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") ';
+        if(typeFilter==='folder')
+            filter+=' and mimeType="application/vnd.google-apps.folder" ';
+        else
+            filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") ';
     }
     
     console.log("filter ? ", filter);
