@@ -2,6 +2,8 @@
 
 /*
 * DAILYMOTION WEB API
+  see https://developer.dailymotion.com/api 
+      https://developer.dailymotion.com/tools/apiexplorer
 */
 var https = require('https');
 var http = require('http');
@@ -131,7 +133,7 @@ function refreshTokens(tokens, userId) {
     return deferred.promise;
 }
 
-function sendVideo(tokens, file, userId, params) {
+function sendVideo(tokens, file, userId, params, providerOptions) {
     
     var deferred = Q.defer();
     //always check tokens validity before use
@@ -161,15 +163,15 @@ function sendVideo(tokens, file, userId, params) {
                 console.log("body ?", body);
                 var videoURL = JSON.parse(body).url;
                 console.log("video uploaded to URL: ", videoURL);
-                publishVideo(videoURL, tokens, params, deferred);
+                publishVideo(videoURL, tokens, params, providerOptions, deferred);
             }
         });
     });
     return deferred.promise;
 }
 
-// resolve videoUrl
-function publishVideo(videoURL, tokens, params, deferred) {
+// see https://developer.dailymotion.com/api#video-upload
+function publishVideo(videoURL, tokens, params, providerOptions, deferred) {
         
     request({
         method : 'POST',
@@ -180,10 +182,15 @@ function publishVideo(videoURL, tokens, params, deferred) {
         form : {
             url: videoURL,
             title : params.title,
-            channel : 'drhelmut',
+            channel : providerOptions.channel.id,
             description : params.description,
             tags : params.tags,
-            published : true
+            published : true,
+            private : providerOptions.private ? providerOptions.private : false/*,
+            password : 'zadazdazdazd',
+            rental_duration : '3' '24' '48' ,
+            rental_price : '1.14',
+            rental_start_time : 10*/ 
         }
     }, function(err, response, body) {
 
@@ -265,6 +272,7 @@ function getUserInfo(token)  {
         });
         res.on('end', function() {
             var userInfo = JSON.parse(data);
+            console.log("dailymotion user info (channel?) :", userInfo);
             deferred.resolve({userName:userInfo.screename});
         });
     });
@@ -277,6 +285,46 @@ function getUserInfo(token)  {
     req.end();
     return deferred.promise;
 }
+
+exports.listCategories = function(tokens) {
+    
+    var deferred = Q.defer();
+
+    var req_options = {
+        host: 'api.dailymotion.com',
+        port: 443,
+        path: '/channels',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer '+tokens.access_token
+        }
+    };
+
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+            var results = JSON.parse(data);
+            //console.log("dailymotion categories :", results.list);
+            deferred.resolve(results.list.map(function(categorie) {
+                delete categorie.description;
+                return categorie;
+            }));
+        });
+    });
+    
+    req.on('error', function(e) {         
+        console.log('get user infos error: ', e);
+        deferred.reject(new Error(e));
+    });
+    
+    req.end();
+    return deferred.promise;
+    
+};
 
 exports.getOAuthURL=getOAuthURL;
 exports.sendVideo=sendVideo;

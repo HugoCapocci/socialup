@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">27.07% </span>
+        <span class="strong">25.69% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>36/133</span>
+        <span class='fraction'>37/144</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">3.57% </span>
+        <span class="strong">3.33% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/28</span>
+        <span class='fraction'>1/30</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">16.67% </span>
+        <span class="strong">14.29% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>3/18</span>
+        <span class='fraction'>3/21</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">27.07% </span>
+        <span class="strong">25.69% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>36/133</span>
+        <span class='fraction'>37/144</span>
       </div>
     </div>
   </div>
@@ -361,7 +361,33 @@
 316
 317
 318
-319</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -474,6 +500,29 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -537,7 +586,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -550,6 +598,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -566,13 +616,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -792,8 +844,31 @@ function pushCode(code) {
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
 }
 &nbsp;
-//todo replace tags by params.tags + param.title, params.description, categoryId ?
-<span class="fstat-no" title="function not covered" >function sendVideo(tokens, file, user, videoParams) {</span>
+exports.listCategories = <span class="fstat-no" title="function not covered" >function(tokens) {</span>
+    
+<span class="cstat-no" title="statement not covered" >    oauth2Client.setCredentials(tokens);</span>
+<span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
+<span class="cstat-no" title="statement not covered" >    youtubeAPI.videoCategories.list({part:'snippet', regionCode:'fr', hl:'fr_FR'}, <span class="fstat-no" title="function not covered" >function(err, response) {</span></span>
+        /*console.log("listCategories response: ",response);
+        console.log("listCategories err: ",err);*/
+<span class="cstat-no" title="statement not covered" >        if(err)</span>
+<span class="cstat-no" title="statement not covered" >            deferred.reject(err);</span>
+        else {
+<span class="cstat-no" title="statement not covered" >            var categories = response.items.map(<span class="fstat-no" title="function not covered" >function(item) {               </span></span>
+<span class="cstat-no" title="statement not covered" >                return {</span>
+                    id : item.id,
+                    name : item.snippet.title
+                };
+            });
+<span class="cstat-no" title="statement not covered" >            deferred.resolve(categories);</span>
+        }
+    });
+        
+<span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
+};
+&nbsp;
+//todo  categoryId ?
+<span class="fstat-no" title="function not covered" >function sendVideo(tokens, file, user, videoParams, providerOptions) {</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    console.log('youtube UploadFile, file? ',file);</span>
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
@@ -805,7 +880,7 @@ function pushCode(code) {
             title: videoParams.title,
             description: videoParams.description,
             tags: videoParams.tags,
-            categoryId: '22'
+            categoryId: providerOptions.category.id
         },
         status: {
           privacyStatus: 'private'
@@ -855,7 +930,6 @@ function pushCode(code) {
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
 }
 &nbsp;
-// see https://developers.google.com/drive/v2/reference/files/insert
 <span class="fstat-no" title="function not covered" >function uploadDrive(tokens, file, parent) {</span>
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
     
@@ -868,6 +942,8 @@ function pushCode(code) {
         visibility: 'PRIVATE',
         title : file.originalname
     };
+<span class="cstat-no" title="statement not covered" >    if(parent!==undefined)</span>
+<span class="cstat-no" title="statement not covered" >        metaData.parents = [{id:parent}];</span>
     
 <span class="cstat-no" title="statement not covered" >    var buf = fs.readFileSync(file.path);</span>
 <span class="cstat-no" title="statement not covered" >    if(buf === undefined) </span>
@@ -882,15 +958,17 @@ function pushCode(code) {
         },
         resource : metaData
     };
-    
-<span class="cstat-no" title="statement not covered" >    if(parent!==undefined)</span>
-<span class="cstat-no" title="statement not covered" >        params.media.parents = [parent];</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    var videoUploadRequest = drive.files.insert(params, <span class="fstat-no" title="function not covered" >function() {</span></span>
          //
     });
 <span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('complete', <span class="fstat-no" title="function not covered" >function(response) {</span></span>
-<span class="cstat-no" title="statement not covered" >        console.log("google video upload request complete with response: ", response.body);</span>
-<span class="cstat-no" title="statement not covered" >        deferred.resolve(JSON.parse(response.body));</span>
+<span class="cstat-no" title="statement not covered" >        var result = JSON.parse(response.body);</span>
+<span class="cstat-no" title="statement not covered" >        console.log("google drive file upload request complete with result: ", result);</span>
+<span class="cstat-no" title="statement not covered" >        deferred.resolve({</span>
+            url : 'https://drive.google.com/file/d/'+result.id+'/view',
+            downloadUrl : result.downloadUrl
+        });
     });
  
 <span class="cstat-no" title="statement not covered" >    videoUploadRequest.on('error', <span class="fstat-no" title="function not covered" >function(err) {</span></span>
@@ -1003,7 +1081,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 08 2015 20:10:34 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Dec 11 2015 13:01:17 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

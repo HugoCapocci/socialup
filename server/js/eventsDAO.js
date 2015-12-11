@@ -18,7 +18,7 @@ function getDB(callback) {
 }
 
 // db key -> eventId
-function saveScheduledEvent(eventId, userId, date, eventType, providers, eventParams) {
+function saveScheduledEvent(eventId, userId, date, eventType, providers, providersOptions, eventParams) {
 
     var eventToSave = {
         user : userId,
@@ -26,12 +26,13 @@ function saveScheduledEvent(eventId, userId, date, eventType, providers, eventPa
         eventType : eventType,
         eventParams: eventParams,
         providers : providers,
+        providersOptions : providersOptions,
         eventId : eventId,
         chainedEventsCounts :0
     };
     return createEvent(eventToSave, scheduledEventsCollection); 
 }
-exports.createChainedEvent = function(eventParentId, userId, eventType, providers, eventParams, messageProvidersOptions) {
+exports.createChainedEvent = function(eventParentId, userId, eventType, providers, providersOptions, eventParams) {
 
     var eventToSave = {
         user : userId,
@@ -40,11 +41,10 @@ exports.createChainedEvent = function(eventParentId, userId, eventType, provider
         //Ids of 
         /*chainedParams: chainedParams,*/
         providers : providers,
-        eventParentId : eventParentId
+        eventParentId : eventParentId,
+        providersOptions : providersOptions
     };
-    
-    if(messageProvidersOptions)
-        eventToSave.messageProvidersOptions=messageProvidersOptions;
+
     // async callback : increments chainedEvents count in scheduledEvent
     return createEvent(eventToSave, chainedEventsCollection, function() {
         updateEvent(eventParentId, {$inc:{chainedEventsCounts:1}}, scheduledEventsCollection);

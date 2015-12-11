@@ -21,18 +21,47 @@ define(['./module', 'moment'], function (appModule, moment) {
             isMessageAfter : false,
             messageProviders : ['twitter', 'facebook', 'linkedin'],
             selectedMessageProviders : [],
-            messageProvidersOptions : {
+            providersOptions : {
                 facebook : {
-                    visibilities : ['EVERYONE', 'ALL_FRIENDS', 'FRIENDS_OF_FRIENDS', /*'CUSTOM', */'SELF']
-                    
+                    visibilities : ['EVERYONE', 'ALL_FRIENDS', /*'FRIENDS_OF_FRIENDS', 'CUSTOM', */'SELF'],
+                    groups: []
+                },
+                google : {
+                    categories : []
+                },
+                dailymotion : {
+                    channels : []
                 }
             },
-            selectedmessageProvidersOptions: {
+            selectedProvidersOptions: {
                 facebook : {
-                    visibility : 'SELF'
+                    visibility : 'SELF',
+                    group : undefined
+                },
+                dailymotion : {
+                    private : false,
+                    channel : null
+                },
+                google : {
+                    category : undefined
                 }
             }
         };
+        //
+        eventService.getCategories('google').then(function(categories) {            
+            $scope.uploadFileData.providersOptions.google.categories=categories;            
+        });
+        
+        eventService.getCategories('dailymotion').then(function(categories) {     
+            console.log("dailymotion channels: ", categories);
+            $scope.uploadFileData.providersOptions.dailymotion.channels=categories;            
+        });
+        
+        eventService.getFacebookGroups().then(function(groups) {     
+            console.log("facebook groups: ", groups);
+            $scope.uploadFileData.providersOptions.facebook.groups=groups;            
+        });
+        
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
             name: 'videoFilter',
@@ -143,7 +172,9 @@ define(['./module', 'moment'], function (appModule, moment) {
         };
         
         $scope.validateFieldsAndUpload = function(item) {
-            
+
+            // console.log("validateFieldsAndUpload - $scope.uploadFileData.selectedProvidersOptions" ,$scope.uploadFileData.selectedProvidersOptions);
+
             if($scope.uploadFileData.title.length<=3) {
                 alertsService.warn("le titre ne peut pas avoir moins de 3 caractères");
                 return;
@@ -169,6 +200,30 @@ define(['./module', 'moment'], function (appModule, moment) {
                 item.formData.push( {'isCloud' : true} );
             }
             
+            //chek provider options
+            if($scope.uploadFileData.selectedProviders.indexOf('google')>-1)
+                if(!$scope.uploadFileData.selectedProvidersOptions.google.category.id) {
+                    alertsService.warn("Vous devez choisir une catégorie de vidéo pour la publication sur Youtube");
+                    return;
+                } else
+                    // remove angular $$hashKey
+                    delete $scope.uploadFileData.selectedProvidersOptions.google.category.$$hashKey;
+            
+            if($scope.uploadFileData.selectedProviders.indexOf('dailymotion')>-1)
+                if(!$scope.uploadFileData.selectedProvidersOptions.dailymotion.channel.id) {
+                    alertsService.warn("Vous devez choisir une chaine pour la publication sur Dailymotion");
+                    return;
+                } else
+                    // remove angular $$hashKey
+                    delete $scope.uploadFileData.selectedProvidersOptions.dailymotion.channel.$$hashKey;
+
+            if($scope.uploadFileData.selectedProvidersOptions.facebook.group)
+                delete $scope.uploadFileData.selectedProvidersOptions.facebook.group.$$hashKey;
+            else
+                delete $scope.uploadFileData.selectedProvidersOptions.facebook.group;
+
+            item.formData.push( {'selectedProvidersOptions' : JSON.stringify($scope.uploadFileData.selectedProvidersOptions)});
+
             openLoading();
             //console.log("upload with formData ",item.formData);
             item.upload();            

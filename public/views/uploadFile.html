@@ -10,10 +10,37 @@
             <input  type="checkbox" ng-model="uploadFileData.isCloud"/> cloud? <br/>
         </div>
         <div class="col-md-8">
-            Providers: 
-            <label ng-repeat="provider in uploadFileData.providers">
-              <input type="checkbox" checklist-model="uploadFileData.selectedProviders" checklist-value="provider"> {{provider}}
-            </label>
+            <div class="row">
+                <div class="col-md-3">Providers:</div>
+                <label ng-repeat="provider in uploadFileData.providers" class="col-md-3">
+                  <input type="checkbox" checklist-model="uploadFileData.selectedProviders" checklist-value="provider"> {{provider}}
+                </label>
+            </div>
+            <div class="row">
+                <div class="col-md-3"><!-- provider options--></div>
+                <div class="col-md-3" ng-repeat="provider in uploadFileData.providers">
+                    <div ng-if="uploadFileData.selectedProviders.indexOf(provider)>-1">
+                        <div ng-if="provider==='dailymotion'">
+                            <input type="checkbox" ng-model="uploadFileData.selectedProvidersOptions.dailymotion.private"> Vidéo privée<br/>
+                            Chaine :
+<select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.dailymotion.channel" ng-options="option.name for option in uploadFileData.providersOptions.dailymotion.channels"></select>
+                        </div>
+                        <div ng-if="provider==='facebook'">
+                            Visibilité :
+                            <select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.facebook.visibility" ng-options="option for option in uploadFileData.providersOptions.facebook.visibilities"></select><br/>
+                            Groupe ? 
+                            <select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.facebook.group" ng-options="option.name for option in uploadFileData.providersOptions.facebook.groups">
+                                <option value="">Aucun</option>
+                            </select><br/>
+                        </div>
+                         <div ng-if="provider==='google'">                        
+                            Categorie :
+<select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.google.category" ng-options="option.name for option in uploadFileData.providersOptions.google.categories"></select>
+                        </div>
+                        
+                    </div>                    
+                </div>
+            </div>            
         </div>
 
         <div class="col-md-12">

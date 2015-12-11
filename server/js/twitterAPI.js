@@ -48,14 +48,13 @@ function getTokens(userId) {
             'Authorization' : 'OAuth '+inLineParams(headerParams)
         },
         method: "POST"
-    }, function(error, response, body) {
-    
+    }, function(error, response, body) {    
         //client error
         if(error)
-            deferred.reject(new Error(error)); 
+            deferred.reject(error); 
         else {
-            console.log("getTokens statusCode? ", response.statusCode);
-            console.log("body: ", body);
+           /* console.log("getTokens statusCode? ", response.statusCode);
+            console.log("body: ", body);*/
             deferred.resolve(bodyToTokens(body));
         }
     });
@@ -96,7 +95,7 @@ function createSignature(baseString, signingKey) {
 //APP_SECRET
 function getSignature(params, httpMethod, url, tokenSecret, consumerSecret) {
     var baseString = createSignatureBaseString(params, httpMethod, url);
-    console.log("SIGNATURE BASE STRING ", baseString);
+    //console.log("SIGNATURE BASE STRING ", baseString);
     return createSignature(baseString, createSigningKey(consumerSecret, tokenSecret));
 }
 
@@ -124,7 +123,7 @@ function getAccessToken(oauthVerifier, tokens) {
     var url= 'https://api.twitter.com/oauth/access_token';
     var token_secret = tokens.oauth_token_secret;
     if(token_secret===undefined) {
-        console.log("pas de oauth token secret, use default");
+        //console.log("no oauth token secret, use default");
         token_secret= TOKEN_SECRET;
     }
     headerParams.oauth_signature = getSignature(headerParams, 'post', url, token_secret, APP_SECRET);
@@ -140,12 +139,12 @@ function getAccessToken(oauthVerifier, tokens) {
         }
     }, function(error, response, body){
 
-        console.log("access token from verification code");
+        //console.log("access token from verification code");
         //client error
         if(error)
-            deferred.reject(new Error(error));
+            deferred.reject(error);
         else {
-            console.log("statusCode? ", response.statusCode);
+            //console.log("statusCode? ", response.statusCode);
             deferred.resolve(bodyToTokens(body));
         }
     });
@@ -182,9 +181,9 @@ function postMessage(tokens, message) {
  
         //client error
         if(error)
-            deferred.reject(new Error(error));
+            deferred.reject(error);
         else {
-            console.log("tweet response statusCode: ", response.statusCode);
+            //console.log("tweet response statusCode: ", response.statusCode);
             deferred.resolve(response);
         }
     });
@@ -217,17 +216,16 @@ function getTweets(tokens) {
         method: "GET"
     }, function(error, response, body){
  
-        console.log(body);
+        //console.log(body);
         //client error
         if(error)
-            deferred.reject(new Error(error));
+            deferred.reject(error);
         else {
-            console.log("tweet response statusCode: ", response.statusCode);
+            //console.log("tweet response statusCode: ", response.statusCode);
             deferred.resolve(response);
         }
     });
     return deferred.promise;
-
 }
 
 function getUserInfo(tokens) {
@@ -257,7 +255,7 @@ function getUserInfo(tokens) {
  
         //client error
         if(error)
-            deferred.reject(new Error(error));
+            deferred.reject(error);
         else {           
             var userInfo = JSON.parse(body);
             deferred.resolve({userName:userInfo.screen_name});

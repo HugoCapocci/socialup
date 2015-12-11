@@ -16,17 +16,17 @@ exports.addEventListerner = function(eventType, listener) {
 };
 
 // returned job can be canceled : job.cancel()
-function scheduleEvent(userId, date, eventType, providers, eventParams, callback) {
+function scheduleEvent(userId, date, eventType, providers, providersOptions, eventParams, callback) {
 
     var eventId = userId + '|' + Date.now();
 
     //job pushed to schedule.scheduledJobs[eventId]
-    addEventToSchedule(userId, date, eventType, providers, eventParams, eventId, callback);
+    addEventToSchedule(userId, date, eventType, providers, providersOptions, eventParams, eventId, callback);
 
     return eventId;
 }
 
-function addEventToSchedule(userId, date, eventType, providers, eventParams, eventId, callback) {
+function addEventToSchedule(userId, date, eventType, providers, providersOptions, eventParams, eventId, callback) {
     
     //iso database
     if(scheduleEvents[userId]===undefined)
@@ -35,7 +35,7 @@ function addEventToSchedule(userId, date, eventType, providers, eventParams, eve
     schedule.scheduleJob(eventId, date, function() {
 
         deleteEventFromUser(userId, eventId);          
-        var args = [eventType, eventId, userId, providers];
+        var args = [eventType, eventId, userId, providers, providersOptions];
         args = args.concat(eventParams);
 
         var hasListeners = eventEmitter.emit.apply(eventEmitter, args);
@@ -46,7 +46,7 @@ function addEventToSchedule(userId, date, eventType, providers, eventParams, eve
     scheduleEvents[userId].push(eventId);
 }
 
-exports.executeChainedEvent = function(userId, eventType, providers, eventParams, eventId) {
+exports.executeChainedEvent = function(userId, eventType, providers, providersOptions, eventParams, eventId) {
 
     var args = [eventType, eventId, userId, providers];   
     args = args.concat(eventParams);
@@ -80,9 +80,9 @@ function deleteEventFromUser(userId, eventId) {
 }
 
 // db key -> eventId
-function saveScheduledEvent(userId, date, eventType, providers, eventParams) {
-    var eventId = scheduleEvent(userId, date, eventType, providers, eventParams);
-    return eventsDAO.saveScheduledEvent(eventId,userId, date, eventType, providers, eventParams);
+function saveScheduledEvent(userId, date, eventType, providers, providersOptions, eventParams) {
+    var eventId = scheduleEvent(userId, date, eventType, providers, providersOptions, eventParams);
+    return eventsDAO.saveScheduledEvent(eventId,userId, date, eventType, providers, providersOptions, eventParams);
 }
 
 function loadScheduledEvents() {
@@ -90,7 +90,7 @@ function loadScheduledEvents() {
         console.log("events to be scheduled: ",results);
         if(results!==undefined)
             results.forEach(function(result) {
-                addEventToSchedule(result.user, new Date(result.dateTime), result.eventType, result.providers, result.eventParams, result.eventId);
+                addEventToSchedule(result.user, new Date(result.dateTime), result.eventType, result.providers, result.providersOptions, result.eventParams, result.eventId);
             });
     }, function(err) {
         console.log("cannot load events, error occurs: ", err);

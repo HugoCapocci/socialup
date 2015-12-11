@@ -102,14 +102,59 @@ function tagsAsHashtags(tags) {
     return hastags;
 }
 
-function sendVideo(token, file, user, params) {
+exports.getUserGroups = function(tokens) {
+   
+    var deferred = Q.defer();
+    var req_options = {
+        host: 'graph.facebook.com',
+        port: 443,
+        path: '/v2.5/me/groups',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer '+tokens.access_token
+        }
+    };
+    
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+            var groupsData = JSON.parse(data);
+            //TODO handle paging groupsData.data.paging.cursors {before, after}
+            deferred.resolve(groupsData.data);
+        });
+    });
+    
+    req.on('error', function(err) {         
+        console.log('get user groups error: ', err);
+        deferred.reject(err);
+    });
+    
+    req.end();
+    return deferred.promise;
+};
+
+function sendVideo(token, file, user, params, providerOptions) {
+
+    //TODO use providerOptions to choose between profil and group
+    //and set visibility
     
     var deferred = Q.defer();
-    var GROUP_ID = '334292563361295';
-    // 'me'
+    //current user by default
+    var targetId = 'me';
+    //post on group 
+    if(providerOptions.group !== undefined)
+        targetId = providerOptions.group.id;
+    //post on page 
+    
+    //TODO
+    
     request({
         method: 'POST',
-        uri: 'https://graph-video.facebook.com/v2.5/'+GROUP_ID+'/videos',
+        uri: 'https://graph-video.facebook.com/v2.5/'+targetId+'/videos',
         formData: {
             access_token : token.access_token,
             source: fs.createReadStream(file.path),
@@ -180,24 +225,21 @@ function getOAuthURL() {
     return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups';//+'&response_type=token'
 }
 
-function postMessage(tokens, message) {
-    return publishOnFeed(tokens, {message : message});
+function postMessage(tokens, message, providerOptions) {
+    return publishOnFeed(tokens, {message : message}, providerOptions);
 }
-exports.postMediaLink = function(tokens, message, url, title, description, messageProviderOptions ) {
-    
-    console.log("FB postMediaLink, messageProviderOptions: ",messageProviderOptions);
-    var privacy;
-    if(messageProviderOptions===undefined)
-        privacy = {'value':'SELF', 'allow':'', 'deny':''};
-    else
-        privacy = {'value':messageProviderOptions.visibility, 'allow':'', 'deny':''};
-    console.log("privacy object stringified: ",privacy);
-    return publishOnFeed(tokens, {message:message, link:url, name: title, caption:description, description:description, privacy: privacy});
+exports.postMediaLink = function(tokens, message, url, title, description, providerOptions ) {
+
+    return publishOnFeed(tokens, {message:message, link:url, name: title, caption:description, description:description}, providerOptions);
 };
-function publishOnFeed(tokens, data) {
+function publishOnFeed(tokens, data, providerOptions) {
 
     data.access_token = tokens.access_token;
     //console.log("publishOnFeed data: ", data);
+    if(providerOptions===undefined)
+        data.privacy = {'value':'SELF'};
+    else
+       data.privacy = {'value':providerOptions.visibility};
 
     var deferred = Q.defer();
     request({

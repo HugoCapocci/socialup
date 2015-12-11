@@ -56,9 +56,9 @@ load existing scheduleEvents fromDataBase
 var scheduler = require('./scheduler.js');
 
 // add post message event
-scheduler.addEventListerner("message", function(eventId, userId, providers, message) {
+scheduler.addEventListerner("message", function(eventId, userId, providers, providersOptions, message) {
    
-    return postMessageToProviders(userId, providers, message).then(function(results) {
+    return postMessageToProviders(userId, providers, providersOptions, message).then(function(results) {
         eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         /*console.log("message event OK");*/
     }, function(err) {
@@ -67,14 +67,14 @@ scheduler.addEventListerner("message", function(eventId, userId, providers, mess
     });
 });
 //uploadToProviders(providers, file)
-scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, file, title, description, tags) {
+scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, providersOptions, file, title, description, tags) {
    
     var params = {
         title:title,
         description:description,
         tags:tags
     };
-    uploadToProviders(userId, providers, file, params).then(function(results) {
+    uploadToProviders(userId, providers, providersOptions, file, params).then(function(results) {
        
         console.log("uploadToProviders results: ",results);
         // check chained Event
@@ -118,7 +118,7 @@ function executeChainedEvent(event, params) {
     console.log("executeChainedEvent: ",event);
                 
     if(event.eventType==='message') {  
-        return postMediaLinkToProviders(event.user, event.providers, event.eventParams[0], params.url, params.title, params.description, event.messageProvidersOptions);
+        return postMediaLinkToProviders(event.user, event.providers, event.eventParams[0], params.url, params.title, params.description, event.providersOptions);
     } else if(event.eventType==='uploadCloud') {
         console.log("upload drive with params: ", params);
         var provider = event.providers[0];        
@@ -338,8 +338,7 @@ app.get('/twitter2callback', function(req, res) {
     var tokens = users[userId].providers[TEST_TWITTER].tokens;
     tokens.oauth_token=oauth_token;
     providersAPI.twitter.getAccessToken(oauth_verifier, tokens).then(function(tokens2) {
-        users[userId].providers[TEST_TWITTER].tokens=tokens2;
-        
+        users[userId].providers[TEST_TWITTER].tokens=tokens2;        
         return providersAPI.twitter.getUserInfo(tokens2);
     
     }, function(err) {
@@ -469,10 +468,10 @@ app.post('/event/chained/:provider/:eventId/:userId', function(req, res) {
     var userId = req.params.userId;
     var provider= req.params.provider;
     var scheduledEvent = req.body;
-
+    // providersOptions
     //console.log("chainedEvent: ", scheduledEvent);
     //res.send(scheduledEvent);
-    eventsDAO.createChainedEvent(eventId, userId, scheduledEvent.eventType, [provider], scheduledEvent.eventParams).then(function(result) {
+    eventsDAO.createChainedEvent(eventId, userId, scheduledEvent.eventType, [provider], undefined, scheduledEvent.eventParams).then(function(result) {
          res.send(result);
     }, function(err) {
          res.send(err);
@@ -561,13 +560,13 @@ app.post('/message/:userId', function(req, res) {
     // chained events
     var eventParentId = req.body.eventParentId;
     // provider options (visibility for FB, ect...)
-    var messageProvidersOptions = req.body.messageProvidersOptions;
-    //TODO
-    console.log("messageProvidersOptions? ",messageProvidersOptions);
+    var providersOptions = req.body.messageProvidersOptions;
+    //TODO use providersOptions for messages
+    console.log("providersOptions? ",providersOptions);
 
     if(eventParentId) {
         //Save chained event eventParentId, userId, eventType, providers, eventParams
-         eventsDAO.createChainedEvent(eventParentId, userId, "message", providers, [message], messageProvidersOptions).then(function(eventId) {
+         eventsDAO.createChainedEvent(eventParentId, userId, "message", providers, providersOptions, [message]).then(function(eventId) {
             res.send(eventId);
         }, function(err) {
             res.send("Cannot create or save chained event: "+err);
@@ -576,7 +575,7 @@ app.post('/message/:userId', function(req, res) {
     } else if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now())
         
         //direct message
-        postMessageToProviders(userId, providers, message).then(function(results) {
+        postMessageToProviders(userId, providers, providersOptions, message).then(function(results) {
             res.send(results);
         }, function(err) {
             res.send("Cannot send message err: "+err);
@@ -585,7 +584,7 @@ app.post('/message/:userId', function(req, res) {
     else {
         //scheduled event (eventId, userId, date, eventType, providers, eventParams) 
         console.log("schedule event for ",scheduledDate);
-        scheduler.saveScheduledEvent(userId, scheduledDate, "message", providers, [message]).then(function(eventId) {
+        scheduler.saveScheduledEvent(userId, scheduledDate, "message", providers, providersOptions, [message]).then(function(eventId) {
             res.send(eventId);
         }, function(err) {
             res.send("Cannot create or save scheduled event: "+err);
@@ -594,23 +593,24 @@ app.post('/message/:userId', function(req, res) {
 });
 
 //simple message
-function postMessageToProviders(userId, providers, message) {
+function postMessageToProviders(userId, providers, providersOptions, message) {
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(postMessageToProvider(userId, provider, message));
+        results.push(postMessageToProvider(userId, provider, providersOptions[provider], message));
     }
     return Q.all(results);
 }
-function postMessageToProvider(userId, provider, message) {
+function postMessageToProvider(userId, provider, providerOptions, message) {
     
     var deffered = Q.defer();    
     var myToken = users[userId].providers[provider].tokens;
    
     if(providersAPI[provider]===undefined || providersAPI[provider].postMessage ===undefined)
         deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
-    
-    providersAPI[provider].postMessage(myToken, message).then(function(result) {
+
+    //TODO add providerOptions
+    providersAPI[provider].postMessage(myToken, message, providerOptions).then(function(result) {
         result.provider=provider;
         deffered.resolve(result);
     }, function(err) {
@@ -676,7 +676,10 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
         var scheduledDate = req.body.scheduledDate;
         var providers = req.body.providers.split(',');
         
+        var providersOptions = JSON.parse(req.body.selectedProvidersOptions);
+        
         console.log('scheduledDate? ', scheduledDate);
+        console.log('selectedProvidersOptions? ', providersOptions);
         var params = {
             title : req.body.title,
             description : req.body.description
@@ -688,7 +691,7 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
         
             // provider for fileupload            
             console.log('targeted providers: ', providers);
-            uploadToProviders(userId, providers, req.file, params).then(function(results) {
+            uploadToProviders(userId, providers, providersOptions, req.file, params).then(function(results) {
                 console.log("uploadFile OK");
                 fs.unlinkSync(req.file.path);
                 res.send(results);
@@ -699,7 +702,7 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
             });
             //scheduled event
         } else {
-            scheduler.saveScheduledEvent(userId, scheduledDate, "uploadVideo", providers, [req.file, params.title, params.description, params.tags]
+            scheduler.saveScheduledEvent(userId, scheduledDate, "uploadVideo", providers, providersOptions, [req.file, params.title, params.description, params.tags]
             ).then(function(eventId) {
                 res.send(eventId);
             }, function(err) {
@@ -710,22 +713,22 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     }
 });
 
-function uploadToProviders(userId, providers, file, params) {
+function uploadToProviders(userId, providers, providersOptions, file, params) {
     
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(uploadToProvider(userId, provider, file, params));
+        results.push(uploadToProvider(userId, provider, providersOptions[provider],file, params));
     }
     return Q.all(results);
 }
 
-function uploadToProvider(userId, provider, file, params) {
+function uploadToProvider(userId, provider, providerOptions, file, params) {
 
     var deffered = Q.defer();
-    console.log("users[userId].providers["+provider+"]: ",users[userId].providers[provider]);
+    //console.log("users[userId].providers["+provider+"]: ",users[userId].providers[provider]);
     var myToken = users[userId].providers[provider].tokens;
-    providersAPI[provider].sendVideo(myToken, file, userId, params).then(function(result) {
+    providersAPI[provider].sendVideo(myToken, file, userId, params, providerOptions).then(function(result) {
         //console.log("uploadToProvider result: ",result);
         result.provider=provider;
         deffered.resolve(result);
@@ -734,6 +737,39 @@ function uploadToProvider(userId, provider, file, params) {
     });
     return deffered.promise;
 }
+
+app.get('/facebookGroups/:userId', function(req, res) {
+    
+     var userId=req.params.userId;
+    providersAPI.facebook.getUserGroups(users[userId].providers.facebook.tokens).then(function(groups) {
+        res.send(groups);
+    }, function(err) {
+        res.status(404).send(err);
+    });
+
+});
+
+var providersCategories = {};
+app.get('/categories/:provider/:userId', function(req, res) {
+    
+    console.log("get categories");
+    
+    var provider = req.params.provider;
+    var userId=req.params.userId;
+    
+    //TODO put categories in cache (avoid calls for almost static data)
+    if(providersCategories.provider!==undefined)
+        res.send(providersCategories.provider);
+    else {
+        var myToken = users[userId].providers[provider].tokens;
+        providersAPI[provider].listCategories(myToken).then(function(categories) {
+            providersCategories.provider=categories;
+            res.send(categories);
+        }, function(err) {
+            res.status(404).send(err);
+        });
+    }
+});
 
 app.get('/authenticate', function(req, res) {
     
@@ -753,7 +789,6 @@ app.get('/authenticate', function(req, res) {
         console.log("social auth not yet implemented");
         res.status(404).end();
     }
-
 });
 
 app.post('/user/create', function(req, res) {
@@ -783,7 +818,6 @@ app.post('/user/create', function(req, res) {
         console.log("social user registration not yet implemented");
         res.status(404).end();
     }
-
 });
 
 var server = app.listen(app.get('port'), function() {

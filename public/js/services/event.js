@@ -110,7 +110,32 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
-        }
-        ]
+            
+            this.getCategories = function(provider) {
+                var deferred = $q.defer();
+                $http.get('/categories/'+provider+'/'+localData.user.id)
+                .then(function(response) {
+                    //console.log('response for google getCategories: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    //console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.getFacebookGroups = function() {
+                var deferred = $q.defer();
+                $http.get('/facebookGroups/'+localData.user.id)
+                .then(function(response) {
+                    console.log('facebookGroups response: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    //console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+        }]
     );
 });

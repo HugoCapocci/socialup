@@ -111,8 +111,31 @@ function refreshTokens(tokens, userId) {
     return deferred.promise;
 }
 
-//todo replace tags by params.tags + param.title, params.description, categoryId ?
-function sendVideo(tokens, file, user, videoParams) {
+exports.listCategories = function(tokens) {
+    
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    youtubeAPI.videoCategories.list({part:'snippet', regionCode:'fr', hl:'fr_FR'}, function(err, response) {
+        /*console.log("listCategories response: ",response);
+        console.log("listCategories err: ",err);*/
+        if(err)
+            deferred.reject(err);
+        else {
+            var categories = response.items.map(function(item) {               
+                return {
+                    id : item.id,
+                    name : item.snippet.title
+                };
+            });
+            deferred.resolve(categories);
+        }
+    });
+        
+    return deferred.promise;
+};
+
+//todo  categoryId ?
+function sendVideo(tokens, file, user, videoParams, providerOptions) {
 
     console.log('youtube UploadFile, file? ',file);
     var deferred = Q.defer();
@@ -124,7 +147,7 @@ function sendVideo(tokens, file, user, videoParams) {
             title: videoParams.title,
             description: videoParams.description,
             tags: videoParams.tags,
-            categoryId: '22'
+            categoryId: providerOptions.category.id
         },
         status: {
           privacyStatus: 'private'
@@ -174,7 +197,6 @@ function sendVideo(tokens, file, user, videoParams) {
     return deferred.promise;
 }
 
-// see https://developers.google.com/drive/v2/reference/files/insert
 function uploadDrive(tokens, file, parent) {
     var deferred = Q.defer();
     
@@ -187,6 +209,8 @@ function uploadDrive(tokens, file, parent) {
         visibility: 'PRIVATE',
         title : file.originalname
     };
+    if(parent!==undefined)
+        metaData.parents = [{id:parent}];
     
     var buf = fs.readFileSync(file.path);
     if(buf === undefined) 
@@ -201,15 +225,17 @@ function uploadDrive(tokens, file, parent) {
         },
         resource : metaData
     };
-    
-    if(parent!==undefined)
-        params.media.parents = [parent];
+
     var videoUploadRequest = drive.files.insert(params, function() {
          //
     });
     videoUploadRequest.on('complete', function(response) {
-        console.log("google video upload request complete with response: ", response.body);
-        deferred.resolve(JSON.parse(response.body));
+        var result = JSON.parse(response.body);
+        console.log("google drive file upload request complete with result: ", result);
+        deferred.resolve({
+            url : 'https://drive.google.com/file/d/'+result.id+'/view',
+            downloadUrl : result.downloadUrl
+        });
     });
  
     videoUploadRequest.on('error', function(err) {
