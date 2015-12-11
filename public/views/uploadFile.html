@@ -2,8 +2,8 @@
 
     <div class="row">
         <div class="col-md-2">
-            <span class="btn btn-default btn-file">
-                Browse video <input type="file"  nv-file-select uploader="uploader"/>
+            <span class="btn btn-default btn-file" ng-if="!uploadFileData.cloudFile">
+                Browse video <input type="file" nv-file-select uploader="uploader"/>
             </span>
         </div>
         <div class="col-md-2">

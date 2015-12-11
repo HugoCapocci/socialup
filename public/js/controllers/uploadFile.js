@@ -5,10 +5,35 @@ define(['./module', 'moment'], function (appModule, moment) {
     appModule.controller('UploadFileController', 
     ['$scope', '$rootScope', '$window', '$location', '$uibModal', 'FileUploader', 'alertsService', 'eventService', 'messageService',
     function($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService) {
+
+        uploadFileController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService);
+        
+    }]);
+    
+    
+    appModule.controller('UploadFileModalController', 
+    ['$scope', '$rootScope', '$window', '$location', '$uibModal', 'FileUploader', 'alertsService', 'eventService', 'messageService', 'file', 
+    function($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, file) {
+
+        $scope.modal = {
+            title : 'Publier depuis le cloud',
+            url : 'views/uploadFile.html',        
+            cancel : function () {
+                $uibModalInstance.dismiss('cancel');
+            }
+        };
+        console.log("UploadFileModalController file ? ", file);
+        uploadFileController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, file);   
+    }]);
+     
+     
+    function uploadFileController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, cloudFile) {
         
         var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
     
+        console.log("uploadFileController file ? ", cloudFile);
         $scope.uploadFileData = {
+            cloudFile : cloudFile,
             title : "",
             description : "",
             isCloud : false,
@@ -17,7 +42,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             providers : ['google', 'dailymotion','facebook'],
             selectedProviders : [],
             isScheduled : false,
-            isFile:false,
+            isFile: cloudFile!==undefined,
             isMessageAfter : false,
             messageProviders : ['twitter', 'facebook', 'linkedin'],
             selectedMessageProviders : [],
@@ -62,6 +87,11 @@ define(['./module', 'moment'], function (appModule, moment) {
             $scope.uploadFileData.providersOptions.facebook.groups=groups;            
         });
         
+        eventService.getFacebookPages().then(function(pages) {     
+            console.log("facebook pages: ", pages);
+            $scope.uploadFileData.providersOptions.facebook.pages=pages;            
+        });
+        
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
             name: 'videoFilter',
@@ -96,7 +126,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             });
         }
 
-         //loading data ?
+        //loading data ?
         var modifyParams = $location.search();
         console.log("url params ?", modifyParams);
         if(modifyParams.eventId) {
@@ -226,7 +256,10 @@ define(['./module', 'moment'], function (appModule, moment) {
 
             openLoading();
             //console.log("upload with formData ",item.formData);
-            item.upload();            
+            if($scope.uploadFileData.cloudFile) {
+                //TODO envoyer publication depuis cloud
+            } else
+                item.upload();            
         };
         
         //date picker
@@ -274,6 +307,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             return tags;
         }
         
-    }]);
+    }
 
 });

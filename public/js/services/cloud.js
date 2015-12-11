@@ -9,27 +9,52 @@ define(['./module'], function (appModule) {
             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
 
             //authentication is made by provider callbacks
-            this.getFolders = function(provider, folderId, typeFilter) {
-
+            this.getFolders = function(provider, parentFolder) {
+                return retrieveFiles(provider, parentFolder, 'folder');
+            };
+            
+            this.getFiles = function(provider, parentFolder) {
+                return retrieveFiles(provider, parentFolder);
+            };
+            
+            function retrieveFiles(provider, parentFolder, typeFilter) {
                 var deferred = $q.defer();
-                if(folderId===undefined)
-                    folderId='root';
+                if(parentFolder===undefined)
+                    parentFolder='root';
                 
                 if(provider==='dropbox') {
-                    folderId = encodeURIComponent(folderId);
-                    console.log("encoded path ", folderId);
+                    parentFolder = encodeURIComponent(parentFolder);
+                    // console.log("encoded path ", parentFolder);
                 }
-                var path = '/cloudExplorer/'+provider+'/'+folderId+'/'+localData.user.id;
-                if(typeFilter)
+                var path = '/cloudExplorer/'+provider+'/'+parentFolder+'/'+localData.user.id;
+                if(typeFilter!==undefined)
                     path+='/?typeFilter='+typeFilter;
+                
                 $http.get(path).then(function(response) {
-                    console.log('response for folderId '+folderId+': ', response);
+                    //console.log('response for folderId '+parentFolder+': ', response);
                     deferred.resolve(response.data);
                 }, function (err) {
                     console.log("err: ", err);
                     deferred.reject(err);
                 });
                 return deferred.promise;
+            }
+            
+            this.getFile = function(provider, fileId) {
+          
+                var deferred = $q.defer();
+                $http.get('/file/'+provider+'/'+fileId+'/'+localData.user.id).then(function(response) {
+                    console.log('response getFile ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.getDownloadFileURL = function(provider, fileId) {                
+                return '/file/'+provider+'/'+fileId+'/'+localData.user.id;
             };
             
             this.uploadChained = function(provider, eventId, folderId) {

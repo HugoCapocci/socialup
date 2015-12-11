@@ -66,17 +66,13 @@ function listFiles(token, path, typeFilter) {
         path='';
     else 
         path = decodeURI(path);
-
-    if(typeFilter===undefined || typeFilter==='folder')
-        return listFolder(token, path);
-    else
-        return searchFiles(token, path, typeFilter);
+    
+    return retrieveAllFiles(token, path, typeFilter);
 }
 
-function listFolder(token, path) {
-       
+function retrieveAllFiles(token, path, typeFilter) {
+    
     var deferred = Q.defer();
-  
     var post_data = {
         path: path,
         recursive: false,
@@ -92,37 +88,36 @@ function listFolder(token, path) {
         json: true,
         body: post_data
     }, function (error, response, body){
-        //console.log(response);
         if(error)
-            deferred.reject(new Error(error));
-        else {
-           // console.log("data? ", body.entries);
+            deferred.reject(error);
+        else {            
             var results = [];
-            if(body.entries)
-                for( var i=0; i<body.entries.length; i++) {
-                   var entry = body.entries[i];
-                  // console.log('add entry: ', entry);
-                   if(entry['.tag'] === 'folder')
-                       results.push({
+            body.entries.forEach(function(entry) {
+                if(typeFilter === 'folder') {
+                    if(entry['.tag'] === 'folder')
+                        results.push({
                            name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
-                       });
-                }
+                        });
+                //TODOfile type filter
+                } else
+                    results.push({
+                        name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
+                    });
+            });
             deferred.resolve(results);
         }
     });
     return deferred.promise;
 }
 
-function searchFiles(token, path, typeFilter) {
+/*function searchFiles(token, path, typeFilter) {
     
     var deferred = Q.defer();
   
     var post_data = {
         path: path,
-        recursive: false,
-        include_media_info: false,
-        query : 'mp4',
-        mode : 'filename'
+        query : '*',
+        mode: 'filename'
     };
 
     request({
@@ -134,24 +129,23 @@ function searchFiles(token, path, typeFilter) {
         json: true,
         body: post_data
     }, function (error, response, body){
-        //console.log(response);
+        console.log(response);
         if(error)
-            deferred.reject(new Error(error));
-        else {
-           // console.log("data? ", body.entries);
-            var results = [];
-            if(body.entries)
-                for( var i=0; i<body.entries.length; i++) {
-                   var entry = body.entries[i];
-                   results.push({
+            deferred.reject(error);
+        else {   
+            if(body.matches) {
+                console.log("files found ", body.matches);
+                deferred.resolve(body.matches.map(function(entry) {
+                    return {
                        name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
-                   });
-                }
-            deferred.resolve(results);
+                    };
+                }));
+            } else
+                deferred.resolve();
         }
     });
     return deferred.promise;
-}
+}*/
 
 function uploadDrive(tokens, file, path) {
     
@@ -197,7 +191,6 @@ function uploadDrive(tokens, file, path) {
 }*/
 
 function getOAuthURL() {
-
     //add require_role    
     return 'https://www.dropbox.com/1/oauth2/authorize?client_id='+DROPBOX_APP_KEY+'&redirect_uri='+DROPBOX_REDIRECT_URI+'&response_type=code';
 }
@@ -205,7 +198,6 @@ function getOAuthURL() {
 function getUserInfo(tokens) {    
        
     var deferred = Q.defer();
- 
     request({
         uri: 'https://'+END_POINT+'/1/account/info',
         auth: {

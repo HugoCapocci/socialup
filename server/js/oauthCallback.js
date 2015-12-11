@@ -550,6 +550,26 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
     });
 });
 
+app.get('/file/:provider/:fileId/:userId', function(req, res) {
+    
+    var fileId = req.params.fileId;
+    var provider = req.params.provider;
+    var userId = req.params.userId;
+   
+    providersAPI[provider]./*downloadFile*/checkFileData(users[userId].providers[provider].tokens, fileId).then(function(fileData) {
+        //res.write(file, 'binary');
+        console.log("file data: ", fileData);
+       // res.send(fileData);
+
+        res.statusCode = 302;
+        res.setHeader('Location', fileData.downloadUrl);
+        res.end();
+        
+    }, function(err) {
+        res.send(provider+" err: "+err);
+    });
+});
+
 app.post('/message/:userId', function(req, res) {
 
     var userId = req.params.userId;
@@ -740,13 +760,22 @@ function uploadToProvider(userId, provider, providerOptions, file, params) {
 
 app.get('/facebookGroups/:userId', function(req, res) {
     
-     var userId=req.params.userId;
+    var userId=req.params.userId;
     providersAPI.facebook.getUserGroups(users[userId].providers.facebook.tokens).then(function(groups) {
         res.send(groups);
     }, function(err) {
         res.status(404).send(err);
     });
+});
 
+app.get('/facebookPages/:userId', function(req, res) {
+    
+    var userId=req.params.userId;
+    providersAPI.facebook.getPages(users[userId].providers.facebook.tokens).then(function(pages) {
+        res.send(pages);
+    }, function(err) {
+        res.status(404).send(err);
+    });
 });
 
 var providersCategories = {};

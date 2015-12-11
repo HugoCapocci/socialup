@@ -47,7 +47,7 @@ define(['./module'], function(appModule) {
         };
 
         function loadProviderRootData() {
-            cloudService.getFolders($scope.uploadCloud.provider, undefined, 'folder').then(function(files) {
+            cloudService.getFolders($scope.uploadCloud.provider, undefined).then(function(files) {
                 $scope.dataForTheTree = files;
                 //console.log("cloud service OK");
             }, function(err) {
@@ -58,7 +58,7 @@ define(['./module'], function(appModule) {
 
         $scope.showToggle = function(node, expanded/*, $parentNode, $index, $first, $middle, $last, $odd, $even*/) {
             if(expanded) {            
-                cloudService.getFolders($scope.uploadCloud.provider, node.id, 'folder').then(function(files) {
+                cloudService.getFolders($scope.uploadCloud.provider, node.id).then(function(files) {
                     node.children = files;
                     //console.log("cloud service OK");
                 }, function(err) {

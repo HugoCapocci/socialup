@@ -18,29 +18,11 @@ define(['./module'], function (appModule) {
             };
 
             function retrieveAllEvents(eventCategory, id) {
-
-                var deferred = $q.defer();
-                $http.get('/'+eventCategory+'/'+id).then(function(response) {
-                    console.log('response for eventService.retrieveAll: ', response);
-                    deferred.resolve(response.data);
-                }, function (err) {
-                    console.log('err in eventService.retrieveAll: ', err);
-                    deferred.reject(err);
-                });
-                return deferred.promise;
+                return getData('/'+eventCategory+'/'+id);
             }
 
             this.retrieveOne = function(eventId) {
-
-                var deferred = $q.defer();
-                $http.get('/event/'+eventId).then(function(response) {
-                    console.log('response for eventService.retrieveOne: ', response);
-                    deferred.resolve(response.data);
-                }, function (err) {
-                    console.log('err in eventService.retrieveOne: ', err);
-                    deferred.reject(err);
-                });
-                return deferred.promise;
+                return getData('/event/'+eventId);
             };
             
             this.deleteScheduledEvent = function(eventId) {
@@ -112,30 +94,29 @@ define(['./module'], function (appModule) {
             };
             
             this.getCategories = function(provider) {
-                var deferred = $q.defer();
-                $http.get('/categories/'+provider+'/'+localData.user.id)
-                .then(function(response) {
-                    //console.log('response for google getCategories: ', response);
-                    deferred.resolve(response.data);
-                }, function (err) {
-                    //console.log("err: ", err);
-                    deferred.reject(err);
-                });
-                return deferred.promise;
+                return getData('/categories/'+provider+'/'+localData.user.id);
             };
             
             this.getFacebookGroups = function() {
+                return getData('/facebookGroups/'+localData.user.id);
+            };
+
+            this.getFacebookPages = function() {                
+                return getData('/facebookPages/'+localData.user.id);
+            };
+            
+            function getData(path) {
                 var deferred = $q.defer();
-                $http.get('/facebookGroups/'+localData.user.id)
+                $http.get(path)
                 .then(function(response) {
-                    console.log('facebookGroups response: ', response);
+                    //console.log('getData response: ', response);
                     deferred.resolve(response.data);
                 }, function (err) {
                     //console.log("err: ", err);
                     deferred.reject(err);
                 });
                 return deferred.promise;
-            };
+            }
         }]
     );
 });

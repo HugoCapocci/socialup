@@ -1,14 +1,35 @@
 <div>
-
-     <select class="form-control" ng-model="cloudExplorer.provider" ng-options="option for option in cloudExplorer.providers" ng-change="cloudExplorer.changeProvider()"></select> <br/>
     
-     <treecontrol class="tree-classic"
-       tree-model="dataForTheTree"
-       options="treeOptions"
-       on-selection="showSelected(node)" 
-       on-node-toggle="showToggle(node, expanded, $parentNode, $index, $first, $middle, $last, $odd, $even)"
-       selected-node="node1">
-       {{node.name}}
-    </treecontrol>
-     
+    <div class="row">
+        
+        <div class="col-md-6">
+            
+            <div class="row">
+                Provider : <select class="form-control" ng-model="cloudExplorer.provider" ng-options="option for option in cloudExplorer.providers" ng-change="cloudExplorer.changeProvider()"></select>
+            </div>
+            <div class="row">
+                <!-- aperçu ? -->
+                selected file: {{cloudExplorer.selectedFile.id}} <br/>
+                <div ng-if="cloudExplorer.selectedFile && cloudExplorer.selectedFile.downloadUrl">
+                    <button ng-click="publishFile()" >Publier</button>
+                    
+                    
+                    
+                    <a href="cloudExplorer.selectedFile.downloadUrl" download="{{cloudExplorer.selectedFile.name}}"><i class="glyphicon glyphicon-download-alt"></i><!--Télécharger le fichier--></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            File tree : 
+             <treecontrol class="tree-classic"
+               tree-model="dataForTheTree"
+               options="treeOptions"
+               on-selection="showSelected(node, selected)" 
+               on-node-toggle="showToggle(node, expanded, $parentNode, $index, $first, $middle, $last, $odd, $even)"
+               selected-node="node1">
+               {{node.name}}
+            </treecontrol>            
+        </div>     
+
 </div>

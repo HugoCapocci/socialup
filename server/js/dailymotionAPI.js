@@ -157,12 +157,11 @@ function sendVideo(tokens, file, userId, params, providerOptions) {
         }, function(err, response, body) {
             
             if(err)
-                deferred.reject(new Error(err));
-            else {
-                
-                console.log("body ?", body);
+                deferred.reject(err);
+            else {                
+                //console.log("body ?", body);
                 var videoURL = JSON.parse(body).url;
-                console.log("video uploaded to URL: ", videoURL);
+                //console.log("video uploaded to URL: ", videoURL);
                 publishVideo(videoURL, tokens, params, providerOptions, deferred);
             }
         });
@@ -215,116 +214,60 @@ function publishVideo(videoURL, tokens, params, providerOptions, deferred) {
 }
 
 function getUploadURL(tokens) {
-        
-    var deferred = Q.defer();
 
-    var req_options = {
-        host: 'api.dailymotion.com',
-        port: 443,
-        path: '/file/upload',
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer '+tokens.access_token
-        }
-    };
-
-    var req = https.request(req_options, function(res) {
-        /*console.log("statusCode: ", res.statusCode);
-        console.log("headers: ", res.headers);*/
-        var data="";
-        res.on('data', function(chunk) {
-            data+=chunk;
-        });
-        res.on('end', function() {
-            console.log("dailymotion upload url? ",data);
-            deferred.resolve(JSON.parse(data));
-        });
+    return processGetRequest(tokens.access_token,'/file/upload', function(url) {
+         return url;
     });
-    
-    req.on('error', function(e) {         
-        console.log('upload url error: ', e);
-        deferred.reject(new Error(e));
-    });
-    
-    req.end();
-    return deferred.promise;
 }
 
-function getUserInfo(token)  {
+function getUserInfo(tokens)  {
     
-    var deferred = Q.defer();
-
-    var req_options = {
-        host: 'api.dailymotion.com',
-        port: 443,
-        path: '/user/me?fields=id,screenname,email',
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer '+token.access_token
-        }
-    };
-
-    var req = https.request(req_options, function(res) {
-
-        var data="";
-        res.on('data', function(chunk) {
-            data+=chunk;
-        });
-        res.on('end', function() {
-            var userInfo = JSON.parse(data);
-            console.log("dailymotion user info (channel?) :", userInfo);
-            deferred.resolve({userName:userInfo.screename});
-        });
+    return processGetRequest(tokens.access_token,'/user/me?fields=id,screenname,email', function(userInfo) {
+         return {userName:userInfo.screename};
     });
-    
-    req.on('error', function(e) {         
-        console.log('get user infos error: ', e);
-        deferred.reject(new Error(e));
-    });
-    
-    req.end();
-    return deferred.promise;
 }
 
 exports.listCategories = function(tokens) {
     
+    return processGetRequest(tokens.access_token,'/channels', function(results) {
+        return results.list.map(function(categorie) {
+            delete categorie.description;
+            return categorie;
+        });
+    });
+    
+};
+
+function processGetRequest(access_token, path, callback) {
+    
     var deferred = Q.defer();
 
     var req_options = {
         host: 'api.dailymotion.com',
         port: 443,
-        path: '/channels',
+        path: path,
         method: 'GET',
         headers: {
-            'Authorization': 'Bearer '+tokens.access_token
+            'Authorization': 'Bearer '+access_token
         }
     };
 
     var req = https.request(req_options, function(res) {
-
         var data="";
         res.on('data', function(chunk) {
             data+=chunk;
         });
         res.on('end', function() {
-            var results = JSON.parse(data);
-            //console.log("dailymotion categories :", results.list);
-            deferred.resolve(results.list.map(function(categorie) {
-                delete categorie.description;
-                return categorie;
-            }));
+            deferred.resolve(callback(JSON.parse(data)));
         });
     });
-    
-    req.on('error', function(e) {         
-        console.log('get user infos error: ', e);
-        deferred.reject(new Error(e));
+    req.on('error', function(err) {         
+        deferred.reject(err);
     });
-    
     req.end();
     return deferred.promise;
     
-};
+}
 
 exports.getOAuthURL=getOAuthURL;
 exports.sendVideo=sendVideo;

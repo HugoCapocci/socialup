@@ -75,7 +75,7 @@ function refreshTokens(tokens, userId) {
     
     req.on('error', function(e) {         
         console.log('upload url error: ', e);
-        deferred.reject(new Error(e));
+        deferred.reject(e);
     });
     
     req.end();
@@ -103,38 +103,11 @@ function tagsAsHashtags(tags) {
 }
 
 exports.getUserGroups = function(tokens) {
-   
-    var deferred = Q.defer();
-    var req_options = {
-        host: 'graph.facebook.com',
-        port: 443,
-        path: '/v2.5/me/groups',
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer '+tokens.access_token
-        }
-    };
     
-    var req = https.request(req_options, function(res) {
+    return processGetRequest(tokens.access_token, '/me/groups', function(groupsData) {
+        return groupsData.data;
+    });
 
-        var data="";
-        res.on('data', function(chunk) {
-            data+=chunk;
-        });
-        res.on('end', function() {
-            var groupsData = JSON.parse(data);
-            //TODO handle paging groupsData.data.paging.cursors {before, after}
-            deferred.resolve(groupsData.data);
-        });
-    });
-    
-    req.on('error', function(err) {         
-        console.log('get user groups error: ', err);
-        deferred.reject(err);
-    });
-    
-    req.end();
-    return deferred.promise;
 };
 
 function sendVideo(token, file, user, params, providerOptions) {
@@ -149,7 +122,6 @@ function sendVideo(token, file, user, params, providerOptions) {
     if(providerOptions.group !== undefined)
         targetId = providerOptions.group.id;
     //post on page 
-    
     //TODO
     
     request({
@@ -165,7 +137,7 @@ function sendVideo(token, file, user, params, providerOptions) {
     }, function(err, response, body) {
 
         if(err)
-            deferred.reject(new Error(err));
+            deferred.reject(err);
         else {
             console.log('FB Video Upload Response body: ', body);
             var videoId = JSON.parse(body).id;
@@ -186,43 +158,15 @@ function sendVideo(token, file, user, params, providerOptions) {
 
 ///v2.5/{video-id}
 function getVideoData(videoId, tokens) {
-    
-    var deferred = Q.defer();
-    var req_options = {
-        host: 'graph.facebook.com',
-        port: 443,
-        path: '/v2.5/'+videoId+'/thumbnails', //optional /thumbnails
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer '+tokens.access_token
-        }
-    };
-    
-    var req = https.request(req_options, function(res) {
 
-        var data="";
-        res.on('data', function(chunk) {
-            data+=chunk;
-        });
-        res.on('end', function() {
-
-            var videoData = JSON.parse(data);
-            deferred.resolve(videoData);
-        });
+    return processGetRequest(tokens.access_token, '/'+videoId+'/thumbnails', function(videoData) {
+        return videoData;
     });
-    
-    req.on('error', function(err) {         
-        console.log('get user infos error: ', err);
-        deferred.reject(err);
-    });
-    
-    req.end();
-    return deferred.promise;
 }
 
 //https://developers.facebook.com/docs/facebook-login/permissions
 function getOAuthURL() {
-    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups';//+'&response_type=token'
+    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages';//+'&response_type=token'
 }
 
 function postMessage(tokens, message, providerOptions) {
@@ -261,39 +205,50 @@ function publishOnFeed(tokens, data, providerOptions) {
     return deferred.promise;
 }
 
+exports.getPages = function(tokens) {
+    
+    return processGetRequest(tokens.access_token, '/me/accounts', function(pages) {
+        console.log("Facebook users pages: ", pages);
+        return pages.data;
+    });
+};
+
+//TODO get events (created by user / where user is admin) https://developers.facebook.com/docs/graph-api/reference/user/promotable_events/
+
 function getUserInfo(tokens)  {
     
-    var deferred = Q.defer();
+    return processGetRequest(tokens.access_token, '/me', function(userInfo) {
+        return {userName:userInfo.name};
+    });
+}
 
+function processGetRequest(access_token, path, callback) {
+    
+    var deferred = Q.defer();
     var req_options = {
         host: 'graph.facebook.com',
         port: 443,
-        path: '/v2.5/me',
+        path: '/v2.5'+path,
         method: 'GET',
         headers: {
-            'Authorization': 'Bearer '+tokens.access_token
+            'Authorization': 'Bearer '+access_token
         }
     };
-
     var req = https.request(req_options, function(res) {
-
         var data="";
         res.on('data', function(chunk) {
             data+=chunk;
         });
         res.on('end', function() {
-
-            var userInfo = JSON.parse(data);
-            deferred.resolve({userName:userInfo.name});
+            deferred.resolve(callback(JSON.parse(data)));
         });
     });
-    
     req.on('error', function(e) {         
-        console.log('get user infos error: ', e);
-        deferred.reject(new Error(e));
+        console.log('processRequest error: ', e);
+        deferred.reject(e);
     });
-    
     req.end();
+    
     return deferred.promise;
 }
 

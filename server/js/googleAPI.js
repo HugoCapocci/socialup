@@ -35,9 +35,7 @@ function getOAuthURL() {
         'https://www.googleapis.com/auth/youtube',
         'https://www.googleapis.com/auth/youtubepartner',
         'https://www.googleapis.com/auth/youtube.force-ssl',
-        'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive.appdata',
-        'https://www.googleapis.com/auth/drive.metadata.readonly',
+        'https://www.googleapis.com/auth/drive',
         'https://www.googleapis.com/auth/plus.me',
 /*        'https://www.googleapis.com/auth/plus.login',*/
         'https://www.googleapis.com/auth/plus.stream.write'
@@ -285,21 +283,21 @@ function listFiles(tokens, folderId, typeFilter) {
             deferred.resolve();
         } else {
             console.log('Files found: ', files.length);
-            deferred.resolve(checkFilesData(files));
+            deferred.resolve(files.map(function(file) {
+                //console.log("file :", file);
+                var fileInfo = {
+                    name:file.title, 
+                    id: file.id, 
+                    mimeType : file.mimeType, 
+                    isFolder : file.mimeType === FOLDER_MIME_TYPE
+                };
+                if(file.downloadUrl)
+                    fileInfo.downloadUrl = file.downloadUrl.replace('&gd=true','');
+                return fileInfo;
+           }));
         }
     });
     return deferred.promise;
-}
-
-function checkFilesData(files) {
-    var results = [];
-    for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        results.push({
-            name:file.title, id: file.id, mimeType : file.mimeType, isFolder : file.mimeType === FOLDER_MIME_TYPE
-        });  
-    }
-    return Q.all(results);
 }
 
 function getGooglePlusUser(tokens) {
@@ -320,21 +318,42 @@ function getGooglePlusUser(tokens) {
     return deferred.promise;
 }
 
-/*function checkFileData(fileId) {
+exports.downloadFile = function(tokens,fileId) {
+    
+    var deferred = Q.defer();
+    oauth2Client.setCredentials(tokens);
+    drive.files.get({fileId:fileId+'?alt=media'}, function(err, bytes) {
+        if(err) {
+            console.log("cannot get data for fileId: "+fileId+" error: ", err);
+            deferred.reject(err);
+        } else {
+            deferred.resolve(bytes);
+        }
+    });
+    return deferred.promise;
+};
+
+exports.checkFileData = function(tokens, fileId) {
     var deferred = Q.defer();
     drive.files.get({fileId:fileId}, function(err, file) {
         if(err) {
             console.log("cannot get data for fileId: "+fileId+" error: ", err);
             deferred.reject(err);
         } else {
-            //console.log('mimeType? ', file.mimeType);
-            deferred.resolve({
-                name:file.title, id: fileId, mimeType : file.mimeType, isFolder : file.mimeType === FOLDER_MIME_TYPE
-            });
+            console.log('fileInfo? ', file);
+            var fileInfo = {
+                name:file.title, 
+                id: fileId, 
+                mimeType : file.mimeType, 
+                isFolder : file.mimeType === FOLDER_MIME_TYPE
+            };
+            if(file.downloadUrl)
+                fileInfo.downloadUrl = file.downloadUrl.replace('&gd=true','');
+            deferred.resolve(fileInfo);
         }
     });
     return deferred.promise;
-}*/
+};
 
 exports.sendVideo=sendVideo;
 exports.getOAuthURL=getOAuthURL;
