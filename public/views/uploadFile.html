@@ -21,21 +21,18 @@
                 <div class="col-md-3" ng-repeat="provider in uploadFileData.providers">
                     <div ng-if="uploadFileData.selectedProviders.indexOf(provider)>-1">
                         <div ng-if="provider==='dailymotion'">
-                            <input type="checkbox" ng-model="uploadFileData.selectedProvidersOptions.dailymotion.private"> Vidéo privée<br/>
+                            <ng-include src="'/views/providers/dailymotionOptions.html'"></ng-include>
+                            <!--<input type="checkbox" ng-model="$root.selectedProvidersOptions.dailymotion.private"> Vidéo privée<br/>
                             Chaine :
-<select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.dailymotion.channel" ng-options="option.name for option in uploadFileData.providersOptions.dailymotion.channels"></select>
+<select class="form-control" ng-model="$root.selectedProvidersOptions.dailymotion.channel" ng-options="option.name for option in uploadFileData.providersOptions.dailymotion.channels"></select>-->
                         </div>
                         <div ng-if="provider==='facebook'">
-                            Visibilité :
-                            <select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.facebook.visibility" ng-options="option for option in uploadFileData.providersOptions.facebook.visibilities"></select><br/>
-                            Groupe ? 
-                            <select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.facebook.group" ng-options="option.name for option in uploadFileData.providersOptions.facebook.groups">
-                                <option value="">Aucun</option>
-                            </select><br/>
+                            <ng-include src="'/views/providers/facebookOptions.html'"></ng-include>
                         </div>
-                         <div ng-if="provider==='google'">                        
-                            Categorie :
-<select class="form-control" ng-model="uploadFileData.selectedProvidersOptions.google.category" ng-options="option.name for option in uploadFileData.providersOptions.google.categories"></select>
+                         <div ng-if="provider==='google'">
+                             <ng-include src="'/views/providers/youtubeOptions.html'"></ng-include>
+                           <!-- Categorie :
+<select class="form-control" ng-model="$root.selectedProvidersOptions.google.category" ng-options="option.name for option in $root.providersOptions.google.categories"></select>-->
                         </div>
                         
                     </div>                    

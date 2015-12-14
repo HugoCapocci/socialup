@@ -7,5 +7,8 @@ define([
     './postMessage',
     './scheduledEvents',
     './chainedEvents',
-    './manageSocialNetworks'    
+    './manageSocialNetworks',
+    './providers/facebookOptions',
+    './providers/dailymotionOptions',
+    './providers/youtubeOptions'
 ], function () {});

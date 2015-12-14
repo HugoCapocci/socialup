@@ -45,53 +45,10 @@ define(['./module', 'moment'], function (appModule, moment) {
             isFile: cloudFile!==undefined,
             isMessageAfter : false,
             messageProviders : ['twitter', 'facebook', 'linkedin'],
-            selectedMessageProviders : [],
-            providersOptions : {
-                facebook : {
-                    visibilities : ['EVERYONE', 'ALL_FRIENDS', /*'FRIENDS_OF_FRIENDS', 'CUSTOM', */'SELF'],
-                    groups: []
-                },
-                google : {
-                    categories : []
-                },
-                dailymotion : {
-                    channels : []
-                }
-            },
-            selectedProvidersOptions: {
-                facebook : {
-                    visibility : 'SELF',
-                    group : undefined
-                },
-                dailymotion : {
-                    private : false,
-                    channel : null
-                },
-                google : {
-                    category : undefined
-                }
-            }
+            selectedMessageProviders : []           
         };
-        //
-        eventService.getCategories('google').then(function(categories) {            
-            $scope.uploadFileData.providersOptions.google.categories=categories;            
-        });
-        
-        eventService.getCategories('dailymotion').then(function(categories) {     
-            console.log("dailymotion channels: ", categories);
-            $scope.uploadFileData.providersOptions.dailymotion.channels=categories;            
-        });
-        
-        eventService.getFacebookGroups().then(function(groups) {     
-            console.log("facebook groups: ", groups);
-            $scope.uploadFileData.providersOptions.facebook.groups=groups;            
-        });
-        
-        eventService.getFacebookPages().then(function(pages) {     
-            console.log("facebook pages: ", pages);
-            $scope.uploadFileData.providersOptions.facebook.pages=pages;            
-        });
-        
+         
+             
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
             name: 'videoFilter',
@@ -179,7 +136,7 @@ define(['./module', 'moment'], function (appModule, moment) {
                         response, 
                         $scope.uploadFileData.selectedMessageProviders, 
                         $scope.uploadFileData.description,
-                        $scope.uploadFileData.selectedmessageProvidersOptions
+                        $rootScope.selectedProvidersOptions
                     ).then(function(results) {
                         console.log("postChainedMessage results: ",results);
                         alertsService.success("Evènement chainé créé");
@@ -232,27 +189,28 @@ define(['./module', 'moment'], function (appModule, moment) {
             
             //chek provider options
             if($scope.uploadFileData.selectedProviders.indexOf('google')>-1)
-                if(!$scope.uploadFileData.selectedProvidersOptions.google.category.id) {
+                if(!$rootScope.selectedProvidersOptions.google.category.id) {
                     alertsService.warn("Vous devez choisir une catégorie de vidéo pour la publication sur Youtube");
                     return;
-                } else
+                } else 
                     // remove angular $$hashKey
-                    delete $scope.uploadFileData.selectedProvidersOptions.google.category.$$hashKey;
+                    delete $rootScope.selectedProvidersOptions.google.category.$$hashKey;
             
             if($scope.uploadFileData.selectedProviders.indexOf('dailymotion')>-1)
-                if(!$scope.uploadFileData.selectedProvidersOptions.dailymotion.channel.id) {
+                if(!$rootScope.selectedProvidersOptions.dailymotion.channel.id) {
                     alertsService.warn("Vous devez choisir une chaine pour la publication sur Dailymotion");
                     return;
                 } else
                     // remove angular $$hashKey
-                    delete $scope.uploadFileData.selectedProvidersOptions.dailymotion.channel.$$hashKey;
+                    delete $rootScope.selectedProvidersOptions.dailymotion.channel.$$hashKey;
 
-            if($scope.uploadFileData.selectedProvidersOptions.facebook.group)
-                delete $scope.uploadFileData.selectedProvidersOptions.facebook.group.$$hashKey;
-            else
-                delete $scope.uploadFileData.selectedProvidersOptions.facebook.group;
-
-            item.formData.push( {'selectedProvidersOptions' : JSON.stringify($scope.uploadFileData.selectedProvidersOptions)});
+            if($rootScope.selectedProvidersOptions.facebook) {
+                if($rootScope.selectedProvidersOptions.facebook.group)
+                    delete $rootScope.selectedProvidersOptions.facebook.group.$$hashKey;
+                if($rootScope.selectedProvidersOptions.facebook.page)
+                    delete $rootScope.selectedProvidersOptions.facebook.page.$$hashKey;
+            }
+            item.formData.push( {'selectedProvidersOptions' : JSON.stringify($rootScope.selectedProvidersOptions)});
 
             openLoading();
             //console.log("upload with formData ",item.formData);
@@ -306,7 +264,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             }
             return tags;
         }
-        
     }
 
 });

@@ -1,5 +1,5 @@
 <div>
-   
+
     <div class="row">  
         <div class="col-md-7 col-lg-7">
             <textarea ng-model="postMessage.message" style="min-width:530px;min-height:250px;"></textarea>
@@ -33,11 +33,11 @@
     <div class="row">
         <div class="col-lg-6 col-md-6">
             <label ng-repeat="provider in postMessage.providers">
-              <input type="checkbox" checklist-model="postMessage.selectedProviders" checklist-value="provider"> {{provider}}
+              <input type="checkbox" checklist-model="selectedProviders" checklist-value="provider"> {{provider}}
             </label>
         </div>
-        <div class="col-md-3 col-lg-3 col-md-offset-4 col-lg-offset-4" ng-if="postMessage.selectedProviders.indexOf('facebook')>-1">
-             FB Visibility : <select class="form-control" ng-model="postMessage.selectedProvidersOptions.facebook.visibility" ng-options="option for option in postMessage.providersOptions.facebook.visibilities"></select> <br/>
+        <div class="col-md-3 col-lg-3 col-md-offset-4 col-lg-offset-4" ng-if="selectedProviders.indexOf('facebook')>-1">            
+            <ng-include src="'/views/providers/facebookOptions.html'"></ng-include>
         </div>
     </div>
 

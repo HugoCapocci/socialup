@@ -1,0 +1,5 @@
+<div ng-controller="YoutubeOptionsController">
+    <input type="checkbox" ng-model="$root.selectedProvidersOptions.google.private"> Vidéo privée<br/>
+    Categorie :
+    <select class="form-control" ng-model="$root.selectedProvidersOptions.google.category" ng-options="option.name for option in $root.providersOptions.google.categories"></select>
+</div>

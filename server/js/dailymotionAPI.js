@@ -94,7 +94,6 @@ function checkAccessTokenValidity(tokens, userId) {
 function refreshTokens(tokens, userId) {
     
     var deferred = Q.defer();
-    
     //ask for token
     var post_data = querystring.stringify({
         'grant_type' : 'refresh_token',
@@ -102,7 +101,6 @@ function refreshTokens(tokens, userId) {
         'client_secret': DAILYMOTION_API_SECRET,
         'refresh_token' : tokens.refresh_token
     });
-    
     var post_options = {
         host: 'api.dailymotion.com',
         port: 443,
@@ -113,7 +111,6 @@ function refreshTokens(tokens, userId) {
             'Content-Length': post_data.length
         }
     };
-
     var post_req = https.request(post_options, function(res) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
@@ -121,11 +118,9 @@ function refreshTokens(tokens, userId) {
             deferred.resolve( saveTokensForUser(tokens, userId) );
         });       
     });
-
     post_req.on('error', function(e) {
       deferred.reject(new Error(e));
     });
-
     // post the data
     post_req.write(post_data);
     post_req.end();
@@ -227,14 +222,22 @@ function getUserInfo(tokens)  {
     });
 }
 
-exports.listCategories = function(tokens) {
+exports.listCategories = function(tokens, userId) {
     
-    return processGetRequest(tokens.access_token,'/channels', function(results) {
-        return results.list.map(function(categorie) {
-            delete categorie.description;
-            return categorie;
-        });
+    var deferred = Q.defer();
+    checkAccessTokenValidity(tokens, userId).then(function(validTokens) {
+        deferred.resolve(
+            processGetRequest(validTokens.access_token,'/channels', function(results) {
+                return results.list.map(function(categorie) {
+                    delete categorie.description;
+                    return categorie;
+                });
+            })
+        );
+    }, function (err) {
+         deferred.reject(err);
     });
+    return deferred.promise;
     
 };
 

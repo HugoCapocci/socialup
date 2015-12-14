@@ -2,13 +2,13 @@ define(['./module', 'moment'], function (appModule, moment) {
     
     'use strict';
     
-    appModule.controller('PostMessageController', ['$scope', '$location', 'messageService', 'alertsService', 'eventService', 
-    function($scope, $location, messageService, alertsService, eventService) {
-        postMessageController($scope, $location, undefined, messageService, alertsService, eventService);
+    appModule.controller('PostMessageController', ['$scope', '$location', '$rootScope', 'messageService', 'alertsService', 'eventService', 
+    function($scope, $location, $rootScope, messageService, alertsService, eventService) {
+        postMessageController($scope, $location, $rootScope, undefined, messageService, alertsService, eventService);
     }]);
 
-    appModule.controller('PostMessageModalController', ['$scope', '$location', '$uibModalInstance', 'messageService', 'alertsService', 'eventService', 'eventId',
-    function($scope, $location, $uibModalInstance, messageService, alertsService, eventService, eventId) {
+    appModule.controller('PostMessageModalController', ['$scope', '$location','$rootScope', '$uibModalInstance', 'messageService', 'alertsService', 'eventService', 'eventId',
+    function($scope, $location, $rootScope, $uibModalInstance, messageService, alertsService, eventService, eventId) {
 
         $scope.modal = {
             title : 'Poster un message chainé',
@@ -17,10 +17,10 @@ define(['./module', 'moment'], function (appModule, moment) {
                 $uibModalInstance.dismiss('cancel');
             }
         };
-        postMessageController($scope, $location, $uibModalInstance, messageService, alertsService, eventService, eventId);
+        postMessageController($scope, $location, $rootScope, $uibModalInstance, messageService, alertsService, eventService, eventId);
     }]);
     
-    function postMessageController($scope, $location, $uibModalInstance, messageService, alertsService, eventService, eventId) {
+    function postMessageController($scope, $location, $rootScope, $uibModalInstance, messageService, alertsService, eventService, eventId) {
         
         var tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -41,6 +41,20 @@ define(['./module', 'moment'], function (appModule, moment) {
             opened: false
         };
         
+        $scope.selectedProviders = [];
+        /*$scope.providersOptions = {
+            facebook : {
+                visibilities : ['EVERYONE', 'ALL_FRIENDS', 'FRIENDS_OF_FRIENDS', 'CUSTOM', 'SELF']
+
+            }
+        };
+
+        $scope.selectedProvidersOptions= {
+            facebook : {
+                visibility : 'SELF'
+            }
+        };*/
+        
         $scope.postMessage = {
             providers : ['twitter', 'facebook', 'linkedin'],
             selectedProviders : [],
@@ -48,12 +62,14 @@ define(['./module', 'moment'], function (appModule, moment) {
             date : moment(new Date()),
             isScheduled : false,
             send : function() {
-                if($scope.postMessage.selectedProviders.length===0)
+                if($scope.selectedProviders.length===0)
                     alertsService.warn("Aucun provider n'est sélectionné");
                 else if($scope.postMessage.message.length>0) {
 
                     if(eventId!==undefined)
-                        messageService.postChainedMessage(eventId, $scope.postMessage.selectedProviders, $scope.postMessage.message,$scope.postMessage.selectedProvidersOptions).then(function(results) {
+                        messageService.postChainedMessage(eventId, $scope.selectedProviders, $scope.postMessage.message,                                                          
+                                                          $rootScope.selectedProvidersOptions).then(function(results) {
+                            
                             console.log("postChainedMessage results: ",results);
                             alertsService.success("Message programmé avec succès");
                             //if page is nested in a modal, close it
@@ -62,7 +78,9 @@ define(['./module', 'moment'], function (appModule, moment) {
                         });
 
                     else
-                        messageService.postMessage($scope.postMessage.selectedProviders, $scope.postMessage.message, $scope.postMessage.date).then(function(results) {
+                        messageService.postMessage($scope.selectedProviders, $scope.postMessage.message, 
+                                                   $scope.selectedProvidersOptions, $scope.postMessage.date).then(function(results) {
+                        
                             console.log("results: ",results);
                             alertsService.success("Message publié avec succès");
                             //if page is nested in a modal, close it
@@ -76,17 +94,6 @@ define(['./module', 'moment'], function (appModule, moment) {
                     alertsService.warn("Le message est vide"); 
                 }
                 
-            },
-            providersOptions : {
-                facebook : {
-                    visibilities : ['EVERYONE', 'ALL_FRIENDS', 'FRIENDS_OF_FRIENDS', /*'CUSTOM', */'SELF']
-                    
-                }
-            },
-            selectedProvidersOptions: {
-                facebook : {
-                    visibility : 'SELF'
-                }
             },
             getDayClass : function(date) {
                 var dayToCheck = new Date(date).setHours(0,0,0,0);                
@@ -110,7 +117,8 @@ define(['./module', 'moment'], function (appModule, moment) {
             eventService.retrieveOne(modifyParams.eventId).then(function(messageEvent) {
                 console.log("event retrieved ", messageEvent);  
                 $scope.postMessage.date = new Date(messageEvent.dateTime);
-                $scope.postMessage.selectedProviders=messageEvent.providers;
+                $scope.selectedProviders=messageEvent.providers;
+                $rootScope.selectedProvidersOptions=messageEvent.selectedProvidersOptions;
                 $scope.postMessage.message=messageEvent.eventParams[0];
                 $scope.postMessage.eventId=messageEvent.eventId;
                 $scope.postMessage.isScheduled=true;

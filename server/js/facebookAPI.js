@@ -208,7 +208,7 @@ function publishOnFeed(tokens, data, providerOptions) {
 exports.getPages = function(tokens) {
     
     return processGetRequest(tokens.access_token, '/me/accounts', function(pages) {
-        console.log("Facebook users pages: ", pages);
+        console.log("Facebook users pages: ", pages.data);
         return pages.data;
     });
 };

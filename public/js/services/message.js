@@ -8,14 +8,15 @@ define(['./module'], function (appModule) {
             
              var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
                         
-            this.postMessage = function(providers, message, scheduledDate) {
+            this.postMessage = function(providers, message, providersOptions, scheduledDate) {
                 console.log("messageService.postMessage "+message);
-                return sendMessage({message: message, providers: providers, scheduledDate:scheduledDate});
+                console.log("providersOptions: ", providersOptions);
+                return sendMessage({message: message, providers: providers, providersOptions:providersOptions, scheduledDate:scheduledDate});
             };
             
-            this.postChainedMessage = function(eventParentId, providers, chainedMessage, messageProvidersOptions) {
+            this.postChainedMessage = function(eventParentId, providers, chainedMessage, providersOptions) {
                 console.log("messageService.postChainedMessage for eventParentId: ",eventParentId);
-                return sendMessage({message: chainedMessage, providers: providers, eventParentId:eventParentId, messageProvidersOptions:messageProvidersOptions});
+                return sendMessage({message: chainedMessage, providers: providers, eventParentId:eventParentId, providersOptions:providersOptions});
             };
             
             function sendMessage(messageObject) {

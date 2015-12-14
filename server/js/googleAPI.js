@@ -37,7 +37,6 @@ function getOAuthURL() {
         'https://www.googleapis.com/auth/youtube.force-ssl',
         'https://www.googleapis.com/auth/drive',
         'https://www.googleapis.com/auth/plus.me',
-/*        'https://www.googleapis.com/auth/plus.login',*/
         'https://www.googleapis.com/auth/plus.stream.write'
     ];
     var url = oauth2Client.generateAuthUrl({
@@ -60,7 +59,7 @@ function pushCode(code) {
 
             //refresh token is set only first tie user use google oauth for this app
             var credentials = {
-              access_token: tokens.access_token
+                access_token: tokens.access_token
             };
             if(tokens.refresh_token)
                 credentials.refresh_token=tokens.refresh_token;
@@ -114,16 +113,19 @@ exports.listCategories = function(tokens) {
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
     youtubeAPI.videoCategories.list({part:'snippet', regionCode:'fr', hl:'fr_FR'}, function(err, response) {
-        /*console.log("listCategories response: ",response);
-        console.log("listCategories err: ",err);*/
+        console.log("listCategories response: ",response.items);
+        //console.log("listCategories err: ",err);
         if(err)
             deferred.reject(err);
         else {
-            var categories = response.items.map(function(item) {               
-                return {
-                    id : item.id,
-                    name : item.snippet.title
-                };
+            
+            var categories = [];
+            response.items.forEach(function(item) {
+                if(item.snippet.assignable)  
+                    categories.push({
+                        id : item.id,
+                        name : item.snippet.title
+                    });
             });
             deferred.resolve(categories);
         }
@@ -136,6 +138,7 @@ exports.listCategories = function(tokens) {
 function sendVideo(tokens, file, user, videoParams, providerOptions) {
 
     console.log('youtube UploadFile, file? ',file);
+    console.log('youtube UploadFile, providerOptions? ',providerOptions);
     var deferred = Q.defer();
     
     oauth2Client.setCredentials(tokens);
@@ -172,18 +175,19 @@ function sendVideo(tokens, file, user, videoParams, providerOptions) {
 
     videoUploadRequest.on('complete', function(response) {
         console.log("video upload request complete with response.body: ", response.body);
-        if(response.body.error)
-            deferred.reject(response.body);
-        else
-            try {
-                var body = JSON.parse(response.body);
+       
+        try {
+            var body = JSON.parse(response.body);
+            if(body.error)
+                 deferred.reject(body.error);
+            else
                 deferred.resolve({
                     url : 'https://www.youtube.com/watch?v='+body.id,
                     thumbnail : body.snippet.thumbnails.high.url
                 });
-            } catch(err) {
-                deferred.reject(err);
-            }
+        } catch(err) {
+            deferred.reject(err);
+        }
     });
  
     videoUploadRequest.on('error', function(err) {
@@ -300,18 +304,18 @@ function listFiles(tokens, folderId, typeFilter) {
     return deferred.promise;
 }
 
-function getGooglePlusUser(tokens) {
+function getUserInfo(tokens) {
     //id=103809399192041774467
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
     googlePlus.people.get({userId:'me'}, function(err, response) {
         
         if (err) {
-            console.log('getGooglePlusUser error: ', err);
+            console.log('getUserInfo error: ', err);
             deferred.reject(new Error(err));
         } else {
-            console.log('getGooglePlusUser response: ', response);
-            deferred.resolve(response);
+            console.log('getUserInfo response: ', response);
+            deferred.resolve({userName : response.displayName});
         }
         
     });
@@ -360,5 +364,5 @@ exports.getOAuthURL=getOAuthURL;
 exports.pushCode=pushCode;
 exports.listFiles=listFiles;
 exports.uploadDrive=uploadDrive;
-exports.getGooglePlusUser=getGooglePlusUser;
+exports.getUserInfo=getUserInfo;
 exports.refreshTokens=refreshTokens;

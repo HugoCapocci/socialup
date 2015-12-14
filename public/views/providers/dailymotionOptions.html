@@ -1,0 +1,5 @@
+<div ng-controller="DailymotionOptionsController">
+    <input type="checkbox" ng-model="$root.selectedProvidersOptions.dailymotion.private"> Vidéo privée<br/>
+    Chaine :
+    <select class="form-control" ng-model="$root.selectedProvidersOptions.dailymotion.channel" ng-options="option.name for option in $root.providersOptions.dailymotion.channels">  </select>
+</div>
