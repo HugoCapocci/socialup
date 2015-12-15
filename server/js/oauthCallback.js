@@ -58,7 +58,7 @@ scheduler.addEventListerner("message", function(eventId, userId, providers, prov
         eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         /*console.log("message event OK");*/
     }, function(err) {
-        eventsDAO.updateScheduledEventAfterExecution(eventId, err);
+        eventsDAO.updateScheduledEventAfterError(eventId, err);
         /*console.log("Cannot send message err: "+err);*/
     });
 });
@@ -68,15 +68,34 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
     var params = {
         title:title,
         description:description,
-        tags:tags
+        tags:tags,
+        file : file
     };
     uploadToProviders(userId, providers, providersOptions, file, params).then(function(results) {
+        
+        if(results && results.length>0 && results[0].url)
+            params.url=results[0].url;
 
         console.log("uploadToProviders results: ",results);
         // check chained Event
-        eventsDAO.retrieveChainedEvents(eventId).then(function(chainedEvents) {
-            //executeChainedEvent
-            console.log(chainedEvents.length+" chainedEvents to execute");
+        return eventsDAO.retrieveChainedEvents(eventId);
+    
+    }, function(err) {
+        eventsDAO.updateScheduledEventAfterError(eventId, err);
+        
+    }).then(function(chainedEvents) {                        
+        //executeChainedEvents
+        return executeChainedEvents(chainedEvents, params);
+        
+    }, function(err) {
+        eventsDAO.updateChainedsEventAfterError(eventId, err);
+    }).then(function(results) {
+        
+        //eventsDAO.updateScheduledEventAfterExecution(eventId, results);
+        fs.unlinkSync(file.path);
+    });
+            
+           /* console.log(chainedEvents.length+" chainedEvents to execute");
             chainedEvents.forEach(function(chainedEvent) {
                 console.log("execute chainedEvent: ",chainedEvent);
                 console.log("with results: ",results);
@@ -98,29 +117,51 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
                     console.log("Cannot send chained message err: "+err);
                 });
             });
+            
             fs.unlinkSync(file.path);
         }); 
-
         eventsDAO.updateScheduledEventAfterExecution(eventId, results);
-        /*console.log("upload video event OK");*/
     }, function(err) {
-        /*console.log("Cannot send message err: "+err);*/
-        eventsDAO.updateScheduledEventAfterExecution(eventId, err);
-    });
+        eventsDAO.updateScheduledEventAfterError(eventId, err);
+    });*/
 });
 
-function executeChainedEvent(event, params) {
+function executeChainedEvents(chainedEvents, args) {
     
+    var results = [];
+    chainedEvents.forEach(function(chainedEvent) {
+        console.log("execute chainedEvent: ",chainedEvent);
+        console.log("with results: ",results);
+        var params;
+        if(chainedEvent.eventType==='message')
+            params = {
+                url : args.url,
+                title: args.title,
+                description : args.description
+            }; 
+        else if(chainedEvent.eventType==='uploadCloud') {
+            params = {
+                file:args.file
+            };
+        }
+        results.push(executeChainedEvent(chainedEvent, params));
+    });
+    return Q.all(results);
+}
+
+
+function executeChainedEvent(event, params) {
+
     console.log("executeChainedEvent: ",event);           
     if(event.eventType==='message') {  
         return postMediaLinkToProviders(event.user, event.providers, event.eventParams[0], params.url, params.title, params.description, event.providersOptions);
     } else if(event.eventType==='uploadCloud') {
         console.log("upload drive with params: ", params);
-        var provider = event.providers[0];        
-        var myToken = users[event.user].providers[provider].tokens;        
-        return providersAPI[provider].uploadDrive(myToken, params.file, event.eventParams[0]);
+        var provider = event.providers[0];
+        return getRefreshedToken(provider, event.user).then(function(tokens) {
+            return providersAPI[provider].uploadDrive(tokens, params.file, event.eventParams[0]);
+        });
     }
-        
 }
 
 userDAO.retrieveUsers().then(function(usersFound) {
@@ -194,19 +235,21 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
 //return promise
 function getRefreshedToken(provider, userId) {
     
-    return Q.Promise(function(resolve, reject) {
-        var myToken = users[userId].providers[provider].tokens;
-        if(myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
-            console.log("refresh  oauth token ");
-            if(providersAPI[provider].refreshTokens instanceof Function) {
-                if(provider ==='google')
-                    myToken = users[userId].providers[provider].originalTokens;
-                return providersAPI[provider].refreshTokens(myToken, userId);
-            } else
-                reject('no refreshTokens fucntino for providier '+provider);
+    var myToken = users[userId].providers[provider].tokens;
+    if(myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
+        console.log("refresh  oauth token ");
+        if(providersAPI[provider].refreshTokens instanceof Function) {
+            if(provider ==='google')
+                myToken = users[userId].providers[provider].originalTokens;
+            return providersAPI[provider].refreshTokens(myToken, userId);
         } else
-            resolve(myToken);
-    });
+            return Q.fcall(function () {
+                throw new Error('no refreshTokens function for providier '+provider);
+            });
+    } else
+        return Q.fcall(function () {
+            return myToken;
+        });
 }
 
 // oauth callback for each kind of provider
@@ -357,9 +400,9 @@ app.get('/refreshToken/:provider/:userId', function(req, res) {
 
     var provider = req.params.provider;
     var userId = req.params.userId;
-    var myToken = users[userId].providers[provider].tokens;
-    providersAPI[provider].refreshTokens(myToken, userId).then(function(tokens) {
+    getRefreshedToken(provider, userId).then(function(tokens) {
         users[userId].tokens[provider]=tokens;
+        //TODO save refreshed tokens ?
         res.status(200).end();
     }, function(err) {
         res.send(err);
@@ -503,7 +546,6 @@ function postMediaLinkToProviders(userId, providers, message, url, name, descrip
 function postMediaLinkToProvider(userId, provider, message, url, name, description, messageProviderOptions) {
     
     console.log("postMediaLinkToProvider, messageProviderOptions: ",messageProviderOptions);
-    
     var deffered = Q.defer();
    
     if(providersAPI[provider]===undefined || providersAPI[provider].postMediaLink ===undefined)

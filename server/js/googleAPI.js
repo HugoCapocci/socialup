@@ -73,7 +73,7 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-function checkAccessTokenValidity(tokens, userId) {
+/*function checkAccessTokenValidity(tokens, userId) {
   
    // console.log("tokens? ", tokens);  
     var deferred = Q.defer();
@@ -84,7 +84,7 @@ function checkAccessTokenValidity(tokens, userId) {
         deferred.resolve(tokens);
         return deferred.promise;
     }
-} 
+} */
 
 function refreshTokens(tokens, userId) {
     
@@ -102,8 +102,7 @@ function refreshTokens(tokens, userId) {
          if(!err) {
 
             oauth2Client.setCredentials(tokens);
-            console.log("google refreshed tokens retrieved : ", tokens);
-
+            //console.log("google refreshed tokens retrieved : ", tokens);
             //refresh token is set only first tie user use google oauth for this app
 /*            oauth2Client.setCredentials({
               access_token: tokens.access_token,
@@ -149,10 +148,9 @@ exports.listCategories = function(tokens) {
 //todo  categoryId ?
 function sendVideo(tokens, file, user, videoParams, providerOptions) {
 
-    console.log('youtube UploadFile, file? ',file);
-    console.log('youtube UploadFile, providerOptions? ',providerOptions);
+    //console.log('youtube UploadFile, file? ',file);
+    //console.log('youtube UploadFile, providerOptions? ',providerOptions);
     var deferred = Q.defer();
-    
     oauth2Client.setCredentials(tokens);
     
     var metaData = {
@@ -166,11 +164,9 @@ function sendVideo(tokens, file, user, videoParams, providerOptions) {
           privacyStatus: providerOptions.privacyStatus
         }
     };
-    
     var buf = fs.readFileSync(file.path);
     if(buf === undefined) 
         deferred.reject(new Error('cannot load file from path: '+file.path));
-
     var  params = {
         part : Object.keys(metaData).join(','),
         media : {
@@ -179,15 +175,12 @@ function sendVideo(tokens, file, user, videoParams, providerOptions) {
         },
         resource : metaData
     };
-
     // https://developers.google.com/youtube/v3/docs/videos/insert
     var videoUploadRequest = youtubeAPI.videos.insert(params, function() {
         console.log("video uploaded on youtube on uri: ", videoUploadRequest.uri);
     });
-
     videoUploadRequest.on('complete', function(response) {
-        console.log("video upload request complete with response.body: ", response.body);
-       
+        //console.log("video upload request complete with response.body: ", response.body);
         try {
             var body = JSON.parse(response.body);
             if(body.error)
@@ -201,21 +194,18 @@ function sendVideo(tokens, file, user, videoParams, providerOptions) {
             deferred.reject(err);
         }
     });
- 
     videoUploadRequest.on('error', function(err) {
         //console.log("video upload request failed: ", err);
         deferred.reject(new Error(err));
     });
-
     //on data -> TODO
     return deferred.promise;
 }
 
 function uploadDrive(tokens, file, parent) {
+    
     var deferred = Q.defer();
-    
     console.log("upload to parent? ",parent);
-    
     oauth2Client.setCredentials(tokens);
 
     var metaData = {
@@ -244,12 +234,17 @@ function uploadDrive(tokens, file, parent) {
          //
     });
     videoUploadRequest.on('complete', function(response) {
-        var result = JSON.parse(response.body);
-        console.log("google drive file upload request complete with result: ", result);
-        deferred.resolve({
-            url : 'https://drive.google.com/file/d/'+result.id+'/view',
-            downloadUrl : result.downloadUrl
-        });
+        var result;
+        try {
+            result = JSON.parse(response.body);
+            console.log("google drive file upload request complete with result: ", result);
+            deferred.resolve({
+                url : 'https://drive.google.com/file/d/'+result.id+'/view',
+                downloadUrl : result.downloadUrl
+            });
+        } catch(err) {
+            deferred.reject(err);
+        }
     });
  
     videoUploadRequest.on('error', function(err) {
