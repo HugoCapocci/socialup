@@ -13,7 +13,7 @@ define(['./module', 'moment'], function (appModule, moment) {
                 Object.keys(userData.providers).map(function(provider/*, index*/) {
                    // console.log("provider: ", provider);
                     //console.log("token: ", userData.providers[provider].tokens);
-                    if(userData.providers[provider].tokens.expiry_date !== undefined) {
+                    if(userData.providers[provider].tokens && userData.providers[provider].tokens.expiry_date !== undefined) {
                        // console.log("token expiry_date found");
                         userData.providers[provider].tokens.expiry_date=moment(userData.providers[provider].tokens.expiry_date).format("dddd D MMMM YYYY à HH:mm");
                     }

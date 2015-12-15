@@ -55,24 +55,36 @@ function pushCode(code) {
         if(!err) {
 
             oauth2Client.setCredentials(tokens);
-            console.log("google refresh_tokens retrieved : ", tokens.refresh_token);
-
+            /*console.log("google refresh_tokens retrieved : ", tokens);
             //refresh token is set only first tie user use google oauth for this app
             var credentials = {
                 access_token: tokens.access_token
             };
             if(tokens.refresh_token)
                 credentials.refresh_token=tokens.refresh_token;
-            oauth2Client.setCredentials(credentials);
+            oauth2Client.setCredentials(credentials);*/
             //console.log("credentials set !");
             deferred.resolve(tokens);
         } else {
             console.log("unable to set credentials, err: ", err);
-            deferred.reject(new Error(err));
+            deferred.reject(err);
         }
     });    
     return deferred.promise;
 }
+
+function checkAccessTokenValidity(tokens, userId) {
+  
+   // console.log("tokens? ", tokens);  
+    var deferred = Q.defer();
+    if(tokens.expiry_date <= Date.now() ) {
+        console.log("refresh google oauth token ");
+        return refreshTokens(tokens, userId);
+    } else {
+        deferred.resolve(tokens);
+        return deferred.promise;
+    }
+} 
 
 function refreshTokens(tokens, userId) {
     
@@ -113,7 +125,7 @@ exports.listCategories = function(tokens) {
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
     youtubeAPI.videoCategories.list({part:'snippet', regionCode:'fr', hl:'fr_FR'}, function(err, response) {
-        console.log("listCategories response: ",response.items);
+       // console.log("listCategories response: ",response.items);
         //console.log("listCategories err: ",err);
         if(err)
             deferred.reject(err);
@@ -151,7 +163,7 @@ function sendVideo(tokens, file, user, videoParams, providerOptions) {
             categoryId: providerOptions.category.id
         },
         status: {
-          privacyStatus: 'private'
+          privacyStatus: providerOptions.privacyStatus
         }
     };
     
@@ -314,7 +326,7 @@ function getUserInfo(tokens) {
             console.log('getUserInfo error: ', err);
             deferred.reject(new Error(err));
         } else {
-            console.log('getUserInfo response: ', response);
+            //console.log('getUserInfo response: ', response);
             deferred.resolve({userName : response.displayName});
         }
         

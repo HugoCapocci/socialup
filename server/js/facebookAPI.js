@@ -123,7 +123,10 @@ function sendVideo(token, file, user, params, providerOptions) {
         targetId = providerOptions.group.id;
     //post on page 
     //TODO
-    
+ /*   if(providerOptions===undefined)
+        data.privacy = {'value':'SELF'};
+    else
+       data.privacy = {'value':providerOptions.visibility};*/
     request({
         method: 'POST',
         uri: 'https://graph-video.facebook.com/v2.5/'+targetId+'/videos',

@@ -71,7 +71,7 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
         tags:tags
     };
     uploadToProviders(userId, providers, providersOptions, file, params).then(function(results) {
-       
+
         console.log("uploadToProviders results: ",results);
         // check chained Event
         eventsDAO.retrieveChainedEvents(eventId).then(function(chainedEvents) {
@@ -111,8 +111,7 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
 
 function executeChainedEvent(event, params) {
     
-    console.log("executeChainedEvent: ",event);
-                
+    console.log("executeChainedEvent: ",event);           
     if(event.eventType==='message') {  
         return postMediaLinkToProviders(event.user, event.providers, event.eventParams[0], params.url, params.title, params.description, event.providersOptions);
     } else if(event.eventType==='uploadCloud') {
@@ -192,6 +191,24 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
     }
 });
 
+//return promise
+function getRefreshedToken(provider, userId) {
+    
+    return Q.Promise(function(resolve, reject) {
+        var myToken = users[userId].providers[provider].tokens;
+        if(myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
+            console.log("refresh  oauth token ");
+            if(providersAPI[provider].refreshTokens instanceof Function) {
+                if(provider ==='google')
+                    myToken = users[userId].providers[provider].originalTokens;
+                return providersAPI[provider].refreshTokens(myToken, userId);
+            } else
+                reject('no refreshTokens fucntino for providier '+provider);
+        } else
+            resolve(myToken);
+    });
+}
+
 // oauth callback for each kind of provider
 app.get('/*2callback', function(req, res) {
     
@@ -219,7 +236,7 @@ app.get('/*2callback', function(req, res) {
         };
 
     getTokens().then(function(tokens) {
-          
+                  
         if(tokens.expires_in) {
             tokens.expiry_date = Date.now() + (provider === 'linkedin' ? tokens.expires_in*1000 : tokens.expires_in);   
             delete tokens.expires_in;
@@ -227,8 +244,12 @@ app.get('/*2callback', function(req, res) {
         users[userId].providers[provider] = { 
             tokens : tokens
         };
-       // console.log('stored token for provider: ', tokens);
-       return providersAPI[provider].getUserInfo(tokens);
+        //save google original token with refresh-token apart
+        if(provider === 'google' && tokens.refresh_token) {
+            users[userId].providers[provider].originalTokens=tokens;
+        }
+        // console.log('stored token for provider: ', tokens);
+        return providersAPI[provider].getUserInfo(tokens);
     }, function(err) {
         console.error("error in token validation: ", err);
         res.send(err);
@@ -360,10 +381,15 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
     var folderId = req.params.folderId;
     var provider = req.params.provider;
     var userId = req.params.userId;
-    var myToken = users[userId].providers[provider].tokens;
+    
     var typeFilter = req.query.typeFilter;
     console.log("Cloud provider: ", provider);
-    providersAPI[provider].listFiles(myToken, folderId, typeFilter).then(function(files) {
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].listFiles(tokens, folderId, typeFilter);
+    }, function(err) {
+         res.send(err);
+    }).then(function(files) {
          res.send(files);
     }, function(err) {
          res.send("Google OAuth OK but GoogleDrive err: "+err);
@@ -376,7 +402,11 @@ app.get('/file/:provider/:fileId/:userId', function(req, res) {
     var provider = req.params.provider;
     var userId = req.params.userId;
    
-    providersAPI[provider]./*downloadFile*/checkFileData(users[userId].providers[provider].tokens, fileId).then(function(fileData) {
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider]./*downloadFile*/checkFileData(tokens, fileId);
+    }, function(err) {
+         res.send(err);
+    }).then(function(fileData) {
         //res.write(file, 'binary');
         console.log("file data: ", fileData);
        // res.send(fileData);
@@ -442,17 +472,17 @@ function postMessageToProviders(userId, providers, providersOptions, message) {
 }
 function postMessageToProvider(userId, provider, providerOptions, message) {
     
-    var deffered = Q.defer();    
-    var myToken = users[userId].providers[provider].tokens;
-   
+    var deffered = Q.defer();
     if(providersAPI[provider]===undefined || providersAPI[provider].postMessage ===undefined)
-        deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
-
-    //TODO add providerOptions
-    providersAPI[provider].postMessage(myToken, message, providerOptions).then(function(result) {
+    deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        //TODO add providerOptions
+        return providersAPI[provider].postMessage(tokens, message, providerOptions);
+    }).then(function(result) {
         result.provider=provider;
         deffered.resolve(result);
-    }, function(err) {
+    }).fail(function(err) {
         deffered.reject(err);
     });
     return deffered.promise;
@@ -474,15 +504,16 @@ function postMediaLinkToProvider(userId, provider, message, url, name, descripti
     
     console.log("postMediaLinkToProvider, messageProviderOptions: ",messageProviderOptions);
     
-    var deffered = Q.defer();    
-    var myToken = users[userId].providers[provider].tokens;
+    var deffered = Q.defer();
    
     if(providersAPI[provider]===undefined || providersAPI[provider].postMediaLink ===undefined)
         deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
     
-    providersAPI[provider].postMediaLink(myToken, message, url, name, description, messageProviderOptions).then(function(result) {
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].postMediaLink(tokens, message, url, name, description, messageProviderOptions);
+    }).then(function(result) {
         deffered.resolve(result);
-    }, function(err) {
+    }).fail(function(err) {
         deffered.reject(err);
     });
     return deffered.promise;
@@ -498,14 +529,15 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     var userId = req.params.userId;
     
     if(req.body.isCloud) {
-        
-        var myToken = users[userId].providers[DROPBOX].tokens;
-        //upload File to root folder
-        providersAPI.dropbox.uploadDrive(myToken, req.file).then(function(results) {
+
+        getRefreshedToken(DROPBOX, userId).then(function(tokens) {
+            //upload File to root folder
+            return providersAPI.dropbox.uploadDrive(tokens, req.file);
+        }).then(function(results) {
             console.log("uploadDrive OK on dropbox");
             fs.unlinkSync(req.file.path);
             res.send(results);
-        }, function(err) {
+        }).fail(function(err) {
             console.error("error in uploadDrive: ", err);
             res.send("uploadDrive ERROR "+err);
         });
@@ -565,9 +597,10 @@ function uploadToProviders(userId, providers, providersOptions, file, params) {
 function uploadToProvider(userId, provider, providerOptions, file, params) {
 
     var deffered = Q.defer();
-    //console.log("users[userId].providers["+provider+"]: ",users[userId].providers[provider]);
-    var myToken = users[userId].providers[provider].tokens;
-    providersAPI[provider].sendVideo(myToken, file, userId, params, providerOptions).then(function(result) {
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].sendVideo(tokens, file, userId, params, providerOptions);
+    }).then(function(result) {
         //console.log("uploadToProvider result: ",result);
         result.provider=provider;
         deffered.resolve(result);
@@ -580,9 +613,11 @@ function uploadToProvider(userId, provider, providerOptions, file, params) {
 app.get('/facebookGroups/:userId', function(req, res) {
     
     var userId=req.params.userId;
-    providersAPI.facebook.getUserGroups(users[userId].providers.facebook.tokens).then(function(groups) {
+    getRefreshedToken('facebook', userId).then(function(tokens) {
+        return providersAPI.facebook.getUserGroups(tokens);
+    }).then(function(groups) {
         res.send(groups);
-    }, function(err) {
+    }).fail(function(err) {
         res.status(404).send(err);
     });
 });
@@ -609,11 +644,13 @@ app.get('/categories/:provider/:userId', function(req, res) {
     if(providersCategories.provider!==undefined)
         res.send(providersCategories.provider);
     else {
-        var myToken = users[userId].providers[provider].tokens;
-        providersAPI[provider].listCategories(myToken, userId).then(function(categories) {
+        
+        getRefreshedToken(provider, userId).then(function(tokens) {
+            return providersAPI[provider].listCategories(tokens, userId);
+        }).then(function(categories) {
             providersCategories.provider=categories;
             res.send(categories);
-        }, function(err) {
+        }).fail(function(err) {
             res.status(404).send(err);
         });
     }

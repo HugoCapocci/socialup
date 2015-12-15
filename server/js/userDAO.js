@@ -163,7 +163,7 @@ function deleteToken(provider, userId) {
         var unset = {
             $unset: {}
         };
-        unset.$unset["providers."+provider] = '';
+        unset.$unset["providers."+provider+".tokens"] = '';
          db.collection(collection).update(query, unset, function(err, r) {
             db.close();
             if (err)
