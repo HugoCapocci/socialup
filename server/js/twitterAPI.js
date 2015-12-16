@@ -183,8 +183,12 @@ function postMessage(tokens, message) {
         if(error)
             deferred.reject(error);
         else {
+            //console.log("twitter post message body ",body);
             //console.log("tweet response statusCode: ", response.statusCode);
-            deferred.resolve(response);
+            var results = JSON.parse(body);
+            var url ='https://twitter.com/'+results.user.screen_name+'/status/'+results.id_str;
+            console.log("tweet published: ", url);
+            deferred.resolve({url:url});
         }
     });
     return deferred.promise;
@@ -228,8 +232,24 @@ function getTweets(tokens) {
     return deferred.promise;
 }
 
-function getUserInfo(tokens) {
+//return 200 if token is valid, 
+exports.verifyCredentials = function(tokens) {
+    
+    return processGetRequest(tokens, 'https://api.twitter.com/1.1/account/verify_credentials.json', function(body, response) {
+        return response.statusCode;
+    });
+};
 
+function getUserInfo(tokens) {
+    
+    return processGetRequest(tokens, 'https://api.twitter.com/1.1/account/settings.json', function(body) {
+        var userInfo = JSON.parse(body);
+        return {userName:userInfo.screen_name};
+    });
+}
+
+function processGetRequest(tokens, url, callback) {
+    
     var deferred = Q.defer();
     
     var headerParams = {
@@ -241,24 +261,18 @@ function getUserInfo(tokens) {
         'oauth_version' : '1.0'
     };
     var globalParams=headerParams; 
-    
-    var url= 'https://api.twitter.com/1.1/account/settings.json';
     headerParams.oauth_signature = getSignature(globalParams, 'get', url, tokens.oauth_token_secret, APP_SECRET);
-
     request({
         uri : url,
         headers : {
             'Authorization' : 'OAuth '+inLineParams(headerParams)
         },
         method: "GET"
-    }, function(error, response, body){
- 
-        //client error
+    }, function (error, response, body){
         if(error)
             deferred.reject(error);
-        else {           
-            var userInfo = JSON.parse(body);
-            deferred.resolve({userName:userInfo.screen_name});
+        else { 
+            deferred.resolve(callback(body, response) );
         }
     });
     return deferred.promise;

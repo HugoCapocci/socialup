@@ -237,7 +237,7 @@ function processGetRequest(access_token, url, callback) {
         else { 
             deferred.resolve(callback(body, response) );
         }
-    }).pipe(fs.createWriteStream('steampunk.jpg'));
+    });
     return deferred.promise;
 }
 

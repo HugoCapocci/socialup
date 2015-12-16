@@ -176,7 +176,7 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
     
     //twitter is more complicated and cannot give synch url
     if(provider==='twitter') {
-        
+        console.log('ask twitter.getOAuthURL for userId ', userId);
         providersAPI.twitter.getTokens(userId).then(function(tokens) {
           
             //store token for user
@@ -225,9 +225,11 @@ function getRefreshedToken(provider, userId) {
 app.get('/*2callback', function(req, res) {
     
     var provider = req.path.split("2callback")[0].substr(1);
-    console.log("provider found :", provider);
+    //console.log("provider found :", provider);
     var code = req.query.code;
     var userId = req.query.state;
+    //console.log('call back with userId ',userId);
+    
     if(users[userId]===undefined)
         initiateUser(userId);
 
@@ -235,6 +237,10 @@ app.get('/*2callback', function(req, res) {
     
     if(provider === TWITTER) {
         
+        if(!users[userId].providers[TWITTER]) {
+            res.status(400).end("Error in twitter oauth process");
+            return;
+        }
         var oauth_token = req.query.oauth_token;
         var oauth_verifier = req.query.oauth_verifier;  
         var tokens = users[userId].providers[TWITTER].tokens;
@@ -262,20 +268,17 @@ app.get('/*2callback', function(req, res) {
         }
         // console.log('stored token for provider: ', tokens);
         return providersAPI[provider].getUserInfo(tokens);
-    }, function(err) {
-        console.error("error in token validation: ", err);
-        res.send(err);
+        
     }).then(function(userInfo) {
         users[userId].providers[provider].userName = userInfo.userName;
         return userDAO.saveUser(users[userId]);
-    }, function(err) {
-        console.error("error googleplusUser: ", err);
-        res.send(err);
+  
     }).then(function(userSaved) {
         users[userId] = userSaved;
         res.redirect('/#?close=true');
-    }, function(err) {
-        console.error("error in saving user: ", err);
+    
+    }).fail(function(err) {
+        console.error("error : ", err);
         res.send(err);
     });
    
@@ -436,7 +439,7 @@ app.post('/message/:userId', function(req, res) {
     // provider options (visibility for FB, ect...)
     var providersOptions = req.body.providersOptions;
     //TODO use providersOptions for messages
-    console.log("providersOptions? ",providersOptions);
+   // console.log("providersOptions? ",providersOptions);
 
     if(eventParentId) {
         //Save chained event eventParentId, userId, eventType, providers, eventParams
@@ -471,7 +474,7 @@ function postMessageToProviders(userId, providers, providersOptions, message) {
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(postMessageToProvider(userId, provider, providersOptions[provider], message));
+        results.push(postMessageToProvider(userId, provider, providersOptions ? providersOptions[provider] : undefined, message));
     }
     return Q.all(results);
 }
