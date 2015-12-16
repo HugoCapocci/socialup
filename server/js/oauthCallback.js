@@ -418,37 +418,10 @@ app.get('/file/:provider/:fileId/:userId', function(req, res) {
     var userId = req.params.userId;
    
     getRefreshedToken(provider, userId).then(function(tokens) {
-        return providersAPI[provider].downloadFile(tokens, fileId);
+        //pipe the bytes returned from request to the response 'res', in order to directly download the file
+        providersAPI[provider].downloadFile(tokens, fileId).pipe(res);
     }, function(err) {
          res.send(err);
-    }).then(function(fileData) {
-        
-        var fileName = fileData.metaData.path.substring(fileData.metaData.path.lastIndexOf('/')+1);
-        res.writeHead(200, {
-            'Content-disposition' : 'attachment; filename='+fileName,
-            'Content-Length': fileData.metaData.bytes,
-            'Content-Type': fileData.metaData.mime_type
-        });
-        
-        //console.log("FILE CONTENT ",fileData.fileContent);
-     /*   var encoding = fileData.metaData.mime_type === 'application/octet-stream' ? 'utf8' : 'binary';
-        // ascii, utf8 (too large), utf16le(too large), base64(far too short), binary(lil too short), hex (error)
-        var buf = new Buffer(fileData.fileContent, encoding);
-        fs.writeFile(fileName, buf.toString(), {encoding : encoding}, function(err) {
-            if(err)
-                console.log("error in creating file? ", err);
-        });*/
-        /*var buffer = new Buffer(fileData.fileContent, 'base64');*/
-        //console.log(" content type: ", typeof fileData.fileContent);
-        res.write(fileData.fileContent);
-       // console.log("file data: ", fileData);
-       /* res.send(fileData);
-        res.statusCode = 302;
-        res.setHeader('Location', fileData.downloadUrl);*/
-        res.end();
-        
-    }, function(err) {
-        res.send(provider+" err: "+err);
     });
 });
 

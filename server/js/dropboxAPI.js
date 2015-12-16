@@ -148,24 +148,19 @@ function retrieveAllFiles(token, path, typeFilter) {
 }*/
 
 exports.downloadFile = function(tokens,filePath) {
-    
-    console.log("downloadFile, filePath: ",encodeURIComponent(filePath));
-     
-    return processGetRequest(tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent(filePath), function(fileContent, response) {
-        //console.log("response.headers: ",response.headers);
-        var metaData = JSON.parse(response.headers['x-dropbox-metadata']);
-         /*console.log("metaData ", metaData);
-        console.log("file size in byte ", metaData.bytes);
-        console.log("file mime_type ", metaData.mime_type);
-        console.log("content size ? ", fileContent.length);*/
-        return {metaData:metaData, fileContent: fileContent};
+
+    return request({
+        uri: 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent(filePath),
+        auth: {
+            bearer: tokens.access_token
+        },
+        method: "GET"
     });
 };
 
 function uploadDrive(tokens, file, path) {
     
     var deferred = Q.defer();
-
     /* 
     var post_data = querystring.stringify({
         'mode': 'overwrite',
@@ -179,7 +174,6 @@ function uploadDrive(tokens, file, path) {
     url+='/'+file.originalname;
 
     request({
-      /*  uri: 'https://content.dropboxapi.com/2/files/upload?arg='+post_data,*/
         uri : url,
         auth: {
             bearer: tokens.access_token
@@ -229,7 +223,7 @@ function processGetRequest(access_token, url, callback) {
         else { 
             deferred.resolve(callback(body, response) );
         }
-    });
+    }).pipe(fs.createWriteStream('steampunk.jpg'));
     return deferred.promise;
 }
 
