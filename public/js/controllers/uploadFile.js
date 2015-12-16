@@ -19,7 +19,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             title : 'Publier depuis le cloud',
             url : 'views/uploadFile.html',        
             cancel : function () {
-                $uibModalInstance.dismiss('cancel');
+                $uibModal.dismiss('cancel');
             }
         };
         console.log("UploadFileModalController file ? ", file);
@@ -47,7 +47,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             messageProviders : ['twitter', 'facebook', 'linkedin'],
             selectedMessageProviders : []           
         };
-         
              
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({

@@ -73,19 +73,6 @@ function pushCode(code) {
     return deferred.promise;
 }
 
-/*function checkAccessTokenValidity(tokens, userId) {
-  
-   // console.log("tokens? ", tokens);  
-    var deferred = Q.defer();
-    if(tokens.expiry_date <= Date.now() ) {
-        console.log("refresh google oauth token ");
-        return refreshTokens(tokens, userId);
-    } else {
-        deferred.resolve(tokens);
-        return deferred.promise;
-    }
-} */
-
 function refreshTokens(tokens, userId) {
     
     var deferred = Q.defer();
@@ -98,23 +85,14 @@ function refreshTokens(tokens, userId) {
     oauth2Client.setCredentials(credentials);
 
     oauth2Client.refreshAccessToken(function(err, tokens) {
-    
-         if(!err) {
 
+        if(!err) {
             oauth2Client.setCredentials(tokens);
-            //console.log("google refreshed tokens retrieved : ", tokens);
-            //refresh token is set only first tie user use google oauth for this app
-/*            oauth2Client.setCredentials({
-              access_token: tokens.access_token,
-              refresh_token: tokens.refresh_token
-            });*/
-            //console.log("credentials set !");
             deferred.resolve(tokens);
         } else {
             console.log("unable to set credentials, err: ", err);
             deferred.reject(new Error(err));
         }
-        
     });
     return deferred.promise;
 }
@@ -129,7 +107,6 @@ exports.listCategories = function(tokens) {
         if(err)
             deferred.reject(err);
         else {
-            
             var categories = [];
             response.items.forEach(function(item) {
                 if(item.snippet.assignable)  

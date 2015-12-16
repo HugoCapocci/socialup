@@ -75,8 +75,8 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
         
         if(results && results.length>0 && results[0].url)
             params.url=results[0].url;
-
-        console.log("uploadToProviders results: ",results);
+        console.log("uploadToProviders results: ",results);        
+        eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         // check chained Event
         return eventsDAO.retrieveChainedEvents(eventId);
     
@@ -86,44 +86,10 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
     }).then(function(chainedEvents) {                        
         //executeChainedEvents
         return executeChainedEvents(chainedEvents, params);
-        
-    }, function(err) {
-        eventsDAO.updateChainedsEventAfterError(eventId, err);
-    }).then(function(results) {
-        
+    }).fin(function () {
         //eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         fs.unlinkSync(file.path);
     });
-            
-           /* console.log(chainedEvents.length+" chainedEvents to execute");
-            chainedEvents.forEach(function(chainedEvent) {
-                console.log("execute chainedEvent: ",chainedEvent);
-                console.log("with results: ",results);
-                var params;
-                if(chainedEvent.eventType==='message')
-                    params = {
-                        url : results[0].url,
-                        title: title,
-                        description : description
-                    }; 
-                else if(chainedEvent.eventType==='uploadCloud') {
-                    params = {
-                        file:file
-                    };
-                }
-                executeChainedEvent(chainedEvent, params).then(function(chainedEventResults) {
-                    console.log("chained event executed with results ",chainedEventResults);
-                }, function(err) {
-                    console.log("Cannot send chained message err: "+err);
-                });
-            });
-            
-            fs.unlinkSync(file.path);
-        }); 
-        eventsDAO.updateScheduledEventAfterExecution(eventId, results);
-    }, function(err) {
-        eventsDAO.updateScheduledEventAfterError(eventId, err);
-    });*/
 });
 
 function executeChainedEvents(chainedEvents, args) {
@@ -149,7 +115,6 @@ function executeChainedEvents(chainedEvents, args) {
     return Q.all(results);
 }
 
-
 function executeChainedEvent(event, params) {
 
     console.log("executeChainedEvent: ",event);           
@@ -160,6 +125,11 @@ function executeChainedEvent(event, params) {
         var provider = event.providers[0];
         return getRefreshedToken(provider, event.user).then(function(tokens) {
             return providersAPI[provider].uploadDrive(tokens, params.file, event.eventParams[0]);
+        }).then(function(results) {
+            console.log("eventsDAO.updateChainedEventAfterExecution");
+            eventsDAO.updateChainedEventAfterExecution(event._id, results);
+        }, function(err) {
+            eventsDAO.updateChainedEventAfterError(event._id, err);
         });
     }
 }
@@ -441,20 +411,40 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
 
 app.get('/file/:provider/:fileId/:userId', function(req, res) {
     
+    console.log("get file ?");
+    
     var fileId = req.params.fileId;
     var provider = req.params.provider;
     var userId = req.params.userId;
    
     getRefreshedToken(provider, userId).then(function(tokens) {
-        return providersAPI[provider]./*downloadFile*/checkFileData(tokens, fileId);
+        return providersAPI[provider].downloadFile(tokens, fileId);
     }, function(err) {
          res.send(err);
     }).then(function(fileData) {
-        //res.write(file, 'binary');
-        console.log("file data: ", fileData);
-       // res.send(fileData);
+        
+        var fileName = fileData.metaData.path.substring(fileData.metaData.path.lastIndexOf('/')+1);
+        res.writeHead(200, {
+            'Content-disposition' : 'attachment; filename='+fileName,
+            'Content-Length': fileData.metaData.bytes,
+            'Content-Type': fileData.metaData.mime_type
+        });
+        
+        //console.log("FILE CONTENT ",fileData.fileContent);
+     /*   var encoding = fileData.metaData.mime_type === 'application/octet-stream' ? 'utf8' : 'binary';
+        // ascii, utf8 (too large), utf16le(too large), base64(far too short), binary(lil too short), hex (error)
+        var buf = new Buffer(fileData.fileContent, encoding);
+        fs.writeFile(fileName, buf.toString(), {encoding : encoding}, function(err) {
+            if(err)
+                console.log("error in creating file? ", err);
+        });*/
+        /*var buffer = new Buffer(fileData.fileContent, 'base64');*/
+        //console.log(" content type: ", typeof fileData.fileContent);
+        res.write(fileData.fileContent);
+       // console.log("file data: ", fileData);
+       /* res.send(fileData);
         res.statusCode = 302;
-        res.setHeader('Location', fileData.downloadUrl);
+        res.setHeader('Location', fileData.downloadUrl);*/
         res.end();
         
     }, function(err) {

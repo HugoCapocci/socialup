@@ -10,12 +10,11 @@
             <div class="row">
                 <!-- aperçu ? -->
                 selected file: {{cloudExplorer.selectedFile.id}} <br/>
-                <div ng-if="cloudExplorer.selectedFile && cloudExplorer.selectedFile.downloadUrl">
-                    <button ng-click="publishFile()" >Publier</button>
-                    
-                    
-                    
-                    <a href="cloudExplorer.selectedFile.downloadUrl" download="{{cloudExplorer.selectedFile.name}}"><i class="glyphicon glyphicon-download-alt"></i><!--Télécharger le fichier--></a>
+                <div ng-if="cloudExplorer.selectedFile && (cloudExplorer.selectedFile.downloadUrl || cloudExplorer.provider === 'dropbox' )">
+                    <button ng-click="publishFile()" >Publier</button>                    
+                    <a ng-href="{{getDownloadFileURL()}}" download="{{cloudExplorer.selectedFile.name}}">
+                        <i class="glyphicon glyphicon-download-alt"></i><!--Télécharger le fichier-->
+                    </a>
                 </div>
             </div>
         </div>
@@ -30,6 +29,7 @@
                selected-node="node1">
                {{node.name}}
             </treecontrol>            
-        </div>     
+        </div> 
+    </div>
 
 </div>

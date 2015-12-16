@@ -72,26 +72,26 @@ function createEvent(eventToSave, collection, callback) {
 
 exports.updateScheduledEvent = function(eventId, scheduledEvent) {
     delete scheduledEvent._id;
-    return updateEvent(eventId, scheduledEvent, scheduledEventsCollection);
+    return updateEvent({eventId:eventId}, scheduledEvent, scheduledEventsCollection);
 };
 function updateScheduledEventAfterExecution(eventId, results) {
-    return updateEvent(eventId, {$set:{results:results}}, scheduledEventsCollection);
+    return updateEvent({eventId:eventId}, {$set:{results:results}}, scheduledEventsCollection);
 }
 function updateScheduledEventAfterError(eventId, error) { 
-    return updateEvent(eventId, {$set:{error:error.toString()}}, scheduledEventsCollection);
+    return updateEvent({eventId:eventId}, {$set:{error:error.toString()}}, scheduledEventsCollection);
 }
-exports.updateChainedsEventAfterExecution = function (eventId, results) {
-    return updateEvent(eventId, {$set:{results:results}}, chainedEventsCollection);
+exports.updateChainedEventAfterExecution = function (eventId, results) {
+    return updateEvent({_id : new ObjectID(eventId) }, {$set:{results:results}}, chainedEventsCollection);
 };
-exports.updateChainedsEventAfterError = function (eventId, error) {
-    return updateEvent(eventId, {$set:{error:error.toString()}}, chainedEventsCollection);
+exports.updateChainedEventAfterError = function (eventId, error) {
+    return updateEvent({_id : new ObjectID(eventId) }, {$set:{error:error.toString()}}, chainedEventsCollection);
 };
-function updateEvent(eventId, update, collection) {
+function updateEvent(query, update, collection) {
 
     var deferred = Q.defer();
     getDB(function(db) {
         //console.log('update event '+eventId+' with update: ', update);
-        db.collection(collection).update({eventId:eventId}, update, function(err, r) {
+        db.collection(collection).update(query, update, function(err, r) {
             db.close();
             if(err)
                 deferred.reject(new Error(err));

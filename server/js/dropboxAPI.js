@@ -147,10 +147,25 @@ function retrieveAllFiles(token, path, typeFilter) {
     return deferred.promise;
 }*/
 
+exports.downloadFile = function(tokens,filePath) {
+    
+    console.log("downloadFile, filePath: ",encodeURIComponent(filePath));
+     
+    return processGetRequest(tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent(filePath), function(fileContent, response) {
+        //console.log("response.headers: ",response.headers);
+        var metaData = JSON.parse(response.headers['x-dropbox-metadata']);
+         /*console.log("metaData ", metaData);
+        console.log("file size in byte ", metaData.bytes);
+        console.log("file mime_type ", metaData.mime_type);
+        console.log("content size ? ", fileContent.length);*/
+        return {metaData:metaData, fileContent: fileContent};
+    });
+};
+
 function uploadDrive(tokens, file, path) {
     
     var deferred = Q.defer();
-    
+
     /* 
     var post_data = querystring.stringify({
         'mode': 'overwrite',
@@ -186,31 +201,33 @@ function uploadDrive(tokens, file, path) {
     return deferred.promise;    
 }
 
-/*function downloadFile() {
-    
-}*/
-
 function getOAuthURL() {
     //add require_role    
     return 'https://www.dropbox.com/1/oauth2/authorize?client_id='+DROPBOX_APP_KEY+'&redirect_uri='+DROPBOX_REDIRECT_URI+'&response_type=code';
 }
 
 function getUserInfo(tokens) {    
-       
+
+    return processGetRequest(tokens.access_token, 'https://'+END_POINT+'/1/account/info', function(userInfo) {
+        return {userName:JSON.parse(userInfo).display_name};
+    });
+}
+
+function processGetRequest(access_token, url, callback) {
+    
     var deferred = Q.defer();
     request({
-        uri: 'https://'+END_POINT+'/1/account/info',
+        uri: url,
         auth: {
-            bearer: tokens.access_token
+            bearer: access_token
         },
         method: "GET"
     }, function (error, response, body){
-        //console.log(response);
+        //console.log("processGetRequest body ",body);
         if(error)
-            deferred.reject(new Error(error));
-        else {
-            var userInfo = JSON.parse(body);
-            deferred.resolve({userName:userInfo.display_name});
+            deferred.reject(error);
+        else { 
+            deferred.resolve(callback(body, response) );
         }
     });
     return deferred.promise;

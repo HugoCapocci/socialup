@@ -2,8 +2,6 @@ define(['./module'], function (appModule) {
     
     'use strict';
     
-    var FOLDER_TYPE_MIME = 'application/vnd.google-apps.folder';
-    
     appModule.controller('CloudExplorerController', ['$scope', '$uibModal', 'cloudService', function($scope, $uibModal, cloudService) {
             
         $scope.treeOptions = {
@@ -54,6 +52,14 @@ define(['./module'], function (appModule) {
             });
         };
         
+        $scope.getDownloadFileURL = function() {
+            
+            if($scope.cloudExplorer.selectedFile.downloadUrl)
+                return $scope.cloudExplorer.selectedFile.downloadUrl;
+            else
+                return cloudService.getDownloadFileURL($scope.cloudExplorer.provider,encodeURIComponent($scope.cloudExplorer.selectedFile.id.substring(1)));
+        };
+
         function loadProviderRootData() {
             cloudService.getFiles($scope.cloudExplorer.provider).then(function(files) {
                 $scope.dataForTheTree = files;
@@ -87,10 +93,7 @@ define(['./module'], function (appModule) {
                 $scope.cloudExplorer.selectedFile=undefined;
             console.log('selectedFile: '+node.name+', type: '+node.mimeType+', id: '+node.id);
         };
-                
-        // iFrame url for google doc preview 'https://drive.google.com/file/d/'+file.id+'/view'
         
-        // dropbox 'https://www.dropbox.com/home/'+path+'?preview='+file.name
     }]);
 
 });

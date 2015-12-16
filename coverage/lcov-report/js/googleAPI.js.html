@@ -394,30 +394,7 @@
 349
 350
 351
-352
-353
-354
-355
-356
-357
-358
-359
-360
-361
-362
-363
-364
-365
-366
-367
-368
-369
-370
-371
-372
-373
-374
-375</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+352</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -492,19 +469,6 @@
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -519,20 +483,11 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -547,7 +502,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -866,19 +820,6 @@ function pushCode(code) {
     return deferred.promise;
 }
 &nbsp;
-/*function checkAccessTokenValidity(tokens, userId) {
-  
-   // console.log("tokens? ", tokens);  
-    var deferred = Q.defer();
-    if(tokens.expiry_date &lt;= Date.now() ) {
-        console.log("refresh google oauth token ");
-        return refreshTokens(tokens, userId);
-    } else {
-        deferred.resolve(tokens);
-        return deferred.promise;
-    }
-} */
-&nbsp;
 <span class="fstat-no" title="function not covered" >function refreshTokens(tokens, userId) {</span>
     
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
@@ -891,23 +832,14 @@ function pushCode(code) {
 <span class="cstat-no" title="statement not covered" >    oauth2Client.setCredentials(credentials);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    oauth2Client.refreshAccessToken(<span class="fstat-no" title="function not covered" >function(err, tokens) {</span></span>
-    
-<span class="cstat-no" title="statement not covered" >         if(!err) {</span>
 &nbsp;
+<span class="cstat-no" title="statement not covered" >        if(!err) {</span>
 <span class="cstat-no" title="statement not covered" >            oauth2Client.setCredentials(tokens);</span>
-            //console.log("google refreshed tokens retrieved : ", tokens);
-            //refresh token is set only first tie user use google oauth for this app
-/*            oauth2Client.setCredentials({
-              access_token: tokens.access_token,
-              refresh_token: tokens.refresh_token
-            });*/
-            //console.log("credentials set !");
 <span class="cstat-no" title="statement not covered" >            deferred.resolve(tokens);</span>
         } else {
 <span class="cstat-no" title="statement not covered" >            console.log("unable to set credentials, err: ", err);</span>
 <span class="cstat-no" title="statement not covered" >            deferred.reject(new Error(err));</span>
         }
-        
     });
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
 }
@@ -922,7 +854,6 @@ exports.listCategories = <span class="fstat-no" title="function not covered" >fu
 <span class="cstat-no" title="statement not covered" >        if(err)</span>
 <span class="cstat-no" title="statement not covered" >            deferred.reject(err);</span>
         else {
-            
 <span class="cstat-no" title="statement not covered" >            var categories = [];</span>
 <span class="cstat-no" title="statement not covered" >            response.items.forEach(<span class="fstat-no" title="function not covered" >function(item) {</span></span>
 <span class="cstat-no" title="statement not covered" >                if(item.snippet.assignable)  </span>
@@ -1171,7 +1102,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Dec 15 2015 16:20:21 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Dec 16 2015 01:07:52 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

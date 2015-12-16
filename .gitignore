@@ -3,3 +3,4 @@ public/bower_components
 server/uploads
 coverage
 localeConfig.js
+tasks.json
