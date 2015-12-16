@@ -38,7 +38,6 @@ define(['./module', 'sha1'], function (appModule, sha1) {
                     };
                     alertsService.warn('Veuillez renesigner tous les champs ');
                 }
-                
             };
 
             $scope.create = function() {

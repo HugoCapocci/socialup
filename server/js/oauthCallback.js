@@ -62,7 +62,7 @@ scheduler.addEventListerner("message", function(eventId, userId, providers, prov
         /*console.log("Cannot send message err: "+err);*/
     });
 });
-//uploadToProviders(providers, file)
+//publishFileToProviders(providers, file)
 scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, providersOptions, file, title, description, tags) {
    
     var params = {
@@ -71,11 +71,11 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
         tags:tags,
         file : file
     };
-    uploadToProviders(userId, providers, providersOptions, file, params).then(function(results) {
+    publishFileToProviders(userId, providers, providersOptions, file, params).then(function(results) {
         
         if(results && results.length>0 && results[0].url)
             params.url=results[0].url;
-        console.log("uploadToProviders results: ",results);        
+        console.log("publishFileToProviders results: ",results);        
         eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         // check chained Event
         return eventsDAO.retrieveChainedEvents(eventId);
@@ -510,10 +510,9 @@ function postMediaLinkToProvider(userId, provider, message, url, name, descripti
     
     console.log("postMediaLinkToProvider, messageProviderOptions: ",messageProviderOptions);
     var deffered = Q.defer();
-   
     if(providersAPI[provider]===undefined || providersAPI[provider].postMediaLink ===undefined)
         deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].postMediaLink(tokens, message, url, name, description, messageProviderOptions);
     }).then(function(result) {
@@ -524,7 +523,57 @@ function postMediaLinkToProvider(userId, provider, message, url, name, descripti
     return deffered.promise;
 }
 
-//sendvideo
+app.post('/publishFromCloud/:userId', function(req, res) {
+    
+    var userId = req.params.userId;
+    
+    console.log("req.body ",req.body);
+    
+    // var scheduledDate = req.body.scheduledDate;
+    var providers = req.body.providers;        
+    var providersOptions = req.body.providersOptions;
+    var cloudProvider = req.body.cloudProvider;
+    //id or path of the file to download from cloud 
+    var fileId = req.body.fileId;
+    var fileName = req.body.fileName;
+    var writeStream;
+    //var cloudTokens;
+    
+    getRefreshedToken(cloudProvider, userId).then(function(tokens) {
+     /*   cloudTokens=tokens;
+        //upload File to root folder
+        return providersAPI[cloudProvider].getFileMetaData(tokens,fileId);
+
+    }).then(function(metaData) {*/
+        //create temp file from cloud content.
+        writeStream=fs.createWriteStream(fileName); 
+        providersAPI[cloudProvider].downloadFile(tokens, fileId).pipe(writeStream);
+        writeStream.on('finish', function() {
+            console.log('file downloaded ');
+            var params = {
+                title : req.body.title,
+                description : req.body.description
+            };
+            if(req.body.tags)
+                params.tags = req.body.tags;
+            
+            publishFileToProviders(userId, providers, providersOptions, {path:fileName}, params).then(function(results) {
+                //delete temp file 
+               // fs.unlinkSync(fileName);
+                res.send(results);
+            }, function(err) {
+                console.log(err);
+                res.status(403).send(err);
+            });
+        });
+        writeStream.on('error', function (err) {
+            console.log(err);
+            res.status(403).send(err);
+        });
+    });
+});
+
+//sendvideo with file from http post
 app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     
     //dailymotion issue : need file extension
@@ -532,81 +581,65 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     fs.renameSync(path, path+'_'+req.file.originalname);
     req.file.path = path+'_'+req.file.originalname;
     var userId = req.params.userId;
-    
-    if(req.body.isCloud) {
+         
+    var scheduledDate = req.body.scheduledDate;
+    var providers = req.body.providers.split(',');
 
-        getRefreshedToken(DROPBOX, userId).then(function(tokens) {
-            //upload File to root folder
-            return providersAPI.dropbox.uploadDrive(tokens, req.file);
-        }).then(function(results) {
-            console.log("uploadDrive OK on dropbox");
+    var providersOptions = JSON.parse(req.body.selectedProvidersOptions);
+
+    console.log('scheduledDate? ', scheduledDate);
+    console.log('selectedProvidersOptions? ', providersOptions);
+    var params = {
+        title : req.body.title,
+        description : req.body.description
+    };
+    if(req.body.tags)
+        params.tags = req.body.tags.split(',');
+
+    if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now()) {
+
+        // provider for fileupload            
+        console.log('targeted providers: ', providers);
+        publishFileToProviders(userId, providers, providersOptions, req.file, params).then(function(results) {
+            console.log("uploadFile OK");
             fs.unlinkSync(req.file.path);
             res.send(results);
-        }).fail(function(err) {
-            console.error("error in uploadDrive: ", err);
-            res.send("uploadDrive ERROR "+err);
+        }, function(err) {
+            //TODO generate error code from error
+            console.error("error in uploadFile: ", err);
+            res.status(403).send(err);
         });
-
+        //scheduled event
     } else {
-        
-        var scheduledDate = req.body.scheduledDate;
-        var providers = req.body.providers.split(',');
-        
-        var providersOptions = JSON.parse(req.body.selectedProvidersOptions);
-        
-        console.log('scheduledDate? ', scheduledDate);
-        console.log('selectedProvidersOptions? ', providersOptions);
-        var params = {
-            title : req.body.title,
-            description : req.body.description
-        };
-        if(req.body.tags)
-            params.tags = req.body.tags.split(',');
-
-        if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now()) {
-        
-            // provider for fileupload            
-            console.log('targeted providers: ', providers);
-            uploadToProviders(userId, providers, providersOptions, req.file, params).then(function(results) {
-                console.log("uploadFile OK");
-                fs.unlinkSync(req.file.path);
-                res.send(results);
-            }, function(err) {
-                //TODO generate error code from error
-                console.error("error in uploadFile: ", err);
-                res.status(403).send(err);
-            });
-            //scheduled event
-        } else {
-            scheduler.saveScheduledEvent(userId, scheduledDate, "uploadVideo", providers, providersOptions, [req.file, params.title, params.description, params.tags]
-            ).then(function(eventId) {
-                res.send(eventId);
-            }, function(err) {
-                console.log("err dans save Scheduled Event: ", err);
-                res.send("Cannot create or save scheduled event: "+err);
-            });
-        }
+        scheduler.saveScheduledEvent(userId, scheduledDate, "uploadVideo", providers, providersOptions, [req.file, params.title, params.description, params.tags]
+        ).then(function(eventId) {
+            res.send(eventId);
+        }, function(err) {
+            console.log("err dans save Scheduled Event: ", err);
+            res.send("Cannot create or save scheduled event: "+err);
+        });
     }
+
 });
 
-function uploadToProviders(userId, providers, providersOptions, file, params) {
+function publishFileToProviders(userId, providers, providersOptions, file, params) {
     
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
-        results.push(uploadToProvider(userId, provider, providersOptions[provider],file, params));
+        results.push(publishFileToProvider(userId, provider, providersOptions[provider],file, params));
     }
     return Q.all(results);
 }
 
-function uploadToProvider(userId, provider, providerOptions, file, params) {
+function publishFileToProvider(userId, provider, providerOptions, file, params) {
 
     var deffered = Q.defer();
     
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].sendVideo(tokens, file, userId, params, providerOptions);
     }).then(function(result) {
-        //console.log("uploadToProvider result: ",result);
+        //console.log("publishFileToProvider result: ",result);
         result.provider=provider;
         deffered.resolve(result);
     }, function(err) {

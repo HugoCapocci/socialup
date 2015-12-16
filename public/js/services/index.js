@@ -3,5 +3,6 @@ define([
     './cloud',
     './message',
     './event',
-    './alerts'
+    './alerts',
+    './publishFile'
 ], function () {});

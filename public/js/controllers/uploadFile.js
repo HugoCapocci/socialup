@@ -5,28 +5,45 @@ define(['./module', 'moment'], function (appModule, moment) {
     appModule.controller('UploadFileController', 
     ['$scope', '$rootScope', '$window', '$location', '$uibModal', 'FileUploader', 'alertsService', 'eventService', 'messageService',
     function($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService) {
-
         uploadFileController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService);
-        
     }]);
     
-    
     appModule.controller('UploadFileModalController', 
-    ['$scope', '$rootScope', '$window', '$location', '$uibModal', 'FileUploader', 'alertsService', 'eventService', 'messageService', 'file', 
-    function($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, file) {
+    ['$scope', '$rootScope', '$window', '$location', '$uibModal', '$uibModalInstance', 'FileUploader', 'alertsService', 'eventService', 'messageService','publishFileService', 'file',  'provider',
+    function($scope, $rootScope, $window, $location, $uibModal, $uibModalInstance, FileUploader, alertsService, eventService, messageService, publishFileService, file, provider) {
 
         $scope.modal = {
             title : 'Publier depuis le cloud',
             url : 'views/uploadFile.html',        
             cancel : function () {
-                $uibModal.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
+            }, 
+            ok : function() {
+                
+                var formData ={
+                    title : $scope.uploadFileData.title,
+                    description : $scope.uploadFileData.description,
+                    providers : $scope.uploadFileData.selectedProviders,
+                    fileId : file.id,
+                    fileName : file.name,
+                    providersOptions : $rootScope.selectedProvidersOptions,
+                    cloudProvider : provider
+                };
+                var tags = $scope.processTags();
+                if(tags.length>0)
+                    formData.tags=tags;
+                console.log("publishFileService.publishFromCloud ");
+                publishFileService.publishFromCloud(formData).then(function(result) {
+                    
+                    //alertService blabla
+                    $uibModalInstance.dismiss('ok');
+                });
             }
         };
         console.log("UploadFileModalController file ? ", file);
         uploadFileController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, file);   
     }]);
-     
-     
+
     function uploadFileController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, cloudFile) {
         
         var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
@@ -148,19 +165,18 @@ define(['./module', 'moment'], function (appModule, moment) {
                  modalInstance.close();
          };
         
-        $scope.update = function(item) {
+       $scope.update = function(item) {
             
             if(item!==undefined) {
                 console.log("update file");
             } else {
                 //eventService.update();
             }
-        };
+       };
         
-        $scope.validateFieldsAndUpload = function(item) {
+       $scope.validateFieldsAndUpload = function(item) {
 
             // console.log("validateFieldsAndUpload - $scope.uploadFileData.selectedProvidersOptions" ,$scope.uploadFileData.selectedProvidersOptions);
-
             if($scope.uploadFileData.title.length<=3) {
                 alertsService.warn("le titre ne peut pas avoir moins de 3 caractères");
                 return;
@@ -263,6 +279,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             }
             return tags;
         }
+        $scope.processTags=processTags;
     }
 
 });

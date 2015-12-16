@@ -147,6 +147,20 @@ function retrieveAllFiles(token, path, typeFilter) {
     return deferred.promise;
 }*/
 
+exports.getFileMetaData = function(tokens,filePath) {
+
+    return processGetRequest(tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent(filePath), function(fileContent, response) {
+        //console.log("response.headers: ",response.headers);
+        var metaData = JSON.parse(response.headers['x-dropbox-metadata']);
+         /*console.log("metaData ", metaData);
+        console.log("file size in byte ", metaData.bytes);
+        console.log("file mime_type ", metaData.mime_type);
+        console.log("content size ? ", fileContent.length);*/
+        metaData.fileName = metaData.path.substring(metaData.path.lastIndexOf('/')+1);
+        return metaData;
+    });
+};
+
 exports.downloadFile = function(tokens,filePath) {
 
     return request({

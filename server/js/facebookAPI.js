@@ -154,8 +154,7 @@ function sendVideo(token, file, user, params, providerOptions) {
                 deferred.reject(err);
             });*/
         }
-    });
-    
+    });    
     return deferred.promise;
 }
 
