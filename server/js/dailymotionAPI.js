@@ -132,12 +132,7 @@ function sendVideo(tokens, file, userId, params, providerOptions) {
     
     var deferred = Q.defer();
     //always check tokens validity before use
-    checkAccessTokenValidity(tokens, userId).then(function(validTokens) {
-
-        tokens=validTokens;
-        return getUploadURL(validTokens);
-    
-    }).then(function(urls) {
+    getUploadURL(tokens).then(function(urls) {
 
         //test with request API 
         request({
@@ -238,7 +233,6 @@ exports.listCategories = function(tokens, userId) {
          deferred.reject(err);
     });
     return deferred.promise;
-    
 };
 
 function processGetRequest(access_token, path, callback) {
@@ -269,7 +263,6 @@ function processGetRequest(access_token, path, callback) {
     });
     req.end();
     return deferred.promise;
-    
 }
 
 exports.getOAuthURL=getOAuthURL;

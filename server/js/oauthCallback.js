@@ -28,7 +28,6 @@ var eventsDAO = require('./eventsDAO.js');
 var app = express();
 
 const TWITTER = 'twitter';
-const DROPBOX = 'dropbox';
 
 /*
 STEP1
@@ -88,7 +87,7 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
         return executeChainedEvents(chainedEvents, params);
     }).fin(function () {
         //eventsDAO.updateScheduledEventAfterExecution(eventId, results);
-        fs.unlinkSync(file.path);
+        fs.unlink(file.path);
     });
 });
 
@@ -526,9 +525,7 @@ function postMediaLinkToProvider(userId, provider, message, url, name, descripti
 app.post('/publishFromCloud/:userId', function(req, res) {
     
     var userId = req.params.userId;
-    
-    console.log("req.body ",req.body);
-    
+        
     // var scheduledDate = req.body.scheduledDate;
     var providers = req.body.providers;        
     var providersOptions = req.body.providersOptions;
@@ -537,16 +534,10 @@ app.post('/publishFromCloud/:userId', function(req, res) {
     var fileId = req.body.fileId;
     var fileName = req.body.fileName;
     var writeStream;
-    //var cloudTokens;
     
     getRefreshedToken(cloudProvider, userId).then(function(tokens) {
-     /*   cloudTokens=tokens;
-        //upload File to root folder
-        return providersAPI[cloudProvider].getFileMetaData(tokens,fileId);
 
-    }).then(function(metaData) {*/
-        //create temp file from cloud content.
-        writeStream=fs.createWriteStream(fileName); 
+        writeStream=fs.createWriteStream(userId+fileName); 
         providersAPI[cloudProvider].downloadFile(tokens, fileId).pipe(writeStream);
         writeStream.on('finish', function() {
             console.log('file downloaded ');
@@ -556,10 +547,10 @@ app.post('/publishFromCloud/:userId', function(req, res) {
             };
             if(req.body.tags)
                 params.tags = req.body.tags;
-            
-            publishFileToProviders(userId, providers, providersOptions, {path:fileName}, params).then(function(results) {
+
+            publishFileToProviders(userId, providers, providersOptions, {path:userId+fileName}, params).then(function(results) {
                 //delete temp file 
-               // fs.unlinkSync(fileName);
+                fs.unlink(userId+fileName);
                 res.send(results);
             }, function(err) {
                 console.log(err);
@@ -602,7 +593,7 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
         console.log('targeted providers: ', providers);
         publishFileToProviders(userId, providers, providersOptions, req.file, params).then(function(results) {
             console.log("uploadFile OK");
-            fs.unlinkSync(req.file.path);
+            fs.unlink(req.file.path);
             res.send(results);
         }, function(err) {
             //TODO generate error code from error

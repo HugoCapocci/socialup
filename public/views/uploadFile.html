@@ -21,18 +21,13 @@
                 <div class="col-md-3" ng-repeat="provider in uploadFileData.providers">
                     <div ng-if="uploadFileData.selectedProviders.indexOf(provider)>-1">
                         <div ng-if="provider==='dailymotion'">
-                            <ng-include src="'/views/providers/dailymotionOptions.html'"></ng-include>
-                            <!--<input type="checkbox" ng-model="$root.selectedProvidersOptions.dailymotion.private"> Vidéo privée<br/>
-                            Chaine :
-<select class="form-control" ng-model="$root.selectedProvidersOptions.dailymotion.channel" ng-options="option.name for option in uploadFileData.providersOptions.dailymotion.channels"></select>-->
+                            <ng-include src="'/views/providers/dailymotionOptions.html'"></ng-include>                           
                         </div>
                         <div ng-if="provider==='facebook'">
                             <ng-include src="'/views/providers/facebookOptions.html'"></ng-include>
                         </div>
                          <div ng-if="provider==='google'">
-                             <ng-include src="'/views/providers/youtubeOptions.html'"></ng-include>
-                           <!-- Categorie :
-<select class="form-control" ng-model="$root.selectedProvidersOptions.google.category" ng-options="option.name for option in $root.providersOptions.google.categories"></select>-->
+                             <ng-include src="'/views/providers/youtubeOptions.html'"></ng-include>                    
                         </div>
                         
                     </div>                    
@@ -80,7 +75,7 @@
             </div>
         </div>
 
-        <div ng-if="uploadFileData.isFile" class="col-md-5 col-md-offset-7">
+        <div ng-if="uploadFileData.isFile && !uploadFileData.cloudFile" class="col-md-5 col-md-offset-7">
             <button class="btn btn-default" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
             <button class="btn btn-default" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
                 {{(uploadFileData.isScheduled ? 'programmer envoit de la vidéo' : 'Publier Vidéo')}}
@@ -88,24 +83,4 @@
         </div>
         
      </div>
-     
-<!--     <div class="row">
-        <input type="checkbox" ng-model="uploadFileData.isMessageAfter"> Envoyer message une fois la vidéo publiée
-     </div>
-     <div class="row" ng-if="uploadFileData.isMessageAfter">
-        <div class="col-md-12">
-            Envoyer message Providers: 
-            <label ng-repeat="messageProvider in uploadFileData.messageProviders">
-                <input type="checkbox" checklist-model="uploadFileData.selectedMessageProviders" checklist-value="messageProvider"> {{messageProvider}}
-            </label>
-         </div>
-         <div class="col-md-12" ng-if="uploadFileData.selectedMessageProviders.indexOf('facebook')>-1">
-             
-             FB Visibility : <select class="form-control" ng-model="uploadFileData.selectedmessageProvidersOptions.facebook.visibility" ng-options="option for option in uploadFileData.messageProvidersOptions.facebook.visibilities"></select> <br/>
-             
-         </div>
-         <div class="col-md-12">
-            <textarea ng-model="uploadFileData.chainedMessage" style="min-width:530px;min-height:250px;"></textarea>
-         </div>
-     </div>-->
 </div>

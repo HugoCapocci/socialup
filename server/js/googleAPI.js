@@ -308,17 +308,17 @@ function getUserInfo(tokens) {
 
 exports.downloadFile = function(tokens,fileId) {
     
-    var deferred = Q.defer();
+    //var deferred = Q.defer();
     oauth2Client.setCredentials(tokens);
-    drive.files.get({fileId:fileId+'?alt=media'}, function(err, bytes) {
+    return drive.files.get({fileId:fileId+'?alt=media'}, function(err/*, bytes*/) {
         if(err) {
             console.log("cannot get data for fileId: "+fileId+" error: ", err);
-            deferred.reject(err);
-        } else {
+          //  deferred.reject(err);
+        } /*else {
             deferred.resolve(bytes);
-        }
+        }*/
     });
-    return deferred.promise;
+   // return deferred.promise;
 };
 
 exports.checkFileData = function(tokens, fileId) {
