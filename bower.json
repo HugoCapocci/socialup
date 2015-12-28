@@ -28,7 +28,8 @@
     "SHA-1": "~0.1.1",
     "angular-smart-table": "~2.1.5",
     "checklist-model": "~0.8.0",
-    "moment": "~2.10.6"
+    "moment": "~2.10.6",
+    "ng-videosharing-embed": "~0.3.4"
   },
   "resolutions": {
     "angular": "1.4.8"

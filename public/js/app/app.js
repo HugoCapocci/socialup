@@ -11,11 +11,12 @@ define([
     'ng-tags-input',
     'angular-smart-table',
     'checklist-model',
+    'ng-videosharing-embed',
     '../services/index',
     '../controllers/index'
     ], function (angular) {
     
-    'use strict';
+        'use strict';
         
         return angular.module('SocialUp', [
             'ngResource',
@@ -27,6 +28,7 @@ define([
             'ngTagsInput',
             'smart-table',
             'checklist-model',
+            'videosharing-embed',
             'SocialUp.services',
             'SocialUp.controllers'
         ]);

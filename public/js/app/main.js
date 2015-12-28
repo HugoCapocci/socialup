@@ -12,7 +12,8 @@ require.config({
         'sha1' : '../../bower_components/SHA-1/sha1',
         'angular-smart-table' : '../../bower_components/angular-smart-table/dist/smart-table',
         'checklist-model' : '../../bower_components/checklist-model/checklist-model',
-        'moment' : '../../bower_components/moment/moment'
+        'moment' : '../../bower_components/moment/moment',
+        'ng-videosharing-embed' : '../../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min'
     },
     shim : {
         'angular' : {
@@ -41,6 +42,9 @@ require.config({
              deps : ['angular']
         },
         'checklist-model' : {
+             deps : ['angular']
+        },
+        'ng-videosharing-embed' : {
              deps : ['angular']
         }
     },

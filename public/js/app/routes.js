@@ -14,11 +14,11 @@ define(['angular', 'app'], function(angular, app) {
 
 	return app.config(['$routeProvider', function($routeProvider) {
 
-        var routes = ['uploadFile', 'cloudExplorer', 'postMessage', 'login', 'scheduledEvents', 'manageSocialNetworks'];
+        var routes = ['uploadFile', 'cloudExplorer', 'postMessage', 'login', 'resetPassword', 'scheduledEvents', 'tracedEvents', 'videos', 'manageSocialNetworks'];
         routes.forEach(function(route) {
             generateRouteProviders($routeProvider, route);
         });
 	}]
-  );
+    );
 
 });

@@ -4,5 +4,6 @@ define([
     './message',
     './event',
     './alerts',
-    './publishFile'
+    './publishFile',
+    './videos'
 ], function () {});

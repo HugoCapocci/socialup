@@ -13,6 +13,10 @@ define(['./module'], function (appModule) {
                 return retrieveAllEvents('events', localData.user.id);
             };
             
+            this.retrieveTracedEvents = function() {
+                return retrieveAllEvents('tracedEvents', localData.user.id);
+            };
+            
             this.retrieveChainedEvents = function(eventParentId) {
                 return retrieveAllEvents('chainedEvents', eventParentId);
             };

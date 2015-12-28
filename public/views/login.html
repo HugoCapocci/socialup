@@ -75,6 +75,18 @@
                                 <img src="images/twitter-connect-button.png" ng-click="socialConnect('twitter')">-->
                             </div>
                         </div>
+                        <div class="clean"></div>
+                        <div class="row">
+                            <div class="col-xs-5 col-md-5 col-lg-6 col-md-offset-3">
+                                Mot de passe oublié ?
+                            </div>
+                            <div class="col-xs-5 col-md-5 col-lg-6">
+                                <input type="text" class="form-control" placeholder="Email (login)" ng-model="form.loginPasswordRetrieve"/>
+                            </div>
+                            <div class="col-xs-5 col-md-5 col-lg-6">
+                                <button class="btn btn-primary" type="button" ng-click="sendResetPassword()">Reset password</button>
+                            </div>
+                        </div>
                     </div>
                 </uib-tab>
             </uib-tabset>

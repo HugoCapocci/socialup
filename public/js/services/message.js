@@ -4,9 +4,9 @@ define(['./module'], function (appModule) {
     
     appModule.service('messageService',
         ['$http', '$q', '$window',
-        function messageService($http, $q, $window) {
-            
-             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
+        function($http, $q, $window) {
+
+            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
                         
             this.postMessage = function(providers, message, providersOptions, scheduledDate) {
                 console.log("messageService.postMessage "+message);

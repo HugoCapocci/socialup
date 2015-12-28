@@ -125,6 +125,20 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
+            
+            this.resetPassword = function(userEmail) {
+                
+                var deferred = $q.defer();
+                $http.post('/user/resetPassword/'+userEmail,{})
+                .then(function(response) {
+                    console.log('response for ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
 
         }]
     );

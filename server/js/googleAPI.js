@@ -122,6 +122,34 @@ exports.listCategories = function(tokens) {
     return deferred.promise;
 };
 
+// see https://developers.google.com/youtube/v3/docs/search/list#forMine
+exports.listVideos = function(tokens) {
+    
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    //youtubeAPI.videos.list({part:'snippet', regionCode:'fr', hl:'fr_FR', chart : 'mostPopular'}
+    youtubeAPI.search.list({part:'snippet', forMine : true, type : 'video'}, function(err, response) {
+        //console.log("listVideos response: ",response);
+        //console.log("listVideos err: ",err);
+        if(err)
+            deferred.reject(err);
+        else {
+            var videos = [];
+            response.items.forEach(function(item) {
+                videos.push({
+                    id : item.id.videoId,
+                    creationDate : item.snippet.publishedAt,
+                    title : item.snippet.title,
+                    description : item.snippet.description,
+                    thumbnailURL : item.snippet.thumbnails['default'].url
+                });
+            });
+            deferred.resolve(videos);
+        }
+    });
+    return deferred.promise;
+};
+
 //todo  categoryId ?
 function sendVideo(tokens, file, user, videoParams, providerOptions) {
 

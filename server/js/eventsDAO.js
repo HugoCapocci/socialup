@@ -7,6 +7,7 @@ var ObjectID = require('mongodb').ObjectID;
 var uri = process.env.MONGOLAB_URI;
 var scheduledEventsCollection = "scheduledEvents";
 var chainedEventsCollection = "chainedEvents";
+var tracedEventsCollection = "tracedEvents";
 
 function getDB(callback) {
      MongoClient.connect(uri, function(err, db) {
@@ -30,7 +31,7 @@ function saveScheduledEvent(eventId, userId, date, eventType, providers, provide
         eventId : eventId,
         chainedEventsCounts :0
     };
-    return createEvent(eventToSave, scheduledEventsCollection); 
+    return createEvent(eventToSave, scheduledEventsCollection);
 }
 exports.createChainedEvent = function(eventParentId, userId, eventType, providers, providersOptions, eventParams) {
 
@@ -70,6 +71,30 @@ function createEvent(eventToSave, collection, callback) {
     return deferred.promise;
 }
 
+exports.createTracedEvent = function(userId, eventType, eventParams, providers, providersOptions, results) {
+    
+    var eventToSave = getEventToSave(userId, eventType, eventParams, providers, providersOptions);
+    eventToSave.results=results;
+    return createEvent(eventToSave, tracedEventsCollection);
+};
+exports.createTracedEventError = function(userId, eventType, eventParams, providers, providersOptions, error) {
+    
+    var eventToSave = getEventToSave(userId, eventType, eventParams, providers, providersOptions);
+    eventToSave.error=error;
+    return createEvent(eventToSave, tracedEventsCollection);
+};
+function getEventToSave(userId, eventType, eventParams, providers, providersOptions) {
+        
+    return {
+        user : userId,
+        dateTime : (new Date()).getTime(),
+        eventType : eventType,
+        eventParams: eventParams,
+        providers : providers,
+        providersOptions : providersOptions
+    };
+}
+
 exports.updateScheduledEvent = function(eventId, scheduledEvent) {
     delete scheduledEvent._id;
     return updateEvent({eventId:eventId}, scheduledEvent, scheduledEventsCollection);
@@ -94,14 +119,14 @@ function updateEvent(query, update, collection) {
         db.collection(collection).update(query, update, function(err, r) {
             db.close();
             if(err)
-                deferred.reject(new Error(err));
+                deferred.reject(err);
             else {
                 //console.log("event updated ?", r.result);
                 deferred.resolve(r.result.nModified);
             }                
         });
     });
-    return deferred.promise;   
+    return deferred.promise;
 }
 
 function deleteScheduledEvent(eventId) {
@@ -166,12 +191,15 @@ function retrieveEvents(collection, params) {
 }
 
 function retrieveScheduledEventsByUser(userId) {
-    return retrieveEventsByUser({user:userId}, scheduledEventsCollection, 'dateTime');
+    return retrieveEventsByQuery({user:userId}, scheduledEventsCollection, 'dateTime');
 }
-exports.retrieveChainedEvents = function(eventParentId) {
-    return retrieveEventsByUser({eventParentId:eventParentId}, chainedEventsCollection);
+exports.retrieveTracedEventsByUser = function(userId) {
+    return retrieveEventsByQuery({user:userId},  tracedEventsCollection, 'dateTime');
 };
-function retrieveEventsByUser(query, collection, sortData) {
+exports.retrieveChainedEvents = function(eventParentId) {
+    return retrieveEventsByQuery({eventParentId:eventParentId}, chainedEventsCollection);
+};
+function retrieveEventsByQuery(query, collection, sortData) {
     var deferred = Q.defer();
     getDB(function(db) {
         var sort = {};

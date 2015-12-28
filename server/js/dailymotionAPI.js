@@ -128,6 +128,20 @@ function refreshTokens(tokens, userId) {
     return deferred.promise;
 }
 
+exports.listVideos = function(tokens) {
+    
+    return processGetRequest(tokens.access_token,'/user/me/videos?fields=id,thumbnail_60_url,title,description,status,created_time', function(videos) {
+        //console.log("raw videos result: ", videos);
+        return videos.list.map(function(video) {
+            video.thumbnailURL = video.thumbnail_60_url;
+            video.creationDate = new Date(video.created_time*1000);
+            delete video.thumbnail_60_url;
+            delete video.created_time;
+            return video;
+        });
+    });
+};
+
 function sendVideo(tokens, file, userId, params, providerOptions) {
     
     var deferred = Q.defer();

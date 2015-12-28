@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">24.52% </span>
+        <span class="strong">23.49% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>38/155</span>
+        <span class='fraction'>39/166</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">2.63% </span>
+        <span class="strong">2.5% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/38</span>
+        <span class='fraction'>1/40</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">12% </span>
+        <span class="strong">10.71% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>3/25</span>
+        <span class='fraction'>3/28</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">24.52% </span>
+        <span class="strong">23.49% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>38/155</span>
+        <span class='fraction'>39/166</span>
       </div>
     </div>
   </div>
@@ -394,7 +394,35 @@
 349
 350
 351
-352</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -513,6 +541,34 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -869,6 +925,34 @@ exports.listCategories = <span class="fstat-no" title="function not covered" >fu
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
 };
 &nbsp;
+// see https://developers.google.com/youtube/v3/docs/search/list#forMine
+exports.listVideos = <span class="fstat-no" title="function not covered" >function(tokens) {</span>
+    
+<span class="cstat-no" title="statement not covered" >    oauth2Client.setCredentials(tokens);</span>
+<span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
+    //youtubeAPI.videos.list({part:'snippet', regionCode:'fr', hl:'fr_FR', chart : 'mostPopular'}
+<span class="cstat-no" title="statement not covered" >    youtubeAPI.search.list({part:'snippet', forMine : true, type : 'video'}, <span class="fstat-no" title="function not covered" >function(err, response) {</span></span>
+        //console.log("listVideos response: ",response);
+        //console.log("listVideos err: ",err);
+<span class="cstat-no" title="statement not covered" >        if(err)</span>
+<span class="cstat-no" title="statement not covered" >            deferred.reject(err);</span>
+        else {
+<span class="cstat-no" title="statement not covered" >            var videos = [];</span>
+<span class="cstat-no" title="statement not covered" >            response.items.forEach(<span class="fstat-no" title="function not covered" >function(item) {</span></span>
+<span class="cstat-no" title="statement not covered" >                videos.push({</span>
+                    id : item.id.videoId,
+                    creationDate : item.snippet.publishedAt,
+                    title : item.snippet.title,
+                    description : item.snippet.description,
+                    thumbnailURL : item.snippet.thumbnails['default'].url
+                });
+            });
+<span class="cstat-no" title="statement not covered" >            deferred.resolve(videos);</span>
+        }
+    });
+<span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
+};
+&nbsp;
 //todo  categoryId ?
 <span class="fstat-no" title="function not covered" >function sendVideo(tokens, file, user, videoParams, providerOptions) {</span>
 &nbsp;
@@ -1102,7 +1186,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Dec 16 2015 19:50:31 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Dec 28 2015 17:26:35 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

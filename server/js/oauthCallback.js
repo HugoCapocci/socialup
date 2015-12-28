@@ -24,6 +24,7 @@ var providersAPI = {
 
 var userDAO = require('./userDAO.js');
 var eventsDAO = require('./eventsDAO.js');
+var emailService = require('./emailService.js');
 
 var app = express();
 
@@ -234,7 +235,6 @@ app.get('/*2callback', function(req, res) {
         initiateUser(userId);
 
     var getTokens;
-    
     if(provider === TWITTER) {
         
         if(!users[userId].providers[TWITTER]) {
@@ -285,14 +285,13 @@ app.get('/*2callback', function(req, res) {
 });
 
 app.get('/events/:userId', function(req, res) {
-    var userId = req.params.userId;    
+    var userId = req.params.userId;
     eventsDAO.retrieveScheduledEventsByUser(userId).then(function(events) {
          res.send(events);
     }, function(err) {
          res.send(err);
     });    
 });
-
 app.get('/chainedEvents/:eventParentId', function(req, res) {
     var eventParentId = req.params.eventParentId;    
     eventsDAO.retrieveChainedEvents(eventParentId).then(function(events) {
@@ -301,7 +300,14 @@ app.get('/chainedEvents/:eventParentId', function(req, res) {
          res.send(err);
     });
 });
-
+app.get('/tracedEvents/:userId', function(req, res) {
+    var userId = req.params.userId; 
+    eventsDAO.retrieveTracedEventsByUser(userId).then(function(events) {
+         res.send(events);
+    }, function(err) {
+         res.send(err);
+    });
+});
 app.get('/event/:eventId', function(req, res) {
  
     var eventId = req.params.eventId;
@@ -453,8 +459,11 @@ app.post('/message/:userId', function(req, res) {
         
         //direct message
         postMessageToProviders(userId, providers, providersOptions, message).then(function(results) {
+            //async
+            eventsDAO.createTracedEvent(userId, "message", [message], providers, providers, results);
             res.send(results);
         }, function(err) {
+            eventsDAO.createTracedEventError(userId, "message", [message], providers, providers, err);
             res.send("Cannot send message err: "+err);
         });
     
@@ -597,10 +606,13 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
         publishFileToProviders(userId, providers, providersOptions, req.file, params).then(function(results) {
             console.log("uploadFile OK");
             fs.unlink(req.file.path);
+            //async save
+            eventsDAO.createTracedEvent(userId, "uploadVideo", params, providers, providers, results);
             res.send(results);
         }, function(err) {
             //TODO generate error code from error
             console.error("error in uploadFile: ", err);
+            eventsDAO.createTracedEventError(userId, "uploadVideo", params, providers, providers, err);
             res.status(403).send(err);
         });
         //scheduled event
@@ -672,7 +684,7 @@ app.get('/categories/:provider/:userId', function(req, res) {
     var provider = req.params.provider;
     var userId=req.params.userId;
     
-    //TODO put categories in cache (avoid calls for almost static data)
+    //put categories in cache (avoid calls for almost static data)
     if(providersCategories.provider!==undefined)
         res.send(providersCategories.provider);
     else {
@@ -683,9 +695,25 @@ app.get('/categories/:provider/:userId', function(req, res) {
             providersCategories.provider=categories;
             res.send(categories);
         }).fail(function(err) {
-            res.status(404).send(err);
+            res.status(403).send(err);
         });
     }
+});
+
+app.get('/videos/:provider/:userId', function(req, res) {
+    
+    //console.log("get videos");    
+    var provider = req.params.provider;
+    var userId=req.params.userId;
+            
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].listVideos(tokens, userId);
+    }).then(function(videos) {
+        //console.log("videos found: ", videos);
+        res.send(videos);
+    }).fail(function(err) {
+        res.status(403).send(err);
+    });
 });
 
 app.get('/authenticate', function(req, res) {
@@ -699,7 +727,7 @@ app.get('/authenticate', function(req, res) {
             res.send(data);
         }, function (err) {
             console.log(err);
-            res.status(404).end();
+            res.status(403).end();
         });
 
     } else {
@@ -725,6 +753,8 @@ app.post('/user/create', function(req, res) {
             providers : {}
         };
         userDAO.saveUser(user).then(function (data) {
+            
+            //TODO send mail to user
             res.send(data);
         }, function (err) {
             console.log(err);
@@ -735,6 +765,17 @@ app.post('/user/create', function(req, res) {
         console.log("social user registration not yet implemented");
         res.status(404).end();
     }
+});
+
+app.post('/user/resetPassword/:userEmail', function(req, res) {
+    var userEmail=req.params.userEmail;
+    
+    emailService.sendMail("reset", userEmail).then(function (data) {  
+        res.send(data);
+    }, function (err) {
+        console.log(err);
+        res.status(404).end();
+    });
 });
 
 var server = app.listen(app.get('port'), function() {

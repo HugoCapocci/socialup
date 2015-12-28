@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>Social Up</title>        
-        
+        <!--<script src="https://www.youtube.com/iframe_api"></script>-->
         <!-- use require.js for dependeny injections -->
         <script data-main="js/app/main.js" src="./require.js"></script>
 
@@ -107,6 +107,10 @@
                 cursor: inherit;
                 display: block;
             }
+            .selected {
+                background : #666 !important;
+                color: #EEE !important;
+            }
         </style>   
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
@@ -131,8 +135,10 @@
                     <li><a href="#/cloudExplorer">Explore drive</a></li>
                     <li><a href="#/postMessage">Post a message</a></li>
                     <li><a href="#/scheduledEvents">Manage scheduled events</a></li>
-                    <li><a href="#/manageSocialNetworks">Manage social networks authentication</a></li>
-                    <li class="active"><a href="#/login">Login / Registration</a></li>
+                    <li><a href="#/tracedEvents">Review traced events</a></li>
+                    <li><a href="#/videos">View videos</a></li>  
+                    <li><a href="#/manageSocialNetworks">Manage authentications</a></li>
+                    <!--<li class="active"><a href="#/login">Login / Registration</a></li>-->
                 </ul>
             </div><!--/.nav-collapse -->
           </div>

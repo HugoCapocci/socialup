@@ -64,7 +64,9 @@ define(['./module', 'moment'], function (appModule, moment) {
             messageProviders : ['twitter', 'facebook', 'linkedin'],
             selectedMessageProviders : []           
         };
-             
+        
+        //$scope.result = {url:'http://www.dailymotion.com/video/x3i7t5f_cette-femme-ote-son-manteau-ce-qui-va-s-en-suivre-est-inimaginable_fun'};
+    
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
             name: 'videoFilter',
@@ -131,10 +133,13 @@ define(['./module', 'moment'], function (appModule, moment) {
            modalInstance.close();
        };
 
-       $scope.uploader.onSuccessItem = function(item, response, status, headers) {
-           
+
+        $scope.uploader.onSuccessItem = function(item, response, status, headers) {
+                       
+            $scope.result=response[0];
+            console.log("onSuccessItem, result? ", $scope.result);
             alertsService.success('video successfully ' + ($scope.uploadFileData.isScheduled ? 'scheduled' : 'published') , 5000);
-           /* console.log("reponse", response);
+            /* console.log("reponse", response);
             console.log("item", item);*/
             if($scope.uploadFileData.isMessageAfter && $scope.uploadFileData.selectedMessageProviders.length>0) {
 
@@ -142,6 +147,11 @@ define(['./module', 'moment'], function (appModule, moment) {
                     messageService.postMessage($scope.uploadFileData.selectedMessageProviders, response[0].url).then(function(results) {
                         console.log("results: ",results);
                         alertsService.success("Message publié avec succès");
+                        
+                        //
+                       /* $scope.result = {
+                            url : results[0].url
+                        };*/
                         modalInstance.close();
                     }, function(err) {
                         alertsService.error("Erreur dans l'envoit de message. Err: "+err);

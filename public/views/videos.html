@@ -1,0 +1,57 @@
+<div>
+    
+    <div class="row">
+       Provider : <select class="form-control" ng-model="videos.provider" ng-options="option for option in videos.providers" ng-change="videos.changeProvider()"></select>
+    </div>
+    
+    <div class="row">
+        <table st-table="displayedCollection"  st-safe-src="videos.list" class="table table-striped">
+            <thead>
+                <tr>
+                    <th st-sort="title">video title</th>
+                    <th st-sort="creationDate">creation date</th>               
+                    <th>description</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>                
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="video in displayedCollection">
+                    <td>{{video.title}}</td>
+                    <td>{{video.creationDate | date:"dd/MM/yyyy HH'h'mm" }}</td>
+                    <td>{{video.description}}</td>
+                    <td>
+                       <a ng-href="{{videos.getURL(video.id)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>
+                    </td>
+                    <td>
+                        <div class="btn-group" uib-dropdown>
+                            <button type="button" class="btn btn-info" uib-dropdown-toggle>
+                                <span class="caret"></span>
+                                <span class="sr-only"></span>
+                            </button>
+                            <ul class="uib-dropdown-menu" role="menu" aria-labelledby="split-button">
+                                <!-- TODO use modal to edit metadata -->
+                                <li role="menuitem">
+                                    <a href="" ng-click="modifyVideo(video)">Editer</a>                          
+                                </li>
+                               <!-- <li class="divider"></li>-->
+                                <!--<li role="menuitem" ng-repeat="contextMenu in contextMenus">
+                                    <a href="" ng-if="contextMenu.allowed.indexOf(event.type)>-1" ng-click="executeAction(contextMenu.type, event)">{{contextMenu.name}}</a>                          
+                                </li>-->
+                            </ul>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <button type="button" ng-click="deleteVideo(video)" class="btn btn-sm btn-danger" uib-tooltip="Effacer la vidéo">
+                                <i class="glyphicon glyphicon-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

@@ -5,7 +5,7 @@ define(['./module', 'moment'], function (appModule, moment) {
     appModule.controller(
         'ManageSocialNetworksController',
         ['$scope', '$window', '$timeout', 'authService', 'alertsService',
-        function manageSocialNetworksController($scope, $window, $timeout, authService, alertsService) {
+        function($scope, $window, $timeout, authService, alertsService) {
         
             $scope.socialTokens = [];
             authService.getUserData().then(function(userData) {

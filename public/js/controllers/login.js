@@ -5,7 +5,7 @@ define(['./module', 'sha1'], function (appModule, sha1) {
     appModule.controller(
         'LoginController',
         ['$scope', '$location', 'authService', 'alertsService',
-        function loginController($scope, $location, authService, alertsService) {
+        function($scope, $location, authService, alertsService) {
 
             $scope.form = {
                 login : '',
@@ -59,9 +59,24 @@ define(['./module', 'sha1'], function (appModule, sha1) {
                         });
                     }
                 } else {
-                     alertsService.warn('Veuillez renesigner tous les champs ');
+                     alertsService.warn('Veuillez renseigner tous les champs ');
                 }
             };
+            
+            $scope.sendResetPassword = function() {
+                
+                console.log("sendResetPassword");
+                
+                if($scope.form.loginPasswordRetrieve !== '')                
+                    authService.resetPassword($scope.form.loginPasswordRetrieve).then(function(userData) {
+                        alertsService.success("Un email vous a été envoyé pour réinitialiser votre mot de passe");
+                    }, function(err) {
+                        alertsService.error('Erreur dans le service de réinitialisation du mot de passe: '+err);
+                    });
+                else 
+                     alertsService.warn('Veuillez renseigner votre email');
+            };
+            
         }]
     );
 });

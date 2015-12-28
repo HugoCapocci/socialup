@@ -20,6 +20,7 @@
     "mongodb": "^2.0.47",
     "multer": "^1.1.0",
     "node-schedule": "^0.2.9",
+    "nodemailer": "^1.10.0",
     "q": "^1.2.0",
     "querystring": "^0.2.0",
     "request": "^2.65.0"

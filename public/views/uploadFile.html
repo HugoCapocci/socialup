@@ -1,7 +1,7 @@
  <div >
 
     <div class="row">
-        <div class="col-md-2">
+        <div class="col-md-2">            
             <span class="btn btn-default btn-file" ng-if="!uploadFileData.cloudFile">
                 Browse video <input type="file" nv-file-select uploader="uploader"/>
             </span>
@@ -17,7 +17,7 @@
                 </label>
             </div>
             <div class="row">
-                <div class="col-md-3"><!-- provider options--></div>
+                <div class="col-md-3"></div>
                 <div class="col-md-3" ng-repeat="provider in uploadFileData.providers">
                     <div ng-if="uploadFileData.selectedProviders.indexOf(provider)>-1">
                         <div ng-if="provider==='dailymotion'">
@@ -74,7 +74,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div ng-if="uploadFileData.isFile && !uploadFileData.cloudFile" class="col-md-5 col-md-offset-7">
             <button class="btn btn-default" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
             <button class="btn btn-default" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
@@ -82,5 +82,9 @@
             </button>
         </div>
         
-     </div>
+    </div>
+     
+    <div class="row">        
+        <embed-video ng-if="result.url" data-ng-href="{{result.url}}" controls="0"></embed-video>
+    </div>
 </div>
