@@ -97,17 +97,15 @@ exports.sendVideo = function(tokens, file, userId, params, providerOptions) {
     }).then(function() {
         return finalizeUpload(completeURI, tokens);
         
-    }).then(function(videoId) {
-        
-        console.log("finalizeUpload result: ", videoId);
-        return patchMetadata(tokens, videoId, params.title, params.description);
+    }).then(function(id) {
+        videoId=id;
+        console.log("finalizeUpload videoId: ", videoId);
+        return patchMetadata(tokens, videoId, params.title, params.description, params.tags);
 
     }).then(function() {
-        
         deferred.resolve({
             url : 'https://vimeo.com/' +videoId
         });
-        
     }).fail(function(err) {
         deferred.reject(err);
     });
@@ -225,13 +223,11 @@ function finalizeUpload(completeURI, tokens) {
         if(err) {
             console.log("cannot finalizeUpload. Err: ",err);
             deferred.reject(err);
-        } else {            
-            console.log('finalizeUpload statusCode ?', response.statusCode);
-            //var results = JSON.parse(body);
-            if(body.error) {
+        } else {
+            if(response.statusCode != 201) {
                 deferred.reject(body.error);
             } else {
-                console.log('headers: ',response.headers);
+                //console.log('headers: ',response.headers);
                 var location = response.headers.location;
                 deferred.resolve(location.substr(location.lastIndexOf('/')+1));
             }

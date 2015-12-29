@@ -9,20 +9,25 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.events = [];
         $scope.displayedCollection = [].concat($scope.events);
         $scope.animationsEnabled = true;
+        $scope.itemsByPage = 5;
+        
+        $scope.formatDate = function(dateTime) {
+            return moment(dateTime).format("dddd D MMM YYYY, HH[h]mm");
+        };
   
         eventService.retrieveTracedEvents().then(function(events) {
             console.log("events retrieved: ", events);
             events.forEach(function(event) {
                 var row = { 
-                    type : event.eventType, 
-                    date : moment(event.dateTime).format("dddd D MMMM YYYY à HH:mm"),
+                    type : event.eventType,
+                    //moment(event.dateTime).format("dddd D MMMM YYYY à HH'h'mm")
+                    date : event.dateTime,
                     providers : event.providers,
                     id : event._id,
                     results : event.results,
                     error : event.error
                 };
-                $scope.events.push(row);
-                    
+                $scope.events.push(row);                    
             });
            // $scope.events=events;
             $scope.displayedCollection = [].concat($scope.events);
@@ -34,7 +39,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.deleteEvent = function(event) {
             console.log("delete event: ", event);
             //TODO open modal window with loading gif, and close it after
-            eventService.deleteScheduledEvent(event.id).then(function() {
+            eventService.deleteTracedEvent(event.id).then(function() {
                 var index = $scope.events.indexOf(event);
                 if (index !== -1) {
                     $scope.events.splice(index, 1);

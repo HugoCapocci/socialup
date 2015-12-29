@@ -362,7 +362,14 @@ app.delete('/event/chained/:eventId/:eventParentId', function(req, res) {
         res.send(err);
     });
 });
-
+app.delete('/event/traced/:eventId', function(req, res) {
+    var eventId = req.params.eventId;
+    eventsDAO.deleteTracedEvent(eventId).then(function(result) {
+        res.status(result===1 ? 200 : 400).end();
+    }, function(err) {
+        res.send(err);
+    });
+});
 app.delete('/token/:provider/:userId', function(req, res) {
 
     var provider = req.params.provider;

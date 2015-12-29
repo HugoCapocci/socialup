@@ -34,6 +34,9 @@ define(['./module'], function (appModule) {
             };            
             this.deleteChainedEvent = function(eventId, eventParentId) {
                 return deleteEvent('/event/chained/'+eventId+'/'+eventParentId);               
+            };
+            this.deleteTracedEvent = function(eventId) {
+                return deleteEvent('/event/traced/'+eventId);               
             }; 
             function deleteEvent(ressource) {
                 

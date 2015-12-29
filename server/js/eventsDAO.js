@@ -141,6 +141,14 @@ exports.deleteChainedEvent = function(eventId, eventParentId) {
             updateEvent(eventParentId, {$inc:{chainedEventsCounts:-1}}, scheduledEventsCollection);
     });
 };
+
+exports.deleteTracedEvent = function(eventId) {
+    var eventToDelete = {
+        _id : new ObjectID(eventId)            
+    };
+    return deleteEvent(eventToDelete, tracedEventsCollection);
+};
+
 function deleteEvent(eventToDelete, collection, callback) {
     var deferred = Q.defer();
     getDB(function(db) {
@@ -162,7 +170,7 @@ function retrieveScheduledEvents() {
     return retrieveEvents(scheduledEventsCollection);
 }
 exports.retrieveChainedEvents = function(eventId) {
-  return retrieveEvents(chainedEventsCollection, [{name : 'eventParentId', value:eventId}]);  
+    return retrieveEvents(chainedEventsCollection, [{name : 'eventParentId', value:eventId}]);  
 };
 function retrieveEvents(collection, params) {
     
