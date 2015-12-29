@@ -28,7 +28,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             //console.log("localData found? ",localData);            
 
             //oauth providers url
-            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin'];
+            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin', 'vimeo'];
 
             $scope.providers.forEach(function(provider) {
                 authService.getProviderURL(provider).then(function(url) {

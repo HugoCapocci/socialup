@@ -19,7 +19,8 @@ var providersAPI = {
     facebook : require('./facebookAPI.js'),
     dropbox : require('./dropboxAPI.js'),
     twitter : require('./twitterAPI.js'),
-    linkedin : require('./linkedInAPI.js')
+    linkedin : require('./linkedInAPI.js'),
+    vimeo : require('./vimeoAPI.js')
 };
 
 var userDAO = require('./userDAO.js');

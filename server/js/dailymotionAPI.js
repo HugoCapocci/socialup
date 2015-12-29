@@ -13,7 +13,6 @@ var fs = require('fs');
 var querystring = require('querystring');
 var userDAO = require('./userDAO.js');
 
-//TODO externaliser dans variables denvironnement, git-ignored
 const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';

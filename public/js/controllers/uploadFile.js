@@ -56,11 +56,12 @@ define(['./module', 'moment'], function (appModule, moment) {
             isCloud : false,
             date : new Date(),
             tags : [],
-            providers : ['google', 'dailymotion','facebook'],
+            providers : ['google', 'dailymotion','facebook', 'vimeo'],
             selectedProviders : [],
             isScheduled : false,
             isFile: cloudFile!==undefined,
             isMessageAfter : false,
+            //TODO remove?
             messageProviders : ['twitter', 'facebook', 'linkedin'],
             selectedMessageProviders : []           
         };

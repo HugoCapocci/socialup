@@ -8,7 +8,7 @@ define(['./module', 'moment'], function(appModule, moment) {
 
         $scope.videos = {
             provider : null,
-            providers: ['google', 'dailymotion'],
+            providers: ['google', 'dailymotion', 'vimeo'],
             list : [],
             changeProvider : function() {
                 console.log("changeProvider -> ",$scope.videos.provider);
@@ -25,6 +25,8 @@ define(['./module', 'moment'], function(appModule, moment) {
                         return 'https://www.youtube.com/watch?v='+videoId;
                     case 'dailymotion':
                         return 'http://www.dailymotion.com/video/'+videoId;
+                    case 'vimeo':
+                        return 'https://vimeo.com/'+videoId;
                 }
             }
         };

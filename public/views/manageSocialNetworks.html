@@ -16,8 +16,8 @@
                 <!--<tr ng-repeat="(provider, token) in socialTokens">-->
                 <tr ng-repeat="provider in providers">
                     <td>
-                        <a href="{{oauthURLS[provider]}}" target="_blank">
-                            <img src="{{'images/'+provider+'.png'}}" width="64" height="64">
+                        <a ng-href="{{oauthURLS[provider]}}" target="_blank">
+                            <img ng-src="{{'images/'+provider+'.png'}}" width="64" height="64">
                         </a>
                     </td>
                     <td>
