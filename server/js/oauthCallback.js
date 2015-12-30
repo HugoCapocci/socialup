@@ -412,7 +412,7 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
     var userId = req.params.userId;
     
     var typeFilter = req.query.typeFilter;
-    console.log("Cloud provider: ", provider);
+    //console.log("Cloud provider: ", provider);
     
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].listFiles(tokens, folderId, typeFilter);
@@ -427,8 +427,7 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
 
 app.get('/file/:provider/:fileId/:userId', function(req, res) {
     
-    console.log("get file ?");
-    
+    // console.log("get file ?");
     var fileId = req.params.fileId;
     var provider = req.params.provider;
     var userId = req.params.userId;
@@ -439,6 +438,22 @@ app.get('/file/:provider/:fileId/:userId', function(req, res) {
     }, function(err) {
          res.send(err);
     });
+});
+
+app.get('/spaceUsage/:provider/:userId', function(req, res) {
+    
+    var provider = req.params.provider;
+    var userId = req.params.userId;
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        //pipe the bytes returned from request to the response 'res', in order to directly download the file
+       return providersAPI[provider].getSpaceUsage(tokens);
+    }).then(function(spaceUsage) {
+         res.send(spaceUsage);
+    }).fail(function(err) {
+         res.send(err);
+    });
+    
 });
 
 app.post('/message/:userId', function(req, res) {

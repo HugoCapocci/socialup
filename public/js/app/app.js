@@ -12,6 +12,7 @@ define([
     'angular-smart-table',
     'checklist-model',
     'ng-videosharing-embed',
+    'angular-chart',
     '../services/index',
     '../controllers/index'
     ], function (angular) {
@@ -29,6 +30,7 @@ define([
             'smart-table',
             'checklist-model',
             'videosharing-embed',
+            'chart.js',
             'SocialUp.services',
             'SocialUp.controllers'
         ]);

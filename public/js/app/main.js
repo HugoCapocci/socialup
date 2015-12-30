@@ -13,7 +13,9 @@ require.config({
         'angular-smart-table' : '../../bower_components/angular-smart-table/dist/smart-table',
         'checklist-model' : '../../bower_components/checklist-model/checklist-model',
         'moment' : '../../bower_components/moment/moment',
-        'ng-videosharing-embed' : '../../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min'
+        'ng-videosharing-embed' : '../../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min',
+        'angular-chart' : '../../bower_components/angular-chart.js/dist/angular-chart.min',
+        'chart' :  '../../bower_components/Chart.js/Chart.min'
     },
     shim : {
         'angular' : {
@@ -46,6 +48,9 @@ require.config({
         },
         'ng-videosharing-embed' : {
              deps : ['angular']
+        },
+        'angular-chart' : {
+             deps : ['angular', 'chart']
         }
     },
     // kick start application

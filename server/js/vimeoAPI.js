@@ -100,9 +100,13 @@ exports.sendVideo = function(tokens, file, userId, params, providerOptions) {
     }).then(function(id) {
         videoId=id;
         console.log("finalizeUpload videoId: ", videoId);
-        return patchMetadata(tokens, videoId, params.title, params.description, params.tags);
+        return patchMetadata(tokens, videoId, params.title, params.description, providerOptions);
 
     }).then(function() {
+                    
+        //tags
+        //if(params.tags)
+        //PUT https://api.vimeo.com/videos/{video_id}/tags/{word}
         deferred.resolve({
             url : 'https://vimeo.com/' +videoId
         });
@@ -236,8 +240,9 @@ function finalizeUpload(completeURI, tokens) {
     return deferred.promise;
 }
 
-function patchMetadata(tokens, videoId, title, description) {
+function patchMetadata(tokens, videoId, title, description, providerOptions) {
     
+    console.log("vimeo patchMetadata providerOptions", providerOptions);
     var deferred = Q.defer();
     request({
         method : 'PATCH',
@@ -248,7 +253,10 @@ function patchMetadata(tokens, videoId, title, description) {
         },
         body : {
             name: title,
-            description: description
+            description: description,
+            privacy : {
+                view : providerOptions.privacyStatus
+            }
         }
     }, function(err, response, body) {
 

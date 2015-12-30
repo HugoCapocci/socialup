@@ -69,6 +69,9 @@ define(['./module'], function (appModule) {
                 return deferred.promise;
             };
             
+            this.getSpaceUsage = function(provider) {
+                return $http.get('/spaceUsage/'+provider+'/'+localData.user.id);
+            };
         }]
     );
 });

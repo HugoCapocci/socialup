@@ -1,52 +1,41 @@
  <div >
 
-    <div class="row">
-        <div class="col-md-2">            
-            <span class="btn btn-default btn-file" ng-if="!uploadFileData.cloudFile">
-                Browse video <input type="file" nv-file-select uploader="uploader"/>
-            </span>
-        </div>
-        <div class="col-md-2">
+    <div class="row">    
+     <!--   <div class="col-md-2">
             <input  type="checkbox" ng-model="uploadFileData.isCloud"/> cloud? <br/>
-        </div>
-        <div class="col-md-8">
+        </div>-->
+        <div class="col-md-12">
             <div class="row">
-                <div class="col-md-3">Providers:</div>
-                <label ng-repeat="provider in uploadFileData.providers" class="col-md-3">
+                <div class="col-md-2">Providers : </div>
+                <label ng-repeat="provider in uploadFileData.providers" class="col-md-2">
                   <input type="checkbox" checklist-model="uploadFileData.selectedProviders" checklist-value="provider"> {{provider}}
                 </label>
             </div>
             <div class="row">
-                <div class="col-md-3"></div>
-                <div class="col-md-3" ng-repeat="provider in uploadFileData.providers">
+                <div class="col-md-2"></div>
+                <div class="col-md-2" ng-repeat="provider in uploadFileData.providers">
                     <div ng-if="uploadFileData.selectedProviders.indexOf(provider)>-1">
-                        <div ng-if="provider==='dailymotion'">
-                            <ng-include src="'/views/providers/dailymotionOptions.html'"></ng-include>                           
-                        </div>
-                        <div ng-if="provider==='facebook'">
-                            <ng-include src="'/views/providers/facebookOptions.html'"></ng-include>
-                        </div>
-                         <div ng-if="provider==='google'">
-                             <ng-include src="'/views/providers/youtubeOptions.html'"></ng-include>                    
-                        </div>
-                        
-                    </div>                    
+                        <ng-include src="'/views/providers/'+provider +'Options.html'"></ng-include>
+                    </div>
                 </div>
-            </div>            
+            </div>
         </div>
 
         <div class="col-md-12">
             <div class="row">
-                <div class="col-md-7">                  
+                <div class="col-md-7">
                     <h4>Titre de la vidéo</h4>
-                    <input type="text" ng-model="uploadFileData.title" value="Title"/><br/>
-
+                    <input type="text" ng-model="uploadFileData.title" value="Title"/>
+                    &nbsp;&nbsp;
+                    <span class="btn btn-default btn-file" ng-if="!uploadFileData.cloudFile">
+                        Browse video <input type="file" nv-file-select uploader="uploader"/>
+                    </span><br/>
+                    
                     <h4>Description de la vidéo</h4>
                     <textarea ng-model="uploadFileData.description" style="min-width:530px;min-height:250px;"></textarea>
-
+                    
                     <h4>Tags de la vidéo</h4>
                     <tags-input  ng-model="uploadFileData.tags" add-on-space="true" style="max-width:600px"></tags-input>
-
                 </div>
                 <div class="col-md-4 col-md-offset-1">
                     <div class="row">

@@ -13,5 +13,6 @@ define([
     './manageSocialNetworks',
     './providers/facebookOptions',
     './providers/dailymotionOptions',
-    './providers/youtubeOptions'
+    './providers/googleOptions',
+    './providers/vimeoOptions'
 ], function () {});

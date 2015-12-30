@@ -371,6 +371,25 @@ exports.checkFileData = function(tokens, fileId) {
     return deferred.promise;
 };
 
+exports.getSpaceUsage = function(tokens) {
+    
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    drive.about.get(function(err, infos) {
+        if(err) {
+            console.log("cannot get googleDrive SpaceUsage, error: ", err);
+            deferred.reject(err);
+        } else {
+            //console.log('SpaceUsage infos? ', infos);           
+            deferred.resolve({
+                used : parseInt(infos.quotaBytesUsedAggregate), //infos.quotaBytesUsed+infos.quotaBytesUsedInTrash
+                total : parseInt(infos.quotaBytesTotal)
+            });
+        }
+    });
+    return deferred.promise;
+};
+
 exports.sendVideo=sendVideo;
 exports.getOAuthURL=getOAuthURL;
 exports.pushCode=pushCode;

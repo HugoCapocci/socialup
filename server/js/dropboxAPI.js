@@ -147,6 +147,33 @@ function retrieveAllFiles(token, path, typeFilter) {
     return deferred.promise;
 }*/
 
+exports.getSpaceUsage = function(tokens) {
+  
+    //post /2/users/get_space_usage
+    var deferred = Q.defer();
+  
+    request({
+        uri: 'https://'+END_POINT+'/2/users/get_space_usage',
+        auth: {
+            bearer: tokens.access_token
+        },
+        method: "POST"
+    }, function (error, response, body){
+        //console.log(response);
+        if(error)
+            deferred.reject(error);
+        else {
+            //console.log("spaceUsage found ", body);
+            var result = JSON.parse(body);
+            deferred.resolve({
+                used : result.used, 
+                total : result.allocation.allocated
+            });
+        }
+    });
+    return deferred.promise;
+};
+
 exports.getFileMetaData = function(tokens,filePath) {
 
     return processGetRequest(tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent(filePath), function(fileContent, response) {

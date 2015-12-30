@@ -29,7 +29,8 @@
     "angular-smart-table": "~2.1.5",
     "checklist-model": "~0.8.0",
     "moment": "~2.10.6",
-    "ng-videosharing-embed": "~0.3.4"
+    "ng-videosharing-embed": "~0.3.4",
+    "angular-chart.js": "~0.8.8"
   },
   "resolutions": {
     "angular": "1.4.8"
