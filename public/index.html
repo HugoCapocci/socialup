@@ -119,7 +119,7 @@
     <body ng-controller="MainController">
         
         <nav class="navbar navbar-inverse navbar-fixed-top">
-          <div class="container">
+          <div class="container"  style="width:90%">
             <div class="navbar-header">
               <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
@@ -131,13 +131,13 @@
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="#/uploadFile">Upload a file</a></li>
-                    <li><a href="#/cloudExplorer">Explore drive</a></li>
-                    <li><a href="#/postMessage">Post a message</a></li>
-                    <li><a href="#/scheduledEvents">Manage scheduled events</a></li>
+                    <li><a href="#/uploadFile">Upload a file <i class="glyphicon glyphicon-open-file"></i></a></li>
+                    <li><a href="#/cloudExplorer">Explore cloud <i class="glyphicon glyphicon-cloud"></i></a></li>
+                    <li><a href="#/postMessage">Post a message <i class="glyphicon glyphicon-comment"></i></a></li>
+                    <li><a href="#/scheduledEvents">Manage scheduled events <i class="glyphicon glyphicon-calendar"></i></a></li>
                     <li><a href="#/tracedEvents">Traced events</a></li>
-                    <li><a href="#/videos">View videos</a></li>  
-                    <li><a href="#/manageSocialNetworks">Manage authentications</a></li>
+                    <li><a href="#/videos">View videos <i class="glyphicon glyphicon-film"></i></a></li>  
+                    <li><a href="#/manageSocialNetworks">Manage authentications <i class="glyphicon glyphicon-cog"></i></a></li>
                     <!--<li class="active"><a href="#/login">Login / Registration</a></li>-->
                 </ul>
             </div><!--/.nav-collapse -->
@@ -146,7 +146,9 @@
     
         <div class="container" style="width:100%">             
             <div class="row">
-                <div class="col-lg-2 col-md-1"></div>
+                <div class="col-lg-2 col-md-1">
+                    <form method="post" action="http://poll.pollcode.com/24296279"><div style="background-color:#EEEEEE;padding:2px;width:175px;font-family:Arial;font-size:small;color:#000000;"><div style="padding:2px 0px 4px 2px;"><strong>Quel fournisseur de cloud ajouter ?</strong></div><input type="radio" name="answer" value="1" id="answer242962791" style="float:left;" /><label for="answer242962791" style="float:left;width:150px;">amazon cloud drive (amazon web services)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="2" id="answer242962792" style="float:left;" /><label for="answer242962792" style="float:left;width:150px;">microsoft one drive (microsoft azure)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="3" id="answer242962793" style="float:left;" /><label for="answer242962793" style="float:left;width:150px;">apple iCloud (apple)</label><div style="clear:both;height:2px;"></div><div align="center" style="padding:3px;"><input type="submit" value=" Vote ">&nbsp;<input type="submit" name="view" value=" View "></div><div align="right" style="font-size:10px">pollcode.com <a href="http://pollcode.com/">free polls</a></div></div></form>
+                </div>
                 <div class="col-lg-7 col-md-9">
                     <div ng-view></div>
                 </div>

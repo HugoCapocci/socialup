@@ -2,7 +2,10 @@ define(['./module'], function (appModule) {
     
     'use strict';
     
-    appModule.controller('CloudExplorerController', ['$scope', '$uibModal', 'cloudService', function($scope, $uibModal, cloudService) {
+    appModule.controller('CloudExplorerController', ['$scope', '$window', '$timeout', '$uibModal', 'cloudService', 'alertsService', 'FileUploader', 
+        function($scope, $window, $timeout, $uibModal, cloudService, alertsService, FileUploader) {
+        
+        var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
             
         $scope.treeOptions = {
             nodeChildren: "children",
@@ -59,6 +62,16 @@ define(['./module'], function (appModule) {
             else
                 return cloudService.getDownloadFileURL($scope.cloudExplorer.provider,encodeURIComponent($scope.cloudExplorer.selectedFile.id.substring(1)));
         };
+        
+        $scope.downloadFile = function() {
+            var iframe = document.createElement('iframe');
+            if($scope.cloudExplorer.selectedFile.downloadUrl)
+                iframe.src =  $scope.cloudExplorer.selectedFile.downloadUrl;
+            else
+                iframe.src =  cloudService.getDownloadFileURL($scope.cloudExplorer.provider,encodeURIComponent($scope.cloudExplorer.selectedFile.id.substring(1)));
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);  
+        };
 
         function loadProviderRootData() {
             
@@ -87,9 +100,8 @@ define(['./module'], function (appModule) {
         };
         
         $scope.showSelected = function(node, selected) {
-            
             console.log("node: ",node);
-            if(selected && !node.isFolder)
+            if(selected)
                 $scope.cloudExplorer.selectedFile=node;
             else
                 $scope.cloudExplorer.selectedFile=undefined;
@@ -138,6 +150,31 @@ define(['./module'], function (appModule) {
             console.log("gooleDriveUsage: ",gooleDriveUsage.data);            
             console.log("$scope.data? ",$scope.data);
         });
+        
+        $scope.cloudUploader = new FileUploader({url : '/uploadFileToCloud/'+localData.user.id});
+
+            
+        $scope.cloudUploader.onAfterAddingFile = function(fileItem) {
+            console.info('onAfterAddingFile', fileItem);
+            //upload!
+            fileItem.formData = [
+                {'provider' : $scope.cloudExplorer.provider},
+                {'target' : $scope.cloudExplorer.selectedFile.id}
+            ];
+            
+            fileItem.upload();
+        };
+        
+        //Workaround
+        $scope.uploadFile = function() {
+            console.log("trigger click");
+            $timeout(function() {
+                var element = angular.element(document.querySelector('#fileDialog'));
+                console.log("dom element: ", element);
+                element.triggerHandler('click');
+            }, 0);
+        };
+        
         
     }]);
 

@@ -3,19 +3,35 @@
     <div class="row">
         
         <div class="col-md-6">
-            
-            <div class="row">
-                Provider : <select class="form-control" ng-model="cloudExplorer.provider" ng-options="option for option in cloudExplorer.providers" ng-change="cloudExplorer.changeProvider()"></select>
+            <div class="row">                
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-addon">Fournisseur de cloud : </span>
+                        <select class="form-control" ng-model="cloudExplorer.provider" ng-options="option for option in cloudExplorer.providers" ng-change="cloudExplorer.changeProvider()" style="min-width:150px;"></select>
+                    </div>
+                </div>
+                <div class="col-md-5" style="text-align: right;">
+                    <div ng-if="cloudExplorer.selectedFile && !cloudExplorer.selectedFile.isFolder && (cloudExplorer.selectedFile.downloadUrl || cloudExplorer.provider === 'dropbox' )">
+                        <button class="btn btn-default btn-primary" ng-click="publishFile()" uib-tooltip="Publiez le fichier">
+                            <i class="glyphicon glyphicon-share-alt"></i>
+                        </button>&nbsp;
+                        <button class="btn btn-default btn-primary" ng-click="downloadFile()" uib-tooltip="Télécharger le fichier">
+                            <i class="glyphicon glyphicon-cloud-download"></i>
+                        </button>
+                        <button ng-click="deleteSelectedFile()" class="btn btn-danger" uib-tooltip="Effacer le fichier">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </button>
+                    </div>
+                    <!-- upload to folder -->
+                    <div ng-if="cloudExplorer.selectedFile && cloudExplorer.selectedFile.isFolder" uib-tooltip="Envoyer un fichier dans le cloud">
+                        <span class="btn btn-default btn-primary btn-file">
+                            <i class="glyphicon glyphicon-cloud-upload"></i><input type="file" id="fileDialog" nv-file-select uploader="cloudUploader"/>
+                        </span>                    
+                    </div>
+                </div>
             </div>
             <div class="row">
-                <!-- aperçu ? -->
-                selected file: {{cloudExplorer.selectedFile.id}} <br/>
-                <div ng-if="cloudExplorer.selectedFile && (cloudExplorer.selectedFile.downloadUrl || cloudExplorer.provider === 'dropbox' )">
-                    <button ng-click="publishFile()" >Publier</button>                    
-                    <a ng-href="{{getDownloadFileURL()}}" download="{{cloudExplorer.selectedFile.name}}">
-                        <i class="glyphicon glyphicon-download-alt"></i><!--Télécharger le fichier-->
-                    </a>
-                </div>
+                &nbsp;
             </div>
             <div class="row">
                 <canvas id="pie" class="chart chart-pie" chart-data="data" chart-labels="labels" chart-options="chartOptions" chart-legend="true"></canvas> 
@@ -23,8 +39,7 @@
         </div>
 
         <div class="col-md-6" style="max-height:300px; overflow-y: auto;">
-            File tree : 
-             <treecontrol class="tree-classic"
+            <treecontrol class="tree-classic"
                tree-model="dataForTheTree"
                options="treeOptions"
                on-selection="showSelected(node, selected)" 

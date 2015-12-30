@@ -208,14 +208,14 @@ function getRefreshedToken(provider, userId) {
     
     var myToken = users[userId].providers[provider].tokens;
     if(myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
-        console.log("refresh  oauth token ");
+        console.log("refresh oauth token for provider "+provider);
         if(providersAPI[provider].refreshTokens instanceof Function) {
             if(provider ==='google')
                 myToken = users[userId].providers[provider].originalTokens;
             return providersAPI[provider].refreshTokens(myToken, userId);
         } else
             return Q.fcall(function () {
-                throw new Error('no refreshTokens function for providier '+provider);
+                throw new Error('no "refreshTokens" function for provider '+provider);
             });
     } else
         return Q.fcall(function () {
@@ -599,7 +599,22 @@ app.post('/publishFromCloud/:userId', function(req, res) {
     });
 });
 
-//sendvideo with file from http post
+app.post('/uploadFileToCloud/:userId', upload.single('file'), function(req, res) {
+    
+    var provider = req.body.provider;
+    var userId = req.params.userId;
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        providersAPI[provider].uploadDrive(tokens, req.file, req.body.target);
+    }).then(function(result) {
+        res.send(result);
+    }).fail(function(err){
+        res.status(403).send(err);
+    });
+    
+});
+
+//sendvideo with file from http post TODO rename
 app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     
     //dailymotion issue : need file extension

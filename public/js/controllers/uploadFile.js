@@ -33,8 +33,7 @@ define(['./module', 'moment'], function (appModule, moment) {
                 if(tags.length>0)
                     formData.tags=tags;
                 console.log("publishFileService.publishFromCloud ");
-                publishFileService.publishFromCloud(formData).then(function(result) {
-                    
+                publishFileService.publishFromCloud(formData).then(function(result) {  
                     //alertService blabla
                     $uibModalInstance.dismiss('ok');
                 });
@@ -53,7 +52,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             cloudFile : cloudFile,
             title : "",
             description : "",
-            isCloud : false,
             date : new Date(),
             tags : [],
             providers : ['google', 'dailymotion','facebook', 'vimeo'],
@@ -65,8 +63,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             messageProviders : ['twitter', 'facebook', 'linkedin'],
             selectedMessageProviders : []           
         };
-        
-        //$scope.result = {url:'http://www.dailymotion.com/video/x3i7t5f_cette-femme-ote-son-manteau-ce-qui-va-s-en-suivre-est-inimaginable_fun'};
     
         $scope.uploader = new FileUploader({url : '/uploadFile/'+localData.user.id});
         $scope.uploader.filters.push({
@@ -134,9 +130,8 @@ define(['./module', 'moment'], function (appModule, moment) {
            modalInstance.close();
        };
 
-
-        $scope.uploader.onSuccessItem = function(item, response, status, headers) {
-                       
+       $scope.uploader.onSuccessItem = function(item, response, status, headers) {
+               
             $scope.result=response[0];
             console.log("onSuccessItem, result? ", $scope.result);
             alertsService.success('video successfully ' + ($scope.uploadFileData.isScheduled ? 'scheduled' : 'published') , 5000);
@@ -148,11 +143,6 @@ define(['./module', 'moment'], function (appModule, moment) {
                     messageService.postMessage($scope.uploadFileData.selectedMessageProviders, response[0].url).then(function(results) {
                         console.log("results: ",results);
                         alertsService.success("Message publié avec succès");
-                        
-                        //
-                       /* $scope.result = {
-                            url : results[0].url
-                        };*/
                         modalInstance.close();
                     }, function(err) {
                         alertsService.error("Erreur dans l'envoit de message. Err: "+err);
@@ -207,10 +197,6 @@ define(['./module', 'moment'], function (appModule, moment) {
                 item.formData.tags = tags;
             if($scope.uploadFileData.isScheduled) {
                 item.formData.push({'scheduledDate' : $scope.uploadFileData.date});
-            } else
-            if($scope.uploadFileData.isCloud) {
-                //console.log("add cloud option");
-                item.formData.push( {'isCloud' : true} );
             }
             
             //chek provider options
@@ -243,7 +229,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             if($scope.uploadFileData.cloudFile) {
                 //TODO envoyer publication depuis cloud
             } else
-                item.upload();            
+                item.upload();
         };
         
         //date picker

@@ -27,7 +27,7 @@
                     <h4>Titre de la vidéo</h4>
                     <input type="text" ng-model="uploadFileData.title" value="Title"/>
                     &nbsp;&nbsp;
-                    <span class="btn btn-default btn-file" ng-if="!uploadFileData.cloudFile">
+                    <span class="btn btn-default btn-primary btn-file" ng-if="!uploadFileData.cloudFile">
                         Browse video <input type="file" nv-file-select uploader="uploader"/>
                     </span><br/>
                     
@@ -40,7 +40,7 @@
                 <div class="col-md-4 col-md-offset-1">
                     <div class="row">
                         <div class="col-md-12">
-                            <h4><input type="checkbox" ng-model="uploadFileData.isScheduled"> Programmer envoit</h4>
+                            <h4><input type="checkbox" ng-model="uploadFileData.isScheduled"> Programmer l'envoi</h4>
                         </div>
                     </div>
                     <div class="row" ng-if="uploadFileData.isScheduled">
@@ -65,9 +65,9 @@
         </div>
         
         <div ng-if="uploadFileData.isFile && !uploadFileData.cloudFile" class="col-md-5 col-md-offset-7">
-            <button class="btn btn-default" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
-            <button class="btn btn-default" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
-                {{(uploadFileData.isScheduled ? 'programmer envoit de la vidéo' : 'Publier Vidéo')}}
+            <button class="btn btn-default btn-primary" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
+            <button class="btn btn-default btn-primary" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
+                {{(uploadFileData.isScheduled ? 'Programmer l\'envoi de la vidéo' : 'Publier la vidéo')}}
             </button>
         </div>
         
