@@ -199,16 +199,34 @@ exports.downloadFile = function(tokens,filePath) {
     });
 };
 
+exports.deleteFile = function(tokens,filePath) {
+ 
+    var deferred = Q.defer();
+    request({
+        uri: 'api.dropboxapi.com/1/fileops/delete',
+        auth: {
+            bearer: tokens.access_token
+        },
+        json: true,
+        form : {
+            root : 'dropbox',
+            path : encodeURIComponent('/'+filePath)
+        },
+        method: "POST"
+    }, function (error, response, body){
+        console.log("deleteFile response: ", response);
+        if(error)
+            deferred.reject(error);
+        else {
+            deferred.resolve(body);
+        }
+    });
+    return deferred.promise;     
+};
+
 function uploadDrive(tokens, file, path) {
     
     var deferred = Q.defer();
-    /* 
-    var post_data = querystring.stringify({
-        'mode': 'overwrite',
-        'autorename': true,
-        'mute': false
-    });
-    */
     var url='https://content.dropboxapi.com/1/files_put/auto';
     if(path!==undefined)
         url+=encodeURIComponent(path);
@@ -226,7 +244,6 @@ function uploadDrive(tokens, file, path) {
         if(error)
             deferred.reject(error);
         else {
-            //console.log("dropbox API upload response body? ", body);
             var results ={
                 url : 'https://www.dropbox.com/home/Camera%C2%A0Uploads?preview='+file.originalname
             };            

@@ -124,6 +124,36 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             }
+            
+            //TODO
+            this.getPages = function(pageName) {
+                var deferred = $q.defer();
+                console.log("search page name: ", pageName);
+                pageName = encodeURI(pageName);
+                $http.get('/searchPage/facebook/'+pageName+'/'+localData.user.id).then(function(response) {
+                    console.log('response for facebook searchPage: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    //console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.getPageMetrics = function(pageId, dateSince, dateUntil) {
+                var deferred = $q.defer();
+                var url = '/pageMetrics/facebook/'+pageId+'/'+localData.user.id;
+                if(dateSince && dateUntil)
+                    url+='?since='+dateSince+"&until="+dateUntil;
+                $http.get(url).then(function(response) {
+                    console.log('response for facebook getPageMetrics: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    //console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
         }]
     );
 });

@@ -10,6 +10,7 @@ define([
     './chainedEvents',
     './tracedEvents',
     './videos',
+    './facebookStats',
     './manageSocialNetworks',
     './providers/facebookOptions',
     './providers/dailymotionOptions',

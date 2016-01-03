@@ -72,6 +72,10 @@ define(['./module'], function (appModule) {
             this.getSpaceUsage = function(provider) {
                 return $http.get('/spaceUsage/'+provider+'/'+localData.user.id);
             };
+            
+            this.deleteFile = function(provider, fileId) {
+                return $http.delete('/file/'+provider+'/'+encodeURIComponent(fileId)+'/'+localData.user.id);
+            };
         }]
     );
 });

@@ -242,7 +242,7 @@ function uploadDrive(tokens, file, parent) {
         var result;
         try {
             result = JSON.parse(response.body);
-            console.log("google drive file upload request complete with result: ", result);
+            //console.log("google drive file upload request complete with result: ", result);
             deferred.resolve({
                 url : 'https://drive.google.com/file/d/'+result.id+'/view',
                 downloadUrl : result.downloadUrl

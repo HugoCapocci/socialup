@@ -1,9 +1,6 @@
  <div >
 
     <div class="row">    
-     <!--   <div class="col-md-2">
-            <input  type="checkbox" ng-model="uploadFileData.isCloud"/> cloud? <br/>
-        </div>-->
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-2">Providers : </div>
@@ -62,18 +59,17 @@
                     </div>
                 </div>
             </div>
-        </div>
-        
+        </div>        
         <div ng-if="uploadFileData.isFile && !uploadFileData.cloudFile" class="col-md-5 col-md-offset-7">
             <button class="btn btn-default btn-primary" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
             <button class="btn btn-default btn-primary" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
                 {{(uploadFileData.isScheduled ? 'Programmer l\'envoi de la vidéo' : 'Publier la vidéo')}}
             </button>
-        </div>
-        
+        </div>        
     </div>
      
-    <div class="row">        
+    <div class="row">
         <embed-video ng-if="result.url" data-ng-href="{{result.url}}" controls="0"></embed-video>
     </div>
+
 </div>

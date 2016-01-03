@@ -168,7 +168,7 @@ function getVideoData(videoId, tokens) {
 
 //https://developers.facebook.com/docs/facebook-login/permissions
 function getOAuthURL() {
-    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages';//+'&response_type=token'
+    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages+read_insights';//+'&response_type=token'
 }
 
 function postMessage(tokens, message, providerOptions) {
@@ -224,13 +224,13 @@ function getUserInfo(tokens)  {
     });
 }
 
-function processGetRequest(access_token, path, callback) {
+function processGetRequest(access_token, path, callback, isOldPath) {
     
     var deferred = Q.defer();
     var req_options = {
         host: 'graph.facebook.com',
         port: 443,
-        path: '/v2.5'+path,
+        path: isOldPath ? path : '/v2.5'+path,
         method: 'GET',
         headers: {
             'Authorization': 'Bearer '+access_token
@@ -253,6 +253,27 @@ function processGetRequest(access_token, path, callback) {
     
     return deferred.promise;
 }
+
+exports.searchPage = function(tokens, pageName) {
+    
+    var searchType = 'page';
+    return processGetRequest(tokens.access_token, '/search?q='+encodeURI(pageName)+'&type='+searchType, function(pages) {
+        console.log("Facebook searched pages: ", pages);
+        return pages;
+    }, true);
+};
+
+//see https://developers.facebook.com/docs/graph-api/reference/v2.5/insights
+exports.getPageMetrics = function(tokens, pageId, since, until) {
+
+    //var metric = 'page_fans';
+    //var metric = 'page_fans_gender_age';
+    var metric = 'page_fans_country';
+    return processGetRequest(tokens.access_token, '/'+pageId+'/insights?metric='+metric+'&since='+since+'&until='+until, function(metrics) {
+        console.log("Facebook searched metrics: ", metrics);
+        return metrics;
+    });
+};
 
 exports.pushCode=pushCode;
 exports.sendVideo=sendVideo;

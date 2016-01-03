@@ -72,6 +72,18 @@ define(['./module'], function (appModule) {
             iframe.style.display = "none";
             document.body.appendChild(iframe);  
         };
+            
+        $scope.deleteFile = function() {
+            console.log("delete file");
+            var fileId = $scope.cloudExplorer.selectedFile.id;
+            if($scope.cloudExplorer.provider === 'dropbox')
+                fileId=fileId.substring(1);
+            cloudService.deleteFile($scope.cloudExplorer.provider, fileId).then(function() {
+                console.log("file deleted");
+            }, function(err) {
+                console.log("err: ", err);
+            });
+        };
 
         function loadProviderRootData() {
             

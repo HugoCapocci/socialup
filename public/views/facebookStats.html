@@ -1,0 +1,66 @@
+<div class="row">
+    <div class="input-group">
+        <span class="input-group-addon">Rechercher page facebook: </span>
+        <input type="text" class="form-control" ng-model="pageName" value="Nom de la page"/>
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="searchFacebookPage()">Chercher</button>
+        </span>
+    </div>
+</div>
+
+<div class="row">
+    <table st-table="displayedCollection" st-safe-src="facebookPages" class="table table-striped">
+        <thead>
+			<tr>
+				<th st-sort="name">Nom de la page</th>
+				<th st-sort="category">Catégorie</th>                
+                <th>Id</th>                
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="page in displayedCollection"  ng-click="setSelected($index)" ng-class="{selected: page === selectedPage}">
+				<td><a ng-href="{{'https://www.facebook.com/'+page.id}}" target="_blank">{{page.name}}</a></td>
+				<td>{{page.category}}</td>
+                <td>{{page.id}}</td>
+			</tr>
+        </tbody>
+         <tfoot>
+			<tr>
+				<td colspan="3" class="text-center">
+					<div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
+				</td>
+			</tr>
+		</tfoot>
+    </table>
+</div>
+
+<!-- select stats-->
+ <div class="row" ng-if="selectedPage">
+    <div class="col-md-5">
+        <div class="input-group">
+            <span class="input-group-addon">Période du </span>
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dateSince" is-open="status.since" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open('since')"><i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="input-group">
+            <span class="input-group-addon">Au </span>
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dateUntil" is-open="status.until" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="open('until')"><i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-default btn-primary" ng-click="getPageStats()">OK</button>
+    </div>
+</div>
+
+<!-- display stats-->
+<div class="row" ng-if="labels">
+    <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-legend="false" chart-series="series" chart-click="onClick">
+    </canvas>
+</div>

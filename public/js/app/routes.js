@@ -14,7 +14,7 @@ define(['angular', 'app'], function(angular, app) {
 
 	return app.config(['$routeProvider', function($routeProvider) {
 
-        var routes = ['uploadFile', 'cloudExplorer', 'postMessage', 'login', 'resetPassword', 'scheduledEvents', 'tracedEvents', 'videos', 'manageSocialNetworks'];
+        var routes = ['uploadFile', 'cloudExplorer', 'postMessage', 'login', 'resetPassword', 'scheduledEvents', 'tracedEvents', 'videos', 'facebookStats', 'manageSocialNetworks'];
         routes.forEach(function(route) {
             generateRouteProviders($routeProvider, route);
         });

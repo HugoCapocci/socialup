@@ -440,6 +440,25 @@ app.get('/file/:provider/:fileId/:userId', function(req, res) {
     });
 });
 
+app.delete('/file/:provider/:fileId/:userId', function(req, res) {
+    
+    // console.log("get file ?");
+    var fileId = req.params.fileId;
+    var provider = req.params.provider;
+    var userId = req.params.userId;
+    
+    console.log("delete cloud file, fileid = ",fileId);
+   
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        //pipe the bytes returned from request to the response 'res', in order to directly download the file
+        return providersAPI[provider].deleteFile(tokens, fileId);
+    }).then(function() {
+        res.status(204).end();
+    }).fail(function(err) {
+        res.send(err);
+    });
+});
+
 app.get('/spaceUsage/:provider/:userId', function(req, res) {
     
     var provider = req.params.provider;
@@ -454,6 +473,41 @@ app.get('/spaceUsage/:provider/:userId', function(req, res) {
          res.send(err);
     });
     
+});
+
+app.get('/searchPage/:provider/:pageName/:userId', function(req, res) {
+    
+    var provider = req.params.provider;
+    var userId = req.params.userId;
+    var pageName = req.params.pageName;
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        //pipe the bytes returned from request to the response 'res', in order to directly download the file
+       return providersAPI[provider].searchPage(tokens, pageName);
+    }).then(function(pagesFound) {
+         res.send(pagesFound);
+    }).fail(function(err) {
+         res.send(err);
+    });
+    
+});
+
+app.get('/pageMetrics/:provider/:pageId/:userId', function(req, res) {
+    
+    var provider = req.params.provider;
+    var userId = req.params.userId;
+    var pageId = req.params.pageId;
+    
+    var since = req.query.since;
+    var until = req.query.until;
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+       return providersAPI[provider].getPageMetrics(tokens, pageId, since, until);
+    }).then(function(pagesFound) {
+         res.send(pagesFound);
+    }).fail(function(err) {
+         res.send(err);
+    });
 });
 
 app.post('/message/:userId', function(req, res) {

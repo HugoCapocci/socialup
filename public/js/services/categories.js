@@ -5,6 +5,8 @@ define(['./module'], function (appModule) {
     appModule.service('categoriesService',
         ['$http', '$q', '$window',
         function categoriesService($http, $q, $window) {
+            
+            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
                                  
             this.getCategories = function() {
                 var deferred = $q.defer();
@@ -18,6 +20,8 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
+            
+            
 
         }]
     );
