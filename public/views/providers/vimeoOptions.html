@@ -1,9 +1,6 @@
 <div ng-controller="VimeoOptionsController">
-    Visibilité :
-    <select class="form-control" ng-model="$root.selectedProvidersOptions.vimeo.privacyStatus" ng-options="option for option in $root.providersOptions.vimeo.privacyStatuses"></select><br/>
-    
-    Categorie :
-    <!--
-    <select class="form-control" ng-model="$root.selectedProvidersOptions.google.category" ng-options="option.name for option in $root.providersOptions.google.categories"></select>
--->
+    <div class="input-group">
+        <span class="input-group-addon">Visibilité : </span>
+        <select class="form-control" ng-model="$root.selectedProvidersOptions.vimeo.privacyStatus" ng-options="option for option in $root.providersOptions.vimeo.privacyStatuses"></select>
+    </div>
 </div>

@@ -30,7 +30,8 @@
     "checklist-model": "~0.8.0",
     "moment": "~2.10.6",
     "ng-videosharing-embed": "~0.3.4",
-    "angular-chart.js": "~0.8.8"
+    "angular-chart.js": "~0.8.8",
+    "angular-i18n": "~1.4.8"
   },
   "resolutions": {
     "angular": "1.4.8"

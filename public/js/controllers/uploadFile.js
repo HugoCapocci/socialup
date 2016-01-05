@@ -233,7 +233,7 @@ define(['./module', 'moment'], function (appModule, moment) {
         };
         
         //date picker
-        $scope.format = 'dd-MMMM-yyyy';
+        $scope.format = 'dd MMMM yyyy';
         $scope.status = {
             opened: false
         };

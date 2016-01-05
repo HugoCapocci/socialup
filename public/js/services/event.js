@@ -140,9 +140,9 @@ define(['./module'], function (appModule) {
                 return deferred.promise;
             };
             
-            this.getPageMetrics = function(pageId, dateSince, dateUntil) {
+            this.getPageMetrics = function(metricType, pageId, dateSince, dateUntil) {
                 var deferred = $q.defer();
-                var url = '/pageMetrics/facebook/'+pageId+'/'+localData.user.id;
+                var url = '/pageMetrics/facebook/'+metricType+'/'+pageId+'/'+localData.user.id;
                 if(dateSince && dateUntil)
                     url+='?since='+dateSince+"&until="+dateUntil;
                 $http.get(url).then(function(response) {

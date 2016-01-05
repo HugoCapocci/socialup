@@ -19,8 +19,7 @@ var userDAO = require('./userDAO.js');
 function pushCode(code) {
 
     var deferred = Q.defer();
-    
-    /// publish_actions
+
     var req_options = {
         host: 'graph.facebook.com',
         port: 443,
@@ -41,7 +40,7 @@ function pushCode(code) {
     });
     
     req.on('error', function(e) {         
-        console.log('upload url error: ', e);
+        console.log('FB authentication error: ', e);
         deferred.reject(new Error(e));
     });
     
@@ -258,19 +257,21 @@ exports.searchPage = function(tokens, pageName) {
     
     var searchType = 'page';
     return processGetRequest(tokens.access_token, '/search?q='+encodeURI(pageName)+'&type='+searchType, function(pages) {
-        console.log("Facebook searched pages: ", pages);
+        //console.log("Facebook searched pages: ", pages);
         return pages;
     }, true);
 };
 
 //see https://developers.facebook.com/docs/graph-api/reference/v2.5/insights
-exports.getPageMetrics = function(tokens, pageId, since, until) {
+exports.getPageMetrics = function(tokens, metricType, pageId, since, until) {
 
-    //var metric = 'page_fans';
-    //var metric = 'page_fans_gender_age';
-    var metric = 'page_fans_country';
-    return processGetRequest(tokens.access_token, '/'+pageId+'/insights?metric='+metric+'&since='+since+'&until='+until, function(metrics) {
-        console.log("Facebook searched metrics: ", metrics);
+    //var metric = 'page_fans'; -> admin
+    //var metric = 'page_fans_gender_age'; -> admin
+   //var metric = 'page_fans_country';
+   // var metric = 'page_storytellers_by_country';
+   // var metric = 'post_stories'; -> admin
+    return processGetRequest(tokens.access_token, '/'+pageId+'/insights?metric='+metricType+'&since='+since+'&until='+until, function(metrics) {
+        //console.log("Facebook searched metrics: ", metrics);
         return metrics;
     });
 };

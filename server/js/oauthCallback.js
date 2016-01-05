@@ -20,7 +20,8 @@ var providersAPI = {
     dropbox : require('./dropboxAPI.js'),
     twitter : require('./twitterAPI.js'),
     linkedin : require('./linkedInAPI.js'),
-    vimeo : require('./vimeoAPI.js')
+    vimeo : require('./vimeoAPI.js'),
+    mixcloud : require('./mixcloudAPI.js')
 };
 
 var userDAO = require('./userDAO.js');
@@ -230,7 +231,7 @@ app.get('/*2callback', function(req, res) {
     //console.log("provider found :", provider);
     var code = req.query.code;
     var userId = req.query.state;
-    //console.log('call back with userId ',userId);
+    console.log('call back with userId ',userId);
     
     if(users[userId]===undefined)
         initiateUser(userId);
@@ -251,7 +252,7 @@ app.get('/*2callback', function(req, res) {
         };
     } else
         getTokens = function() { 
-            return providersAPI[provider].pushCode(code); 
+            return providersAPI[provider].pushCode(code, userId); 
         };
 
     getTokens().then(function(tokens) {
@@ -492,17 +493,17 @@ app.get('/searchPage/:provider/:pageName/:userId', function(req, res) {
     
 });
 
-app.get('/pageMetrics/:provider/:pageId/:userId', function(req, res) {
+app.get('/pageMetrics/:provider/:metricType/:pageId/:userId', function(req, res) {
     
     var provider = req.params.provider;
+    var metricType = req.params.metricType;
     var userId = req.params.userId;
     var pageId = req.params.pageId;
-    
     var since = req.query.since;
     var until = req.query.until;
     
     getRefreshedToken(provider, userId).then(function(tokens) {
-       return providersAPI[provider].getPageMetrics(tokens, pageId, since, until);
+       return providersAPI[provider].getPageMetrics(tokens, metricType, pageId, since, until);
     }).then(function(pagesFound) {
          res.send(pagesFound);
     }).fail(function(err) {

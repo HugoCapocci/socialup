@@ -63,6 +63,7 @@ define(['./module'], function (appModule) {
                 return cloudService.getDownloadFileURL($scope.cloudExplorer.provider,encodeURIComponent($scope.cloudExplorer.selectedFile.id.substring(1)));
         };
         
+        //FIXME iFrame workaround not stable
         $scope.downloadFile = function() {
             var iframe = document.createElement('iframe');
             if($scope.cloudExplorer.selectedFile.downloadUrl)

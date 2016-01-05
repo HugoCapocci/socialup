@@ -11,6 +11,7 @@ require.config({
         'ng-tags-input' : '../../bower_components/ng-tags-input/ng-tags-input',
         'sha1' : '../../bower_components/SHA-1/sha1',
         'angular-smart-table' : '../../bower_components/angular-smart-table/dist/smart-table',
+        'angular-i18n-fr' : '../../bower_components/angular-i18n/angular-locale_fr-fr',
         'checklist-model' : '../../bower_components/checklist-model/checklist-model',
         'moment' : '../../bower_components/moment/moment',
         'ng-videosharing-embed' : '../../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min',

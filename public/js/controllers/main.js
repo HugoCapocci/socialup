@@ -1,4 +1,4 @@
-define(['./module', 'moment'], function (appModule, moment) {
+define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
     
     'use strict';
 

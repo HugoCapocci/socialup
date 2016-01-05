@@ -1,13 +1,18 @@
 <div ng-controller="FacebookOptionsController">
-    Visibilité :
-    <select class="form-control" ng-model="$root.selectedProvidersOptions.facebook.visibility" ng-options="option for option in $root.providersOptions.facebook.visibilities"></select><br/>
-    Groupe ? 
-    <select class="form-control" ng-model="$root.selectedProvidersOptions.facebook.group" ng-options="option.name for option in $root.providersOptions.facebook.groups">
-        <option value="">Aucun</option>
-    </select><br/>
-    Page ? 
-    <select class="form-control" ng-model="$root.selectedProvidersOptions.facebook.page" ng-options="option.name for option in $root.providersOptions.facebook.pages">
-        <option value="">Aucune</option>
-    </select><br/>
+    <div class="input-group">
+        <span class="input-group-addon">Visibilité : </span>
+        <select class="form-control" ng-model="$root.selectedProvidersOptions.facebook.visibility" ng-options="option for option in $root.providersOptions.facebook.visibilities"></select> 
+    </div>
+    <div class="input-group">
+        <span class="input-group-addon">Groupe ? </span> 
+        <select class="form-control" ng-model="$root.selectedProvidersOptions.facebook.group" ng-options="option.name for option in $root.providersOptions.facebook.groups">
+            <option value="">Aucun</option>
+        </select> 
+
+        <span class="input-group-addon">Page ? </span>
+        <select class="form-control" ng-model="$root.selectedProvidersOptions.facebook.page" ng-options="option.name for option in $root.providersOptions.facebook.pages">
+            <option value="">Aucune</option>
+        </select>
+    </div>
     
 </div>

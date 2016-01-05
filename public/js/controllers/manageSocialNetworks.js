@@ -9,12 +9,9 @@ define(['./module', 'moment'], function (appModule, moment) {
         
             $scope.socialTokens = [];
             authService.getUserData().then(function(userData) {
-                //console.log("userData.providers founds: ", userData.providers);
                 Object.keys(userData.providers).map(function(provider/*, index*/) {
-                   // console.log("provider: ", provider);
-                    //console.log("token: ", userData.providers[provider].tokens);
+
                     if(userData.providers[provider].tokens && userData.providers[provider].tokens.expiry_date !== undefined) {
-                       // console.log("token expiry_date found");
                         userData.providers[provider].tokens.expiry_date=moment(userData.providers[provider].tokens.expiry_date).format("dddd D MMMM YYYY à HH:mm");
                     }
                 });
@@ -24,17 +21,19 @@ define(['./module', 'moment'], function (appModule, moment) {
             $scope.oauthURLS = {};
             
             //authenticate user
-            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
-            //console.log("localData found? ",localData);            
+            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));       
 
             //oauth providers url
-            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin', 'vimeo'];
-
+            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin', 'vimeo', 'mixcloud'];
             $scope.providers.forEach(function(provider) {
                 authService.getProviderURL(provider).then(function(url) {
                     $scope.oauthURLS[provider]=url;
                     if(localData !== undefined &&localData.user !== undefined)
-                        $scope.oauthURLS[provider] += '&state='+localData.user.id;
+                        //workaround for mixcloud (doesn't store the state)
+                        if(provider==='mixcloud')
+                            $scope.oauthURLS[provider] += '?state='+localData.user.id;
+                        else
+                            $scope.oauthURLS[provider] += '&state='+localData.user.id;
                 });
             });
             

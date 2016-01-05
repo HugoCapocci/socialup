@@ -1,9 +1,9 @@
 <div class="row">
     <div class="input-group">
-        <span class="input-group-addon">Rechercher page facebook: </span>
+        <span class="input-group-addon">Rechercher page facebook : </span>
         <input type="text" class="form-control" ng-model="pageName" value="Nom de la page"/>
         <span class="input-group-btn">
-            <button type="button" class="btn btn-default" ng-click="searchFacebookPage()">Chercher</button>
+            <button type="button" class="btn btn-default btn-primary" ng-click="searchFacebookPage()">Chercher</button>
         </span>
     </div>
 </div>
@@ -35,32 +35,34 @@
 </div>
 
 <!-- select stats-->
- <div class="row" ng-if="selectedPage">
-    <div class="col-md-5">
+<div class="row" ng-if="selectedPage">
+    <div class="col-md-12">
+        
         <div class="input-group">
+            <span class="input-group-addon">Stat : </span>
+            <select class="form-control" ng-model="stats.metricType" ng-options="option.label for option in metricTypes"></select>
+
             <span class="input-group-addon">Période du </span>
-            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dateSince" is-open="status.since" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.since" is-open="status.since" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('since')"/>
             <span class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="open('since')"><i class="glyphicon glyphicon-calendar"></i></button>
+                <button type="button" class="form-control btn btn-default" ng-click="open('since', $event)"><i class="glyphicon glyphicon-calendar"></i></button>
             </span>
-        </div>
-    </div>
-    <div class="col-md-5">
-        <div class="input-group">
+
             <span class="input-group-addon">Au </span>
-            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dateUntil" is-open="status.until" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close" />
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.until" is-open="status.until" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('until')"/>
             <span class="input-group-btn">
-                <button type="button" class="btn btn-default" ng-click="open('until')"><i class="glyphicon glyphicon-calendar"></i></button>
+                <button type="button" class="form-control btn btn-default" ng-click="open('until', $event)"><i class="glyphicon glyphicon-calendar"></i></button>
             </span>
         </div>
     </div>
-    <div class="col-md-2">
-        <button class="btn btn-default btn-primary" ng-click="getPageStats()">OK</button>
+    <div class="col-md-1 col-md-offset-11">
+        <br/>
+        <button class=" btn btn-default btn-primary" ng-click="getPageStats()">Valider</button>
     </div>
 </div>
 
 <!-- display stats-->
 <div class="row" ng-if="labels">
-    <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-legend="false" chart-series="series" chart-click="onClick">
+    <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-legend="false" chart-series="series" chart-options="chartOptions">
     </canvas>
 </div>
