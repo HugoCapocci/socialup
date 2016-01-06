@@ -3,11 +3,10 @@ var Q = require('q');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectID = require('mongodb').ObjectID;
 
-var uri = process.env.MONGOLAB_URI;
 var collection = "users";
 
 function getDB(callback) {
-     MongoClient.connect(uri, function(err, db) {
+     MongoClient.connect(process.env.MONGOLAB_URI, function(err, db) {
          if(err)
              throw err;
          else

@@ -1,7 +1,12 @@
 <div>
     
-    <div class="row">
-       Provider : <select class="form-control" ng-model="videos.provider" ng-options="option for option in videos.providers" ng-change="videos.changeProvider()"></select>
+    <div class="row">        
+        <div class="col-md-6">
+            Provider : <select class="form-control" ng-model="videos.provider" ng-options="option for option in videos.providers" ng-change="videos.changeProvider()"></select>
+        </div>
+        <div class="col-md-6">
+            <canvas id="radar" class="chart chart-radar" chart-data="data" chart-labels="labels"></canvas> 
+        </div>
     </div>
     
     <div class="row">
@@ -49,5 +54,5 @@
             </tbody>
         </table>
     </div>
-
+    
 </div>

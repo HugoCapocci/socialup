@@ -77,7 +77,6 @@ exports.getUserInfo = function(tokens) {
     });    
     req.end();    
     return deferred.promise;
-
 };
 
 exports.sendMusic = function(tokens, file, params) {
@@ -121,5 +120,52 @@ exports.sendMusic = function(tokens, file, params) {
                 deferred.resolve(result);           
         }
     });    
+    return deferred.promise;
+};
+
+exports.listMedia = function(tokens) {
+
+    var deferred = Q.defer();
+    var req_options = {
+        host: 'api.mixcloud.com',
+        path: '/me/cloudcasts/?access_token='+tokens.access_token,
+        method: 'GET'
+    };
+    var req = https.request(req_options, function(res) {
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {
+            console.log("listMedia ", data);
+            var results = JSON.parse(data);
+            if(results.error) {
+                console.log('mixcloud listMedia error: ', results.error.message);
+                deferred.reject(results.error);
+            } else {
+                console.log("listMedia ?  ",results);                
+                deferred.resolve(results.data.map(function(music) {
+                     return {
+                        id : music.key,
+                        title : music.name,
+                        creationDate : music.created_time,
+                        streamURL : music.url,
+                        thumbnailURL : music.pictures.medium,
+                        description : music.description,
+                        //playbackCount : music.listener_count,
+                        playbackCount : music.play_count,
+                        repostCount : music.repost_count,
+                        likes : music.favorite_count,
+                        commentsCount : music.comment_count
+                    };
+                }));
+            }
+        });
+    });
+    req.on('error', function(e) {         
+        console.log('mixcloud listMedia error: ', e);
+        deferred.reject(e);
+    });    
+    req.end();    
     return deferred.promise;
 };

@@ -32,11 +32,17 @@ define(['./module'], function (appModule) {
         };
         
         $scope.publishFile = function() {
-          
+            
+            //selon le type de fichier
+            console.log("publishFile: ",$scope.cloudExplorer.selectedFile);
+            var name = $scope.cloudExplorer.selectedFile.name;
+            var ext = name.substr(name.lastIndexOf('.')+1);
+            var audioExts = ['mp3', 'wav', 'aif'];
+            console.log("file ext: ", ext);
             var modalInstance = $uibModal.open({
                 animation: $scope.animationsEnabled,
                 templateUrl: 'modalContent.html',
-                controller: 'UploadFileModalController',
+                controller: (audioExts.indexOf(ext)!== -1 ? 'UploadMusicModalController' :'UploadFileModalController'),
                 size: 'lg',
                 resolve: {
                     file : function() {

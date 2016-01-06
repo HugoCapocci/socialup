@@ -24,7 +24,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));       
 
             //oauth providers url
-            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin', 'vimeo', 'mixcloud'];
+            $scope.providers = ['dailymotion', 'google', 'facebook', 'dropbox', 'twitter', 'linkedin', 'vimeo', 'mixcloud', 'soundcloud'];
             $scope.providers.forEach(function(provider) {
                 authService.getProviderURL(provider).then(function(url) {
                     $scope.oauthURLS[provider]=url;

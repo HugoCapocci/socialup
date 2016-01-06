@@ -5,8 +5,9 @@ if(process.env.MONGOLAB_URI===undefined)
     try {
         require('../../localeConfig.js');
     } catch (error) {
-        console.warn("No configuration file found");
+        console.log("No configuration file found");
     }
+
 var userDAO = require('../js/userDAO.js');
 
 describe("userDAO tests", function() {

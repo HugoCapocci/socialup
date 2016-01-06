@@ -12,6 +12,7 @@ TODO check tokens.expiry_date and update user data in database if needed with re
 var googleAPI = require('googleapis');
 var Q = require('q');
 var fs = require("fs");
+var userDAO = require('./userDAO.js');
 
 const GOOGLE_API_ID = process.env.GOOGLE_API_ID;
 const GOOGLE_API_SECRET = process.env.GOOGLE_API_SECRET;
@@ -88,10 +89,12 @@ function refreshTokens(tokens, userId) {
 
         if(!err) {
             oauth2Client.setCredentials(tokens);
+            //TODO update in database
+            userDAO.updateUserTokens(userId, 'google', tokens);
             deferred.resolve(tokens);
         } else {
             console.log("unable to set credentials, err: ", err);
-            deferred.reject(new Error(err));
+            deferred.reject(err);
         }
     });
     return deferred.promise;
@@ -123,7 +126,7 @@ exports.listCategories = function(tokens) {
 };
 
 // see https://developers.google.com/youtube/v3/docs/search/list#forMine
-exports.listVideos = function(tokens) {
+exports.listMedia = function(tokens) {
     
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
@@ -136,6 +139,7 @@ exports.listVideos = function(tokens) {
         else {
             var videos = [];
             response.items.forEach(function(item) {
+                console.log('youtube item: ', item);
                 videos.push({
                     id : item.id.videoId,
                     creationDate : item.snippet.publishedAt,

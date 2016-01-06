@@ -13,7 +13,21 @@ define(['./module'], function (appModule) {
                 var deferred = $q.defer();               
                 $http.get('/videos/'+provider+'/'+localData.user.id)
                 .then(function(response) {
-                    //console.log('getData response: ', response);
+                    //console.log('getVideos response: ', response);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    //console.log("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
+            
+            this.getMedia = function(provider) {
+
+                var deferred = $q.defer();               
+                $http.get('/media/'+provider+'/'+localData.user.id)
+                .then(function(response) {
+                    console.log('getMusics response data: ', response.data);
                     deferred.resolve(response.data);
                 }, function (err) {
                     //console.log("err: ", err);

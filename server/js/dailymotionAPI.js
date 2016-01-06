@@ -70,7 +70,6 @@ function saveTokensForUser(tokens, userId) {
 
     tokens.expiry_date = Date.now() + tokens.expires_in;
     delete tokens.expires_in;
-    //userDAO.updateUserTokens(userId, 'dailymotion', tokens);
     return tokens;
 }
 
@@ -114,6 +113,7 @@ function refreshTokens(tokens, userId) {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
             var tokens = JSON.parse(chunk);
+            //TODO save refreshed token
             deferred.resolve( saveTokensForUser(tokens, userId) );
         });       
     });
@@ -127,7 +127,7 @@ function refreshTokens(tokens, userId) {
     return deferred.promise;
 }
 
-exports.listVideos = function(tokens) {
+exports.listMedia = function(tokens) {
     
     return processGetRequest(tokens.access_token,'/user/me/videos?fields=id,thumbnail_60_url,title,description,status,created_time', function(videos) {
         //console.log("raw videos result: ", videos);

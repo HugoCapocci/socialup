@@ -13,6 +13,7 @@ try {
 }
 console.log("ENV ?", process.env.NODE_ENV);
 
+//TODO automatically read folder 'providerAPI' , avoid exports
 var providersAPI = {
     google : require('./googleAPI.js'),
     dailymotion : require('./dailymotionAPI.js'),
@@ -21,7 +22,8 @@ var providersAPI = {
     twitter : require('./twitterAPI.js'),
     linkedin : require('./linkedInAPI.js'),
     vimeo : require('./vimeoAPI.js'),
-    mixcloud : require('./mixcloudAPI.js')
+    mixcloud : require('./mixcloudAPI.js'),
+    soundcloud : require('./soundcloudAPI.js')
 };
 
 var userDAO = require('./userDAO.js');
@@ -207,8 +209,10 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
 //return promise
 function getRefreshedToken(provider, userId) {
     
+    console.log("getRefreshedToken for userId: ", userId);
+    
     var myToken = users[userId].providers[provider].tokens;
-    if(myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
+    if(provider !== 'soundcloud' && myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
         console.log("refresh oauth token for provider "+provider);
         if(providersAPI[provider].refreshTokens instanceof Function) {
             if(provider ==='google')
@@ -389,7 +393,7 @@ app.get('/refreshToken/:provider/:userId', function(req, res) {
     var userId = req.params.userId;
     getRefreshedToken(provider, userId).then(function(tokens) {
         users[userId].tokens[provider]=tokens;
-        //TODO save refreshed tokens ?
+        userDAO.updateUserTokens(userId, provider, tokens);
         res.status(200).end();
     }, function(err) {
         res.send(err);
@@ -679,24 +683,46 @@ app.post('/uploadMusic/:userId', upload.single('file'), function(req, res) {
     var userId = req.params.userId;
          
     //var scheduledDate = req.body.scheduledDate;
-    var provider = req.body.provider;
-    
-    getRefreshedToken(provider, userId).then(function(tokens) {   
-        var params = {
-            title : req.body.title,
-            description : req.body.description
-        };
-        if(req.body.tags)
-            params.tags = req.body.tags.split(',');
-        console.log("sendMusic !");
-        return providersAPI[provider].sendMusic(tokens, req.file, params);
-    }).then(function(result) {
-        res.send(result);
+    var providers = req.body.providers.split(',');
+    var params = {
+        title : req.body.title,
+        description : req.body.description
+    };
+    if(req.body.tags)
+        params.tags = req.body.tags.split(',');
+    sendMusicToProviders(providers, userId, req.file, params).then(function(results) {
+        fs.unlink(req.file.path);
+         eventsDAO.createTracedEvent(userId, "uploadMusic", params, providers, providers, results);
+        res.send(results);
     }).fail(function(err){
         console.log(err);
         res.status(403).send(err);
     });
 });
+
+function sendMusicToProviders(providers, userId, file, params) {
+    var results = [];
+    for(var i=0; i< providers.length; i++) {
+        var provider = providers[i];
+        results.push(sendMusicToProvider(provider, userId, file, params));
+    }
+    return Q.all(results);
+}
+
+function sendMusicToProvider(provider, userId, file, params) {
+    
+    var deffered = Q.defer();    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        console.log("sendMusic with provider: ", provider);
+        return providersAPI[provider].sendMusic(tokens, file, params);
+    }).then(function(result) {
+        result.provider=provider;
+        deffered.resolve(result);
+    }, function(err) {
+        deffered.reject(err);
+    });
+    return deffered.promise;
+}
 
 //sendvideo with file from http post TODO rename
 app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
@@ -822,7 +848,7 @@ app.get('/categories/:provider/:userId', function(req, res) {
     }
 });
 
-app.get('/videos/:provider/:userId', function(req, res) {
+/*app.get('/videos/:provider/:userId', function(req, res) {
     
     //console.log("get videos");    
     var provider = req.params.provider;
@@ -833,6 +859,22 @@ app.get('/videos/:provider/:userId', function(req, res) {
     }).then(function(videos) {
         //console.log("videos found: ", videos);
         res.send(videos);
+    }).fail(function(err) {
+        res.status(403).send(err);
+    });
+});*/
+
+app.get('/media/:provider/:userId', function(req, res) {
+    
+    //console.log("get videos");    
+    var provider = req.params.provider;
+    var userId=req.params.userId;
+            
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].listMedia(tokens, userId);
+    }).then(function(media) {
+        //console.log("media found: ", media);
+        res.send(media);
     }).fail(function(err) {
         res.status(403).send(err);
     });

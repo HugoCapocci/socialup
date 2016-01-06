@@ -38,12 +38,12 @@ define(['./module', 'moment'], function (appModule, moment) {
                 });
             }
         };
-        console.log("UploadFileModalController file ? ", file);
+        console.log("UploadMusicModalController file ? ", file);
         uploadMusicController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, file);   
     }]);
 
     function uploadMusicController($scope, $rootScope, $window, $location, $uibModal, FileUploader, alertsService, eventService, messageService, cloudFile) {
-        
+
         var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
         console.log("uploadMusicController file ? ", cloudFile);
         $scope.uploadMusicData = {
@@ -52,7 +52,7 @@ define(['./module', 'moment'], function (appModule, moment) {
             description : "",
             date : new Date(),
             tags : [],
-            providers : ['mixcloud', 'soundcloud','facebook'],
+            providers : ['mixcloud', 'soundcloud'/*,'facebook'*/],
             selectedProviders : [],
             isScheduled : false,
             isFile: cloudFile!==undefined           
@@ -131,7 +131,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             $scope.result=response[0];
             console.log("onSuccessItem, result? ", $scope.result);
             alertsService.success('music successfully ' + ($scope.uploadMusicData.isScheduled ? 'scheduled' : 'published') , 5000);
-            
         };
         
         $scope.update = function(item) {
@@ -153,14 +152,13 @@ define(['./module', 'moment'], function (appModule, moment) {
                 alertsService.warn("Vous devez choisir au moins un provider");
                 return;
             }
-            
+
             item.formData = [
                 {'title' : $scope.uploadMusicData.title},
                 {'description' : $scope.uploadMusicData.description},
-                {'providers' : $scope.uploadMusicData.selectedProviders},
-                {'provider' : 'mixcloud'}
+                {'providers' : $scope.uploadMusicData.selectedProviders}
             ];
-           var tags = processTags();
+            var tags = processTags();
             if(tags.length>0)
                 item.formData.tags = tags;
             if($scope.uploadMusicData.isScheduled) {

@@ -64,7 +64,7 @@ exports.getUserInfo = function(tokens) {
     return deferred.promise;
 };
 
-exports.listVideos = function(tokens) {
+exports.listMedia = function(tokens) {
     
     return processGetRequest(tokens.access_token, '/me/videos', function(response) {
         
