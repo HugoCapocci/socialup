@@ -285,6 +285,30 @@ function processGetRequest(access_token, url, callback) {
     return deferred.promise;
 }
 
+exports.createShareLink = function(tokens, filePath) {
+
+    var deferred = Q.defer();
+    request({
+        uri: 'api.dropboxapi.com/2/sharing/create_shared_link',
+        auth: {
+            bearer: tokens.access_token
+        },
+        json: true,
+        form : {
+            path : encodeURIComponent('/'+filePath)
+        },
+        method: "POST"
+    }, function (error, response, body){
+        console.log("createShareLink response: ", response);
+        if(error)
+            deferred.reject(error);
+        else {
+            deferred.resolve(JSON.parse(body).url);
+        }
+    });
+    return deferred.promise;     
+};
+
 exports.pushCode=pushCode;
 exports.getOAuthURL=getOAuthURL;
 exports.listFiles=listFiles;

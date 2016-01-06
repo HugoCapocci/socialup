@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">23.16% </span>
+        <span class="strong">22.46% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>41/177</span>
+        <span class='fraction'>42/187</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">2.38% </span>
+        <span class="strong">2.27% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/42</span>
+        <span class='fraction'>1/44</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">10% </span>
+        <span class="strong">9.38% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>3/30</span>
+        <span class='fraction'>3/32</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">23.16% </span>
+        <span class="strong">22.46% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>41/177</span>
+        <span class='fraction'>42/187</span>
       </div>
     </div>
   </div>
@@ -445,7 +445,40 @@
 400
 401
 402
-403</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -836,6 +869,39 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1243,6 +1309,39 @@ exports.getSpaceUsage = <span class="fstat-no" title="function not covered" >fun
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
 };
 &nbsp;
+exports.createShareLink = <span class="fstat-no" title="function not covered" >function(tokens, fileId) {</span>
+    
+    
+    // drive.permissions.insert
+    
+     /*params - Parameters for request
+     * @param  {string=} params.emailMessage - A custom message to include in notification emails.
+     * @param  {string} params.fileId - The ID for the file.
+     * @param  {boolean=} params.sendNotificationEmails - Whether to send notification emails when sharing to users or groups. This parameter is ignored and an email is sent if the role is owner.
+     * @param  {object} params.resource - Request body data*/
+    
+<span class="cstat-no" title="statement not covered" >    oauth2Client.setCredentials(tokens);</span>
+<span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
+<span class="cstat-no" title="statement not covered" >    var permission = {</span>
+        type : 'anyone',
+        id : 'anyone',
+        name :'anyone',
+        role : 'reader',
+        withLink : true
+    };
+    
+<span class="cstat-no" title="statement not covered" >    drive.permissions.insert({fileId:fileId, resource : permission}, <span class="fstat-no" title="function not covered" >function(err, results) {</span></span>
+<span class="cstat-no" title="statement not covered" >         if(err) {</span>
+<span class="cstat-no" title="statement not covered" >            console.log("cannot change file permission ", err);</span>
+<span class="cstat-no" title="statement not covered" >            deferred.reject(err);</span>
+        } else {
+            //console.log('SpaceUsage infos? ', infos);           
+<span class="cstat-no" title="statement not covered" >            deferred.resolve(results);</span>
+        }
+    });
+<span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
+};
+&nbsp;
 exports.sendVideo=sendVideo;
 exports.getOAuthURL=getOAuthURL;
 exports.pushCode=pushCode;
@@ -1255,7 +1354,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 06 2016 17:10:54 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 06 2016 19:50:31 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

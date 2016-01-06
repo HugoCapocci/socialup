@@ -848,22 +848,6 @@ app.get('/categories/:provider/:userId', function(req, res) {
     }
 });
 
-/*app.get('/videos/:provider/:userId', function(req, res) {
-    
-    //console.log("get videos");    
-    var provider = req.params.provider;
-    var userId=req.params.userId;
-            
-    getRefreshedToken(provider, userId).then(function(tokens) {
-        return providersAPI[provider].listVideos(tokens, userId);
-    }).then(function(videos) {
-        //console.log("videos found: ", videos);
-        res.send(videos);
-    }).fail(function(err) {
-        res.status(403).send(err);
-    });
-});*/
-
 app.get('/media/:provider/:userId', function(req, res) {
     
     //console.log("get videos");    

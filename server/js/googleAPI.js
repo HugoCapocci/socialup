@@ -394,6 +394,39 @@ exports.getSpaceUsage = function(tokens) {
     return deferred.promise;
 };
 
+exports.createShareLink = function(tokens, fileId) {
+    
+    
+    // drive.permissions.insert
+    
+     /*params - Parameters for request
+     * @param  {string=} params.emailMessage - A custom message to include in notification emails.
+     * @param  {string} params.fileId - The ID for the file.
+     * @param  {boolean=} params.sendNotificationEmails - Whether to send notification emails when sharing to users or groups. This parameter is ignored and an email is sent if the role is owner.
+     * @param  {object} params.resource - Request body data*/
+    
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    var permission = {
+        type : 'anyone',
+        id : 'anyone',
+        name :'anyone',
+        role : 'reader',
+        withLink : true
+    };
+    
+    drive.permissions.insert({fileId:fileId, resource : permission}, function(err, results) {
+         if(err) {
+            console.log("cannot change file permission ", err);
+            deferred.reject(err);
+        } else {
+            //console.log('SpaceUsage infos? ', infos);           
+            deferred.resolve(results);
+        }
+    });
+    return deferred.promise;
+};
+
 exports.sendVideo=sendVideo;
 exports.getOAuthURL=getOAuthURL;
 exports.pushCode=pushCode;
