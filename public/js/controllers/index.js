@@ -3,6 +3,7 @@ define([
     './login',
     './resetPassword',
     './uploadFile',
+    './uploadMusic',
     './cloudExplorer',
     './uploadCloud',
     './postMessage',

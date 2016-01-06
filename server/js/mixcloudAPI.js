@@ -79,3 +79,47 @@ exports.getUserInfo = function(tokens) {
     return deferred.promise;
 
 };
+
+exports.sendMusic = function(tokens, file, params) {
+    
+    //post https://api.mixcloud.com/upload/
+    var formData= {
+        mp3: fs.createReadStream(file.path),
+        name : params.title,
+        description : params.description
+    };
+    
+    //5 tags max
+    if(params.tags && params.tags.length>0) {
+        for(var i=0; i<params.tags.length;i++) {
+            formData['tags-'+i+'-tag']=params.tags[i];
+        }
+    }
+    
+    /* track sections
+    sections-0-chapter=Introduction" \
+     -F "sections-0-start_time=0" \
+     -F "sections-1-artist=Artist Name" \
+     -F "sections-1-song=Song Title" \
+     -F "sections-1-start_time=10" \*/
+    
+    var deferred = Q.defer();
+    request({
+        method: 'POST',
+        uri: 'https://api.mixcloud.com/upload/?access_token='+tokens.access_token,
+        formData: formData
+    }, function(err, response, body) {
+
+        if(err)
+            deferred.reject(err);
+        else {
+            //console.log('Mixcloud Upload Response body: ', body);
+            var result = JSON.parse(body);
+            if(result.error)
+                deferred.reject(result);
+            else
+                deferred.resolve(result);           
+        }
+    });    
+    return deferred.promise;
+};

@@ -669,6 +669,35 @@ app.post('/uploadFileToCloud/:userId', upload.single('file'), function(req, res)
     
 });
 
+app.post('/uploadMusic/:userId', upload.single('file'), function(req, res) {
+    
+    console.log("uploadMusic !");
+    
+    var path = req.file.path;
+    fs.renameSync(path, path+'_'+req.file.originalname);
+    req.file.path = path+'_'+req.file.originalname;
+    var userId = req.params.userId;
+         
+    //var scheduledDate = req.body.scheduledDate;
+    var provider = req.body.provider;
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {   
+        var params = {
+            title : req.body.title,
+            description : req.body.description
+        };
+        if(req.body.tags)
+            params.tags = req.body.tags.split(',');
+        console.log("sendMusic !");
+        return providersAPI[provider].sendMusic(tokens, req.file, params);
+    }).then(function(result) {
+        res.send(result);
+    }).fail(function(err){
+        console.log(err);
+        res.status(403).send(err);
+    });
+});
+
 //sendvideo with file from http post TODO rename
 app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
     

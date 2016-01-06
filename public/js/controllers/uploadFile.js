@@ -277,7 +277,6 @@ define(['./module', 'moment'], function (appModule, moment) {
             return tags;
         }
         $scope.processTags=processTags;
-        
 
     }
 

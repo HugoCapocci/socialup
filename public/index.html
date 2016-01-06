@@ -123,27 +123,39 @@
         
         <nav class="navbar navbar-inverse navbar-fixed-top">
           <div class="container" style="width:90%">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="#">Social Up</a>
+            <div class="navbar-header">               
+                <button type="button" uib-dropdown-toggle ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Social Up</a>
             </div>
-            <div id="navbar" class="collapse navbar-collapse">
+            <div id="navbar" class="collapse navbar-collapse" ng-class="{'in':!navCollapsed}">
                 <ul class="nav navbar-nav">
-                    <li><a href="#/uploadFile">Upload a file <i class="glyphicon glyphicon-open-file"></i></a></li>
-                    <li><a href="#/cloudExplorer">Explore cloud <i class="glyphicon glyphicon-cloud"></i></a></li>
-                    <li><a href="#/postMessage">Post a message <i class="glyphicon glyphicon-comment"></i></a></li>
-                    <li><a href="#/scheduledEvents">Manage scheduled events <i class="glyphicon glyphicon-calendar"></i></a></li>
-                    <li><a href="#/tracedEvents">Traced events</a></li>
-                    <li><a href="#/videos">View videos <i class="glyphicon glyphicon-film"></i></a></li>  
-                    <li><a href="#/manageSocialNetworks">Manage authentications <i class="glyphicon glyphicon-cog"></i></a></li>
-                    <li><a href="#/facebookStats">Stats <i class="glyphicon glyphicon-stats"></i></a></li>                    
+                    <li class="dropdown" uib-dropdown>
+                      <a href uib-dropdown-toggle class="dropdown-toggle">Publier <i class="glyphicon glyphicon-open-file"></i><span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#/uploadFile" ng-click="navCollapsed=true">Publier une vidéo <i class="glyphicon glyphicon-film"></i></a></li>
+                        <li><a href="#/uploadMusic" ng-click="navCollapsed=true">Publier un son <i class="glyphicon glyphicon-music"></i></a></li>
+                      </ul>
+                    </li>
+                    <li><a href="#/cloudExplorer" ng-click="navCollapsed=true">Explorer clouds <i class="glyphicon glyphicon-cloud"></i></a></li>
+                    <li><a href="#/postMessage" ng-click="navCollapsed=true">Poster un message <i class="glyphicon glyphicon-comment"></i></a></li>
+                    <li class="dropdown" uib-dropdown>
+                      <a href uib-dropdown-toggle class="dropdown-toggle">Evènements <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#/scheduledEvents" ng-click="navCollapsed=true">Voir actions programmées <i class="glyphicon glyphicon-calendar"></i></a></li>
+                        <li><a href="#/tracedEvents" ng-click="navCollapsed=true">Historique des actions</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="#/videos" ng-click="navCollapsed=true">Voir videos <i class="glyphicon glyphicon-film"></i></a></li>  
+                    <li><a href="#/manageSocialNetworks" ng-click="navCollapsed=true">Gestion des authentifications <i class="glyphicon glyphicon-cog"></i></a></li>
+                    <li><a href="#/facebookStats" ng-click="navCollapsed=true">Stats <i class="glyphicon glyphicon-stats"></i></a></li>                    
                     <!--<li class="active"><a href="#/login">Login / Registration</a></li>-->
                 </ul>
+                
             </div><!--/.nav-collapse -->
           </div>
         </nav>
@@ -151,7 +163,7 @@
         <div class="container" style="width:100%">             
             <div class="row">
                 <div class="col-lg-2 col-md-1">
-                    <form method="post" action="http://poll.pollcode.com/24296279"><div style="background-color:#EEEEEE;padding:2px;width:175px;font-family:Arial;font-size:small;color:#000000;"><div style="padding:2px 0px 4px 2px;"><strong>Quel fournisseur de cloud ajouter ?</strong></div><input type="radio" name="answer" value="1" id="answer242962791" style="float:left;" /><label for="answer242962791" style="float:left;width:150px;">amazon cloud drive (amazon web services)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="2" id="answer242962792" style="float:left;" /><label for="answer242962792" style="float:left;width:150px;">microsoft one drive (microsoft azure)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="3" id="answer242962793" style="float:left;" /><label for="answer242962793" style="float:left;width:150px;">apple iCloud (apple)</label><div style="clear:both;height:2px;"></div><div align="center" style="padding:3px;"><input type="submit" value=" Vote ">&nbsp;<input type="submit" name="view" value=" View "></div><div align="right" style="font-size:10px">pollcode.com <a href="http://pollcode.com/">free polls</a></div></div></form>
+                    <form method="post" action="http://poll.pollcode.com/24296279" target="_blank"><div style="background-color:#EEEEEE;padding:2px;width:175px;font-family:Arial;font-size:small;color:#000000;"><div style="padding:2px 0px 4px 2px;"><strong>Quel fournisseur de cloud ajouter ?</strong></div><input type="radio" name="answer" value="1" id="answer242962791" style="float:left;" /><label for="answer242962791" style="float:left;width:150px;">amazon cloud drive (amazon web services)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="2" id="answer242962792" style="float:left;" /><label for="answer242962792" style="float:left;width:150px;">microsoft one drive (microsoft azure)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="3" id="answer242962793" style="float:left;" /><label for="answer242962793" style="float:left;width:150px;">apple iCloud (apple)</label><div style="clear:both;height:2px;"></div><div align="center" style="padding:3px;"><input type="submit" value=" Vote ">&nbsp;<input type="submit" name="view" value=" View "></div><div align="right" style="font-size:10px">pollcode.com <a href="http://pollcode.com/">free polls</a></div></div></form>
                 </div>
                 <div class="col-lg-7 col-md-9">
                     <div ng-view></div>

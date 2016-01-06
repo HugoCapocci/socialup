@@ -1,0 +1,74 @@
+ <div>
+
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="row">
+                <!-- left side -->
+                <div class="col-md-7">
+                    <h4>Titre du morceau/mix</h4>
+                    <input type="text" ng-model="uploadMusicData.title" value="Title"/>
+                    &nbsp;&nbsp;
+                    <span class="btn btn-default btn-primary btn-file" ng-if="!uploadMusicData.cloudFile">
+                        Fichier <input type="file" nv-file-select uploader="uploader"/>
+                    </span><br/>
+                    
+                    <h4>Description (opt)</h4>
+                    <textarea ng-model="uploadMusicData.description" style="min-width:530px;min-height:250px;"></textarea>
+                    
+                    <h4>Tags (opt)</h4>
+                    <tags-input  ng-model="uploadMusicData.tags" add-on-space="true" style="max-width:600px"></tags-input>
+                </div>
+                
+                <!-- rigth side, options -->
+                <div class="col-md-5">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4><input type="checkbox" ng-model="uploadMusicData.isScheduled"> Programmer l'envoi</h4>
+                        </div>
+                    </div>
+                    <div class="row" ng-if="uploadMusicData.isScheduled">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">Le </span>
+                                <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="uploadMusicData.date" is-open="status.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Close"/>
+                                <span class="input-group-btn">
+                                    <button type="button" class="form-control btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">à </span>
+                                <uib-timepicker ng-model="uploadMusicData.date" ng-change="changed()" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></uib-timepicker>
+                            </div>
+                        </div>                       
+                    </div>
+                    
+                    <div class="row">
+                        <div class="btn-group btn-group-justified">
+                            <span>Providers : </span>
+                            <div ng-repeat="provider in uploadMusicData.providers" >
+                                <input type="checkbox" class="input-md" checklist-model="uploadMusicData.selectedProviders" checklist-value="provider">
+                                <span>{{provider}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div ng-if="uploadMusicData.isFile && !uploadMusicData.cloudFile" class="col-md-5 col-md-offset-7">
+            <button class="btn btn-default btn-primary" ng-if="uploadMusicData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
+            <button class="btn btn-default btn-primary" ng-if="!uploadMusicData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
+                {{(uploadFileData.isScheduled ? 'Programmer l\'envoi du morceau' : 'Publier le morceau')}}
+            </button>
+        </div>        
+    </div>
+     
+    <div class="row">
+        <!-- afficher directive/musique/mixcloud-->
+        <audio ng-if="result" src=""></audio>
+    </div>
+
+</div>
