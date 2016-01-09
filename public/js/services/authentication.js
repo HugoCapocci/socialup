@@ -1,10 +1,10 @@
-define(['./module'], function (appModule) {
+define(['./module'], function(appModule) {
 
     'use strict';
     
     appModule.service('authService', 
         ['$http', '$q', '$window',
-        function authService($http, $q, $window) {
+        function($http, $q, $window) {
 
             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
 
@@ -24,20 +24,6 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
-        
-/*            this.getTwitterAccessToken = function(oauthVerifier) {
-                var deferred = $q.defer();
-                $http.post('/twitter/'+oauthVerifier+'/'+localData.user.id)
-                .then(function (response) {
-                    console.log('response for getTwitterAccessToken: ', response);
-                    deferred.resolve(response.data);
-                }, function (err) {
-                    
-                    console.log("err: ", err);
-                    deferred.reject(err);
-                });
-                return deferred.promise;
-            };*/
 
             this.authenticate = function(login, hashedPassword) {
 

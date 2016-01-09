@@ -21,6 +21,8 @@ exports.getOAuthURL = function() {
 };
 
 exports.pushCode = function(code, userId) {
+    
+    console.log("pushing code: ",code);
 
     var deferred = Q.defer();
     var post_data = querystring.stringify({
@@ -47,7 +49,10 @@ exports.pushCode = function(code, userId) {
         });
         res.on('end', function() {
             console.log("soundcloud code validated ? ", data);
-            deferred.resolve(JSON.parse(data));
+            if(!data)
+                deferred.reject(new Error("No data returned by soundloud"));
+            else
+                deferred.resolve(JSON.parse(data));
         });
     });
 
@@ -150,20 +155,22 @@ exports.listMedia = function(tokens) {
                 deferred.reject(results.error);
             } else {
                              
-                deferred.resolve(results.map(function(music) {
-                    return {
-                        id : music.id,
-                        title : music.title,
-                        creationDate : music.created_at,
-                        streamURL : music.stream_url,
-                        thumbnailURL : music.artwork_url,
-                        description : music.description,
-                        playbackCount : music.playback_count,
-                        downloadCount : music.download_count,
-                        likes : music.favoritings_count,
-                        commentsCount : music.comment_count
-                    };
-                }));
+                deferred.resolve({
+                    list :results.map(function(music) {
+                        return {
+                            id : music.id,
+                            title : music.title,
+                            creationDate : music.created_at,
+                            streamURL : music.stream_url,
+                            thumbnailURL : music.artwork_url,
+                            description : music.description,
+                            playbackCount : music.playback_count,
+                            downloadCount : music.download_count,
+                            likes : music.favoritings_count,
+                            commentsCount : music.comment_count
+                        };
+                    })
+                });
             }
         });
     });

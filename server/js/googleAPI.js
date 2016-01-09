@@ -126,10 +126,14 @@ exports.listCategories = function(tokens) {
 };
 
 // see https://developers.google.com/youtube/v3/docs/search/list#forMine
-exports.listMedia = function(tokens) {
+exports.listMedia = function(tokens, userId) {
     
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
+    
+    //var channelId = 'UCwe1fNRckYTpUwRfngtOK0w';
+    //youtubeAPI.channels.list({part : 'snippet', id : channelId}, function(err, response) {
+    var videoIDs = [];   
     //youtubeAPI.videos.list({part:'snippet', regionCode:'fr', hl:'fr_FR', chart : 'mostPopular'}
     youtubeAPI.search.list({part:'snippet', forMine : true, type : 'video'}, function(err, response) {
         //console.log("listVideos response: ",response);
@@ -138,8 +142,19 @@ exports.listMedia = function(tokens) {
             deferred.reject(err);
         else {
             var videos = [];
+            var counts={
+                view:0,
+                like:0,
+                dislike:0,
+                favorite:0,
+                comment:0
+            };
+            var getStat = function(name) {
+                return { name : name, value : counts[name]};
+            };
             response.items.forEach(function(item) {
-                console.log('youtube item: ', item);
+                //console.log('youtube item: ', item);
+                videoIDs.push(item.id.videoId);
                 videos.push({
                     id : item.id.videoId,
                     creationDate : item.snippet.publishedAt,
@@ -148,7 +163,33 @@ exports.listMedia = function(tokens) {
                     thumbnailURL : item.snippet.thumbnails['default'].url
                 });
             });
-            deferred.resolve(videos);
+            youtubeAPI.videos.list({part:'statistics', id : videoIDs.toString()}, function(e, res) {
+                //console.log("videos.list ",res);
+                var i=0;
+                res.items.forEach(function(item) {
+                    console.log("videos.list item ",item);
+                    console.log("videos[i].id === item.id ? ", videos[i].id === item.id);
+                    videos[i].counts = item.statistics;
+                    counts.view += parseInt(item.statistics.viewCount);
+                    counts.like += parseInt(item.statistics.likeCount);
+                    counts.dislike += parseInt(item.statistics.dislikeCount);
+                    counts.favorite += parseInt(item.statistics.favoriteCount);
+                    counts.comment += parseInt(item.statistics.commentCount);
+                    i++;
+                });
+                
+                deferred.resolve({
+                    list : videos,
+                    stats : [
+                        getStat('view'),
+                        getStat('like'),
+                        getStat('dislike'),
+                        getStat('favorite'),
+                        getStat('comment')
+                    ]
+                });
+                
+            });
         }
     });
     return deferred.promise;

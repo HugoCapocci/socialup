@@ -1,11 +1,20 @@
-define(['./module', 'sha1'], function (appModule, sha1) {
+define(['./module', 'sha1'], function(appModule, sha1) {
     
     'use strict';
     
+    console.log('appModule \'login\' registered? ' , appModule);
+    
+    if(!appModule.controller)
+        appModule = angular.module('SocialUp');
+    
+    console.log("appModule.controller ? ", appModule.controller);
+    
     appModule.controller(
         'LoginController',
-        ['$scope', '$location', 'authService', 'alertsService',
-        function($scope, $location, authService, alertsService) {
+        ['$scope', 'authService', 'alertsService',
+        function($scope, authService, alertsService) {
+            
+            console.log('trying to instanciate LoginController');
 
             $scope.form = {
                 login : '',
@@ -77,6 +86,7 @@ define(['./module', 'sha1'], function (appModule, sha1) {
                      alertsService.warn('Veuillez renseigner votre email');
             };
             
+        
         }]
     );
 });

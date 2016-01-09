@@ -4,7 +4,7 @@ define(['./module'], function (appModule) {
     
     appModule.service('alertsService', 
         ['$rootScope', '$timeout', 
-        function alertsService($rootScope, $timeout) {
+        function ($rootScope, $timeout) {
 
             //authentication is made by provider callbacks
             this.success = function(message, delay) {

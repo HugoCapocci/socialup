@@ -6,7 +6,7 @@ define(['./module'], function (appModule) {
         function($scope, $window, $timeout, $uibModal, cloudService, alertsService, FileUploader) {
         
         var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
-            
+        $scope.isLoading=false;
         $scope.treeOptions = {
             nodeChildren: "children",
             dirSelectable: true,
@@ -94,13 +94,20 @@ define(['./module'], function (appModule) {
 
         function loadProviderRootData() {
             
+            //load
+            $scope.dataForTheTree = undefined;
+            $scope.cloudExplorer.selectedFile = undefined;
+            $scope.isLoading=true;
+            
             //adapt pie chart data to selected provider
             $scope.labels=["Espace utilisé", "Espace disponible"];
             $scope.data = [spaceUsage[$scope.cloudExplorer.provider].used, spaceUsage[$scope.cloudExplorer.provider].total-spaceUsage[$scope.cloudExplorer.provider].used];
             cloudService.getFiles($scope.cloudExplorer.provider).then(function(files) {
                 $scope.dataForTheTree = files;
+                $scope.isLoading=false;
                 console.log("cloud service OK files: ", files);
             }, function(err) {
+                $scope.isLoading=false;
                 console.log("error in cloud service: ", err);
             });
         }
@@ -108,13 +115,18 @@ define(['./module'], function (appModule) {
        
         $scope.showToggle = function(node, expanded/*, $parentNode, $index, $first, $middle, $last, $odd, $even*/) {
 
-            if(expanded) {            
+            if(expanded) {
+                $scope.isLoading=true;
                 cloudService.getFiles($scope.cloudExplorer.provider, node.id).then(function(files) {
+                    $scope.isLoading=false;
                     node.children = files;
                     console.log("cloud service OK");
                 }, function(err) {
+                    $scope.isLoading=false;
                     console.log("error in cloud service: ", err);
                 });
+            } else {
+                node.children = [];
             }
         };
         
@@ -171,7 +183,6 @@ define(['./module'], function (appModule) {
         });
         
         $scope.cloudUploader = new FileUploader({url : '/uploadFileToCloud/'+localData.user.id});
-
             
         $scope.cloudUploader.onAfterAddingFile = function(fileItem) {
             console.info('onAfterAddingFile', fileItem);
@@ -180,8 +191,13 @@ define(['./module'], function (appModule) {
                 {'provider' : $scope.cloudExplorer.provider},
                 {'target' : $scope.cloudExplorer.selectedFile.id}
             ];
-            
+            $scope.isLoading=true;
             fileItem.upload();
+        };
+            
+        $scope.cloudUploader.onSuccessItem = function(item, response, status, headers) {
+            $scope.isLoading=false;
+            console.log("TODO: refresh folder");
         };
         
         //Workaround
@@ -193,8 +209,7 @@ define(['./module'], function (appModule) {
                 element.triggerHandler('click');
             }, 0);
         };
-        
-        
+
     }]);
 
 });

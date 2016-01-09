@@ -1,5 +1,6 @@
 node_modules
 public/bower_components
+public/dist
 server/uploads
 coverage
 localeConfig.js

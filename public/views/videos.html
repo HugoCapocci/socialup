@@ -2,15 +2,27 @@
     
     <div class="row">        
         <div class="col-md-6">
-            Provider : <select class="form-control" ng-model="videos.provider" ng-options="option for option in videos.providers" ng-change="videos.changeProvider()"></select>
+            <div class="input-group">
+                <span class="input-group-addon">Fournisseur de media : </span>
+                <select class="form-control" ng-model="media.provider" ng-options="option for option in media.providers" ng-change="media.changeProvider()"></select>
+            </div>
         </div>
-        <div class="col-md-6">
-            <canvas id="radar" class="chart chart-radar" chart-data="data" chart-labels="labels"></canvas> 
+        <div class="col-md-6">            
+            <div ng-if="!isLoading && stats">
+                <span ng-repeat="stat in stats">
+                    <span class="label label-primary">
+                        {{stat.name}} : {{stat.value}}
+                    </span>&nbsp;
+                </span>
+            </div>
         </div>
     </div>
-    
+    <div class="row">&nbsp;</div>    
     <div class="row">
-        <table st-table="displayedCollection"  st-safe-src="videos.list" class="table table-striped">
+        <div ng-if="isLoading" class="col-md-12" style="text-align:center;">
+            <img src="images/loading.gif" width="64" height="64"/> Chargement en cours...
+        </div>
+        <table ng-if="!isLoading && displayedCollection.length>0" st-table="displayedCollection" st-safe-src="media.list" class="table table-striped">
             <thead>
                 <tr>
                     <th st-sort="title">video title</th>
@@ -27,7 +39,7 @@
                     <td>{{video.creationDate | date:"dd/MM/yyyy HH'h'mm" }}</td>
                     <td>{{video.description}}</td>
                     <td>
-                       <a ng-href="{{videos.getURL(video.id)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>
+                       <a ng-href="{{media.getURL(video.id)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>
                     </td>
                     <td>
                         <div class="btn-group" uib-dropdown>

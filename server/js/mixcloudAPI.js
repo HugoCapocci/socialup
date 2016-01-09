@@ -137,35 +137,64 @@ exports.listMedia = function(tokens) {
             data+=chunk;
         });
         res.on('end', function() {
-            console.log("listMedia ", data);
+            //console.log("listMedia ", data);
             var results = JSON.parse(data);
             if(results.error) {
                 console.log('mixcloud listMedia error: ', results.error.message);
                 deferred.reject(results.error);
             } else {
-                console.log("listMedia ?  ",results);                
-                deferred.resolve(results.data.map(function(music) {
-                     return {
+                //console.log("listMedia ?  ",results);
+                var counts={
+                    listener:0, 
+                    playback:0, 
+                    repost:0, 
+                    like:0, 
+                    comment:0
+                };
+                
+                var getStat = function(name) {
+                    return { name : name, value : counts[name]};
+                };
+                
+                var dataList = results.data.map(function(music) {
+                    counts.listener += music.listener_count;
+                    counts.playback += music.play_count;
+                    counts.repost += music.repost_count;
+                    counts.like += music.favorite_count;
+                    counts.comment += music.comment_count; 
+                    return {
                         id : music.key,
                         title : music.name,
                         creationDate : music.created_time,
                         streamURL : music.url,
                         thumbnailURL : music.pictures.medium,
                         description : music.description,
-                        //playbackCount : music.listener_count,
-                        playbackCount : music.play_count,
-                        repostCount : music.repost_count,
-                        likes : music.favorite_count,
-                        commentsCount : music.comment_count
+                        counts : {
+                            listener : music.listener_count,
+                            playback : music.play_count,
+                            repost : music.repost_count,
+                            like : music.favorite_count,
+                            comment : music.comment_count
+                        }
                     };
-                }));
+                });                
+                deferred.resolve({
+                    list : dataList, 
+                    stats : [
+                        getStat('listener'),
+                        getStat('playback'),
+                        getStat('repost'),
+                        getStat('like'),
+                        getStat('comment')
+                    ]
+                });
             }
         });
     });
     req.on('error', function(e) {         
         console.log('mixcloud listMedia error: ', e);
         deferred.reject(e);
-    });    
-    req.end();    
+    });
+    req.end();
     return deferred.promise;
 };

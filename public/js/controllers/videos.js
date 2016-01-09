@@ -6,19 +6,26 @@ define(['./module', 'moment'], function(appModule, moment) {
     ['$scope', '$location', '$uibModal', 'videosService', 'alertsService', 
     function($scope,  $location, $uibModal, videosService, alertsService) {
 
-        $scope.videos = {
+        $scope.isLoading = false;
+        $scope.media = {
             provider : null,
             providers: ['google', 'dailymotion', 'vimeo', 'soundcloud', 'mixcloud'],
             list : [],
             changeProvider : function() {
-                console.log("changeProvider -> ",$scope.videos.provider);
-                videosService.getMedia($scope.videos.provider).then(function(media) {
-                    $scope.videos.list=media;
-                    $scope.displayedCollection = [].concat($scope.videos.list);
-                    
+                console.log("changeProvider -> ",$scope.media.provider);
+                $scope.isLoading = true;
+                $scope.displayedCollection= [];
+                $scope.data=[];
+                videosService.getMedia($scope.media.provider).then(function(media) {
+                    $scope.isLoading=false;
+                    $scope.media.list=media.list;
+                    $scope.displayedCollection = [].concat($scope.media.list);
+  
                     //stats:
-                    var playbackCount=0, downloadCount=0, likes=0, commentsCount=0, repostCount=0;
-                    if($scope.videos.provider === 'soundcloud' || $scope.videos.provider === 'mixcloud') {
+                    $scope.stats = media.stats;
+                    console.log("stats: ", $scope.stats);
+                   // var playbackCount=0, downloadCount=0, likes=0, commentsCount=0, repostCount=0;
+                   /* if($scope.media.provider === 'soundcloud' || $scope.media.provider === 'mixcloud') {
                         media.forEach(function(datum) {
                             playbackCount+=datum.playbackCount;
                             if(datum.downloadCount)
@@ -30,7 +37,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                         });
                         $scope.data = [[playbackCount, commentsCount, likes]];
                         $scope.labels = ['lectures', 'commentaires', 'likes'];
-                        if($scope.videos.provider === 'soundcloud') {
+                        if($scope.media.provider === 'soundcloud') {
                             $scope.data[0].push(downloadCount);
                             $scope.labels.push('téléchargements');
                         } else {
@@ -41,27 +48,28 @@ define(['./module', 'moment'], function(appModule, moment) {
                     } else {
                         $scope.data = [];
                         $scope.labels = [];
-                    }
+                    }*/
                 }, function(err) {
+                    $scope.isLoading=false;
                     alertsService.error("Impossible de récupérer les vidéos. Err: "+err);
                 });
             },
-            getURL : function(videoId) {
-                switch($scope.videos.provider) {
+            getURL : function(mediaId) {
+                switch($scope.media.provider) {
                     case 'google':
-                        return 'https://www.youtube.com/watch?v='+videoId;
+                        return 'https://www.youtube.com/watch?v='+mediaId;
                     case 'dailymotion':
-                        return 'http://www.dailymotion.com/video/'+videoId;
+                        return 'http://www.dailymotion.com/video/'+mediaId;
                     case 'vimeo':
-                        return 'https://vimeo.com/'+videoId;
+                        return 'https://vimeo.com/'+mediaId;
                     case 'mixcloud':
-                        return 'https://www.mixcloud.com'+videoId;
+                        return 'https://www.mixcloud.com'+mediaId;
                     default:
                         return '#';
                 }
             }
         };
-        $scope.displayedCollection = [].concat($scope.videos.list);
+        $scope.displayedCollection = [].concat($scope.media.list);
         $scope.animationsEnabled = true;
       
         function openModal(controller, eventId) {
@@ -70,12 +78,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                 animation: $scope.animationsEnabled,
                 templateUrl: 'modalContent.html',
                 controller: controller+'ModalController',
-                size: 'lg',
-                resolve: {
-                    eventId : function() {
-                        return eventId;
-                    }
-                }
+                size: 'lg'
             });
                        
             modalInstance.result.then(function(selectedItem) {
@@ -86,22 +89,22 @@ define(['./module', 'moment'], function(appModule, moment) {
             });
         }
 
-        $scope.deleteVideo= function(video) {
-            console.log("delete video: ", video.id);
+        $scope.deleteVideo= function(media) {
+            console.log("delete video: ", media.id);
             //TODO open modal window with loading gif, and close it after
-            videosService.delete($scope.videos.provider, video.id).then(function() {
-                var index = $scope.videos.indexOf(video);
+            videosService.delete($scope.media.provider, media.id).then(function() {
+                var index = $scope.media.indexOf(media);
                 if (index !== -1) {
-                    $scope.videos.splice(index, 1);
+                    $scope.media.splice(index, 1);
                 }
             }, function(err) {
-                alertsService.error("Impossible d'effacer la video. Erreur : "+err);
+                alertsService.error("Impossible d'effacer le media. Erreur : "+err);
             });
         };
         
-        $scope.modifyVideo = function(video) {
+        $scope.modifyVideo = function(media) {
             
-            console.log("modify Video id? ", video.id);
+            console.log("modify media id? ", media.id);
         };
         
         $scope.parseDate = function(dateString) {

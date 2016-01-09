@@ -4,10 +4,10 @@
   "description": "Optimize Social Network use",
   "main": "index.js",
   "scripts": {
-    "test": "gulp",
+    "test": "gulp test",
     "oldstart": "node index.js",
     "start": "node server/js/oauthCallback.js",
-    "postinstall": "node node_modules/bower/bin/bower install",
+    "postinstall": "node node_modules/bower/bin/bower install && gulp minify",
     "gulp": "node node_modules/gulp/bin/gulp"
   },
   "dependencies": {
@@ -40,14 +40,25 @@
   "license": "MIT",
   "devDependencies": {
     "gulp": "^3.9.0",
+    "gulp-bower": "0.0.11",
     "gulp-istanbul": "^0.10.2",
+    "gulp-jasmine": "^2.2.1",
     "gulp-jshint": "^1.11.2",
+    "gulp-karma": "0.0.5",
     "gulp-mocha": "^2.1.3",
     "gulp-uglify": "^1.4.2",
     "jasmine": "^2.3.2",
+    "jasmine-core": "^2.4.1",
     "jshint-stylish": "^2.0.1",
+    "karma": "^0.13.19",
+    "karma-jasmine": "^0.3.6",
+    "karma-phantomjs-launcher": "^0.2.3",
+    "karma-requirejs": "^0.2.2",
+    "karma-spec-reporter": "0.0.23",
     "mocha": "^2.3.3",
     "nock": "^2.15.0",
+    "phantomjs": "^1.9.19",
+    "requirejs": "^2.1.22",
     "should": "^7.1.0"
   },
   "jshintConfig": {}

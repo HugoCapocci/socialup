@@ -6,18 +6,42 @@
             <div class="row">
                 <!-- left side -->
                 <div class="col-md-7">
-                    <h4>Titre de la vidéo</h4>
-                    <input type="text" ng-model="uploadFileData.title" value="Title"/>
-                    &nbsp;&nbsp;
-                    <span class="btn btn-default btn-primary btn-file" ng-if="!uploadFileData.cloudFile">
-                        Browse video <input type="file" nv-file-select uploader="uploader"/>
-                    </span><br/>
+                    <form class = "form-horizontal" role = "form">
+                        <div class="form-group has-error">
+                            <label class="col-sm-4 control-label">Titre de la vidéo</label>
+                            <div class = "col-sm-4">
+                                <!--<input class = "form-control" id = "focusedInput" type = "text" value = "This is focused...">-->
+                                <input type="text" class="form-control" ng-model="uploadFileData.title" value="Title"/>
+                            </div>
+                            <div class = "col-sm-4">
+                                <span class="btn btn-default btn-file" ng-if="!uploadFileData.cloudFile" ng-class="{'btn-success' : !uploadFileData.isFile}">
+                                    Browse video <input type="file" nv-file-select uploader="uploader"/>
+                                </span> 
+                            </div>
+                        </div>
+                        <div class="form-group has-warning">
+                            <label class="col-sm-5 control-label" style="text-align:left;">Description</label>
+                            <div class = "col-sm-12">
+                                <textarea class="form-control" ng-model="uploadFileData.description" style="min-width:530px;min-height:250px;"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class = "form-group">
+                            <label class="col-sm-2 control-label" style="padding-top: 9px;">Tags</label>
+                            <div class = "col-sm-10">
+                                <tags-input ng-model="uploadFileData.tags" add-on-space="true"></tags-input>
+                            </div>
+                        </div>
+                    </form>
                     
-                    <h4>Description de la vidéo</h4>
-                    <textarea ng-model="uploadFileData.description" style="min-width:530px;min-height:250px;"></textarea>
-                    
-                    <h4>Tags de la vidéo</h4>
-                    <tags-input  ng-model="uploadFileData.tags" add-on-space="true" style="max-width:600px"></tags-input>
+                 <!--   <div class="input-group">
+                        <span>Description de la vidéo</span> 
+                        <textarea class="form-control" ng-model="uploadFileData.description" style="min-width:530px;min-height:250px;"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon">Tags de la vidéo</span>
+                        <tags-input ng-model="uploadFileData.tags" add-on-space="true"></tags-input>
+                    </div>-->
                 </div>
                 
                 <!-- rigth side, options -->
@@ -76,8 +100,8 @@
             </div>
         </div>
         <div ng-if="uploadFileData.isFile && !uploadFileData.cloudFile" class="col-md-5 col-md-offset-7">
-            <button class="btn btn-default btn-primary" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
-            <button class="btn btn-default btn-primary" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
+            <button class="btn btn-default btn-success" ng-if="uploadFileData.eventId" ng-click="update(uploader.queue[0])">'Mettre à jour'</button>
+            <button class="btn btn-default btn-success" ng-if="!uploadFileData.eventId" ng-click="validateFieldsAndUpload(uploader.queue[0])">
                 {{(uploadFileData.isScheduled ? 'Programmer l\'envoi de la vidéo' : 'Publier la vidéo')}}
             </button>
         </div>        

@@ -68,14 +68,42 @@ exports.listMedia = function(tokens) {
     
     return processGetRequest(tokens.access_token, '/me/videos', function(response) {
         
-        return response.data.map(function(video) {
-            video.id=video.uri.substr(video.uri.lastIndexOf('/'));
-            video.title=video.name;
-            video.thumbnailURL = video.pictures.sizes[0].link;
-            video.creationDate = video.created_time;            
-           // console.log("vimeo video returned: ", video);
-            return video;
-        });
+        var counts={
+            view:0,
+            comment:0,
+            like:0
+        };
+        var getStat = function(name) {
+            return { name : name, value : counts[name]};
+        };
+        
+        // video.stats .plays
+        //video.metadata.connections comments.total likes.total 
+        return {
+            list : response.data.map(function(video) {
+                video.id=video.uri.substr(video.uri.lastIndexOf('/'));
+                video.title=video.name;
+                video.thumbnailURL = video.pictures.sizes[0].link;
+                video.creationDate = video.created_time;            
+               // console.log("vimeo video returned: ", video);
+                counts.view += video.stats.plays;
+                counts.comment += video.metadata.connections.comments.total;
+                counts.like += video.metadata.connections.likes.total;
+                video.counts = {
+                    view : video.stats.plays,
+                    comment : video.metadata.connections.comments.total,
+                    like : video.metadata.connections.likes.total
+                };
+                delete video.stats;
+                delete video.metadata.connections;
+                return video;
+            }),
+            stats : [
+                getStat('view'),
+                getStat('comment'),
+                getStat('like')
+            ]
+        };
     });
 };
 

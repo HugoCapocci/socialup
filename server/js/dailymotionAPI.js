@@ -2,7 +2,7 @@
 
 /*
 * DAILYMOTION WEB API
-  see https://developer.dailymotion.com/api 
+  see https://developer.dailymotion.com/api
       https://developer.dailymotion.com/tools/apiexplorer
 */
 var https = require('https');
@@ -129,15 +129,37 @@ function refreshTokens(tokens, userId) {
 
 exports.listMedia = function(tokens) {
     
-    return processGetRequest(tokens.access_token,'/user/me/videos?fields=id,thumbnail_60_url,title,description,status,created_time', function(videos) {
+    return processGetRequest(tokens.access_token,'/user/me/videos?fields=id,thumbnail_60_url,title,description,status,created_time,views_total,comments_total', function(videos) {
         //console.log("raw videos result: ", videos);
-        return videos.list.map(function(video) {
+        var counts={
+            view:0,
+            comment:0
+        };
+        var getStat = function(name) {
+            return { name : name, value : counts[name]};
+        };
+        var videoList=videos.list.map(function(video) {
             video.thumbnailURL = video.thumbnail_60_url;
             video.creationDate = new Date(video.created_time*1000);
             delete video.thumbnail_60_url;
             delete video.created_time;
+            counts.view+=video.views_total;
+            counts.comment+=video.comments_total;
+            video.counts = {
+                view : video.views_total,
+                comment : video.comments_total
+            };
+            delete  video.views_total;
+            delete video.comments_total;
             return video;
         });
+        return {
+            list : videoList,
+            stats : [
+                getStat('view'),
+                getStat('comment')
+            ]
+        };
     });
 };
 

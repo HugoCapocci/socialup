@@ -83,12 +83,7 @@ define(['./module', 'moment'], function (appModule, moment) {
                 animation: $scope.animationsEnabled,
                 templateUrl: 'modalContent.html',
                 controller: 'WaitingModalController',
-                size: 'lg',
-                resolve: {
-                    items: function () {
-                        return $scope.items;
-                    }
-                }
+                size: 'lg'
             });
             modalInstance.result.then(function(selectedItem) {
                 $scope.selected = selectedItem;

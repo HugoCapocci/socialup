@@ -86,7 +86,7 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
     
     }, function(err) {
         eventsDAO.updateScheduledEventAfterError(eventId, err);
-        
+ 
     }).then(function(chainedEvents) {                        
         //executeChainedEvents
         return executeChainedEvents(chainedEvents, params);
@@ -209,7 +209,7 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
 //return promise
 function getRefreshedToken(provider, userId) {
     
-    console.log("getRefreshedToken for userId: ", userId);
+    //console.log("getRefreshedToken for userId: ", userId);
     
     var myToken = users[userId].providers[provider].tokens;
     if(provider !== 'soundcloud' && myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
@@ -855,7 +855,8 @@ app.get('/media/:provider/:userId', function(req, res) {
     var userId=req.params.userId;
             
     getRefreshedToken(provider, userId).then(function(tokens) {
-        return providersAPI[provider].listMedia(tokens, userId);
+        //userName
+        return providersAPI[provider].listMedia(tokens, userId,users[userId].providers[provider].userName);
     }).then(function(media) {
         //console.log("media found: ", media);
         res.send(media);
