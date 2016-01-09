@@ -4,16 +4,15 @@ Live: https://socialup.herokuapp.com
 
 ========
 
-Allow multiple social networks operation from one entry point: schedule publications, explore cloud, and so on
+Allow multiple social networks operation from one entry point: schedule publications, explore cloud storage and publish from them to naywhere, and so on
 
-use config vars (process.env.<VAR>) on a localeConfig.js file (aleardy git-ignored)
+Use config vars (process.env.<VAR>) on a localeConfig.js file *(aleardy git-ignored)*
 
-DAILYMOTION_API_KEY, DAILYMOTION_API_SECRET : OAuth credentials for dailymotion
-FACEBOOK_APP_ID, FACEBOOK_APP_SECRET : OAuth credentials for facebook
-GOOGLE_API_ID, GOOGLE_API_SECRET : OAuth credentials for google/youtube
-DROPBOX_APP_KEY, DROPBOX_APP_SECRET : OAuth credentials for dropbox cloud storage
-TWITTER_APP_KEY, TWITTER_APP_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET : OAuth credentials for twitter
-
-MONGOLAB_URI : Url to cloud mongolab database
-APP_URL : your target URL
-PORT : your target port
+- DAILYMOTION_API_KEY, DAILYMOTION_API_SECRET : OAuth credentials for dailymotion
+- FACEBOOK_APP_ID, FACEBOOK_APP_SECRET : OAuth credentials for facebook
+- GOOGLE_API_ID, GOOGLE_API_SECRET : OAuth credentials for google/youtube
+- DROPBOX_APP_KEY, DROPBOX_APP_SECRET : OAuth credentials for dropbox cloud storage
+- TWITTER_APP_KEY, TWITTER_APP_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET : OAuth credentials for twitter
+- MONGOLAB_URI : Url to cloud mongolab database
+- APP_URL : your target URL
+- PORT : your target port

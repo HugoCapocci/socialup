@@ -7,7 +7,7 @@
     "test": "node node_modules/gulp/bin/gulp",
     "oldstart": "node index.js",
     "start": "node server/js/oauthCallback.js",
-    "postinstall": "node node_modules/bower/bin/bower install && gulp minify",
+    "postinstall": "node node_modules/bower/bin/bower install",
     "gulp": "node node_modules/gulp/bin/gulp",
     "build-prod" : "node node_modules/gulp/bin/gulp prod"
   },
