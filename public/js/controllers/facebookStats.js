@@ -23,11 +23,18 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.stats = {
             dates : {}
         };
-        $scope.metricTypes = [{value:"page_fans_country", label:"Nombre de likes total, par jour"}, {value:"page_storytellers_by_country", label:"Interactions journalières"}];
+        $scope.metricTypes = [
+            {value:"page_fans_country", label:"Nombre de likes total, par jour"},
+            {value:"page_fans_country", label:"Variation des likes, par jour", isVariation : true}, 
+            {value:"page_storytellers_by_country", label:"Interactions journalières"}
+        ];
         
         $scope.getPageStats = function() {
             
-            if(!$scope.stats.dates.since || !$scope.stats.dates.until) {
+            var dateSince = $scope.stats.dates.since;
+            var dateUntil = $scope.stats.dates.until;
+            
+            if(!dateSince || !dateUntil) {
                 alertsService.warn("Veuillez choisir une date de début ET une date de fin svp");
                 return;
             }
@@ -42,12 +49,19 @@ define(['./module', 'moment'], function(appModule, moment) {
             else
                  $scope.chartOptions.tooltipTemplate = $scope.tooltipTemplate+" interactions";
             
-            eventService.getPageMetrics($scope.stats.metricType.value, $scope.selectedPage.id, $scope.stats.dates.since.getTime()/1000, $scope.stats.dates.until.getTime()/1000).then(function(metrics){
+            //add 1 day to "dateUntil parameter" because facebook exclude it
+            dateUntil = moment(dateUntil).add(1,'days');
+            
+            eventService.getPageMetrics($scope.stats.metricType.value, $scope.selectedPage.id, dateSince.getTime()/1000, dateUntil.unix()).then(function(metrics){
                 console.log("metrics: ", metrics.data);
                 var valuesByDay = metrics.data[0].values; //end_time, value{}
                 $scope.labels=[];
                 $scope.series = [$scope.stats.metricType];
                 $scope.data = [[]];
+                
+                // if($scope.stats.metricType.isVariation)
+                var previousValue = undefined;
+                
                 //aggegate all countries values
                 valuesByDay.forEach(function(dayValue) {
                     //console.log("dayValue: ", dayValue);
@@ -57,8 +71,22 @@ define(['./module', 'moment'], function(appModule, moment) {
                     for(var country in dayValue.value){
                         likes+=dayValue.value[country];
                     }
-                    $scope.data[0].push(likes);
+                    
                    // $scope.data[1].push(dayValue.value.BE);
+                    
+                    if($scope.stats.metricType.isVariation) {
+                        if(!previousValue) {
+                            previousValue = likes;
+                            $scope.data[0].push(0);
+                        } else {
+                            var variation = previousValue - likes;
+                            $scope.data[0].push(variation);
+                            previousValue = likes;
+                        }
+                    } else {
+                        $scope.data[0].push(likes);
+                    }
+                    
                 });
                 console.log("$scope.data: ", $scope.data);
             });
@@ -71,8 +99,8 @@ define(['./module', 'moment'], function(appModule, moment) {
             until: false
         };
         
-        $scope.maxDate = moment().hours(0).minutes(0).seconds(0);
-       // $scope.minDate = moment().subtract(1,'months');
+        //3 jours d'écart pour les stats FB
+        $scope.maxDate = moment().subtract(3,'days').hours(0).minutes(0).seconds(0);
         
         $scope.open = function(type, $event) {
             $event.preventDefault();
