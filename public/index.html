@@ -5,17 +5,17 @@
         <meta lang="fr">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
         <title>Social Up</title>
-        <!-- use require.js for dependency injections -->
+        <!-- build:js -->
         <script data-main="js/app/main.js" src="./require.js"></script>
-
+        <!-- endbuild -->
+        
         <!-- link for CSS when using the tree as a Dom element -->
         <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control.css">
         <!-- link for CSS when using the tree as an attribute -->
         <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control-attribute.css">
         <link rel="stylesheet" type="text/css" href="bower_components/ng-tags-input/ng-tags-input.min.css">  
-        <link rel="stylesheet" type="text/css" href="bower_components/angular-chart.js/dist/angular-chart.css">
+        <link rel="stylesheet" type="text/css" href="bower_components/angular-chart.js/dist/angular-chart.min.css">
         <style>
             .stripped div:nth-child(even){
                 background-color: #dcdcdc;
@@ -174,7 +174,9 @@
             <footer>
                 <div class="row text-center">
                     <div class="col-lg-12">
-                        <p>Copyright &copy; Social Up 2015</p>
+                        <p>
+                            Copyright &copy; Social Up 2015-2016. - Version <!-- build:version -->x<!-- endbuild -->
+                        </p>
                     </div>
                 </div>
             </footer>

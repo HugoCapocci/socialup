@@ -9,8 +9,12 @@ var jshintConfig = packageJSON.jshintConfig;
 
 var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
-
+var htmlreplace = require('gulp-html-replace');
 var uglify = require('gulp-uglify');
+
+var dist = "build/";
+
+console.log("version ",packageJSON.version);
 
 gulp.task('pre-test', function () {
   return gulp.src(['server/**/*.js'])
@@ -78,6 +82,23 @@ gulp.task('minify', function() {
     return gulp.src('public/js/**/*.js')
     .pipe(uglify())
     .pipe(gulp.dest('public/dist'));
+});
+
+gulp.task('prod', ['minify'],function() {
+  gulp.src('./public/index.html')
+   //js/app/main.js
+    .pipe(htmlreplace({
+        js: {
+            src: [['dist/app/main.js', './require.js']],
+            tpl: '<script data-main="%s" src="%s"></script>'
+        },
+        version : {
+            src : [[packageJSON.version]],
+            tpl : '%s'
+        }
+    }))
+    .pipe(gulp.dest(dist));
+
 });
 
 gulp.task('default', ['jshintNode']);

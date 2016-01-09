@@ -253,6 +253,7 @@ function processGetRequest(access_token, path, callback, isOldPath) {
     return deferred.promise;
 }
 
+// see https://developers.facebook.com/docs/graph-api/using-graph-api & https://developers.facebook.com/docs/graph-api/reference/page
 exports.searchPage = function(tokens, pageName) {
     
     var searchType = 'page';
