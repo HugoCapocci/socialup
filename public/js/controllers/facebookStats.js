@@ -44,9 +44,13 @@ define(['./module', 'moment'], function(appModule, moment) {
             }
             
             //adapt tootip label on the graph according to selected stat type
-            if($scope.stats.metricType.value === 'page_fans_country')
-                $scope.chartOptions.tooltipTemplate = $scope.tooltipTemplate+" likes";
-            else
+            if($scope.stats.metricType.value === 'page_fans_country') {
+                
+                if($scope.stats.metricType.isVariation)
+                    $scope.chartOptions.tooltipTemplate = "<%if (label){%><%=label%> : <%}%><%if(value>0){%>+<%}%><%=value%> likes";
+                else
+                    $scope.chartOptions.tooltipTemplate = $scope.tooltipTemplate+" likes";
+            } else
                  $scope.chartOptions.tooltipTemplate = $scope.tooltipTemplate+" interactions";
             
             //add 1 day to "dateUntil parameter" because facebook exclude it
@@ -60,12 +64,13 @@ define(['./module', 'moment'], function(appModule, moment) {
                 $scope.data = [[]];
                 
                 // if($scope.stats.metricType.isVariation)
-                var previousValue = undefined;
+                var previousValue;
                 
                 //aggegate all countries values
                 valuesByDay.forEach(function(dayValue) {
                     //console.log("dayValue: ", dayValue);
-                    $scope.labels.push(moment(dayValue.end_time).format('D MMM YYYY'));
+                    if(!$scope.stats.metricType.isVariation || ($scope.stats.metricType.isVariation && previousValue) )                   
+                        $scope.labels.push(moment(dayValue.end_time).format('D MMM YYYY'));
                     //$scope.data[0].push(dayValue.value.FR);
                     var likes = 0;
                     for(var country in dayValue.value){
@@ -77,9 +82,9 @@ define(['./module', 'moment'], function(appModule, moment) {
                     if($scope.stats.metricType.isVariation) {
                         if(!previousValue) {
                             previousValue = likes;
-                            $scope.data[0].push(0);
+                            //$scope.data[0].push(null);
                         } else {
-                            var variation = previousValue - likes;
+                            var variation = likes - previousValue;
                             $scope.data[0].push(variation);
                             previousValue = likes;
                         }
@@ -109,8 +114,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         };
         
         $scope.changeDate = function(type) {
-
-            // There cannot be more than 93 days (8035200 s) between since and from
+            // There cannot be more than 93 days (8035200 s) between since and from => 92 days (8035200-86400=7948800) because we add one
             var since = $scope.stats.dates.since;
             var until = $scope.stats.dates.until;
             if(since && until) {
@@ -120,8 +124,8 @@ define(['./module', 'moment'], function(appModule, moment) {
                     alertsService.warn("Veuillez choisir une date de début antérieure à celle de fin");
                     delete $scope.stats.dates[type];
                     return;
-                } else if((until-since)>8035200) {
-                    alertsService.warn("Vous ne pouvez choisir plus de 93 jours d'écart entre la date de début et celle de fin");
+                } else if((until-since)>7948800) {
+                    alertsService.warn("Vous ne pouvez choisir plus de 92 jours d'écart entre la date de début et celle de fin");
                     delete $scope.stats.dates[type];
                     return;
                 }
