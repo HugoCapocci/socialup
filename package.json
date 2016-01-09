@@ -4,7 +4,7 @@
   "description": "Optimize Social Network use",
   "main": "index.js",
   "scripts": {
-    "test": "gulp",
+    "test": "node node_modules/gulp/bin/gulp",
     "oldstart": "node index.js",
     "start": "node server/js/oauthCallback.js",
     "postinstall": "node node_modules/bower/bin/bower install && gulp minify",
