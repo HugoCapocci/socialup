@@ -12,21 +12,23 @@
     <table st-table="displayedCollection" st-safe-src="facebookPages" class="table table-striped">
         <thead>
 			<tr>
+                <th></th>
 				<th st-sort="name">Nom de la page</th>
-				<th st-sort="category">Catégorie</th>                
-                <th>Id</th>                
+                <th>Description</th>
+                <th st-sort="category">Catégorie</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="page in displayedCollection"  ng-click="setSelected($index)" ng-class="{selected: page === selectedPage}">
-				<td><a ng-href="{{'https://www.facebook.com/'+page.id}}" target="_blank">{{page.name}}</a></td>
-				<td>{{page.category}}</td>
-                <td>{{page.id}}</td>
+                <td><img ng-src="{{page.picture.data.url}}" ></td>
+				<td><a ng-href="{{'https://www.facebook.com/'+page.id}}" target="_blank">{{page.name}}</a></td>            
+                <td>{{page.about}}</td>
+                <td>{{page.category}}</td>
 			</tr>
         </tbody>
          <tfoot>
 			<tr>
-				<td colspan="3" class="text-center">
+				<td colspan="4" class="text-center">
 					<div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
 				</td>
 			</tr>

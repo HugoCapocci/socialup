@@ -256,7 +256,7 @@ function processGetRequest(access_token, path, callback, isOldPath) {
 exports.searchPage = function(tokens, pageName) {
     
     var searchType = 'page';
-    return processGetRequest(tokens.access_token, '/search?q='+encodeURI(pageName)+'&type='+searchType, function(pages) {
+    return processGetRequest(tokens.access_token, '/search?q='+encodeURI(pageName)+'&type='+searchType+'&fields=id,name,category,picture,about', function(pages) {
         //console.log("Facebook searched pages: ", pages);
         return pages;
     }, true);
