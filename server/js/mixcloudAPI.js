@@ -151,11 +151,9 @@ exports.listMedia = function(tokens) {
                     like:0, 
                     comment:0
                 };
-                
                 var getStat = function(name) {
                     return { name : name, value : counts[name]};
                 };
-                
                 var dataList = results.data.map(function(music) {
                     counts.listener += music.listener_count;
                     counts.playback += music.play_count;

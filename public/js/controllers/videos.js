@@ -54,7 +54,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                     alertsService.error("Impossible de récupérer les vidéos. Err: "+err);
                 });
             },
-            getURL : function(mediaId) {
+            getURL : function(mediaId, $index) {
                 switch($scope.media.provider) {
                     case 'google':
                         return 'https://www.youtube.com/watch?v='+mediaId;
@@ -64,6 +64,8 @@ define(['./module', 'moment'], function(appModule, moment) {
                         return 'https://vimeo.com/'+mediaId;
                     case 'mixcloud':
                         return 'https://www.mixcloud.com'+mediaId;
+                    case 'soundcloud':
+                        return $scope.displayedCollection[$index].permalinkURL;
                     default:
                         return '#';
                 }

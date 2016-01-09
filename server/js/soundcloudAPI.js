@@ -38,10 +38,13 @@ exports.pushCode = function(code, userId) {
         path: '/oauth2/token',
         method: 'POST',
         headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
             'Content-Length': post_data.length
         }
     };
     var req = https.request(req_options, function(res) {
+        
+        console.log('sound cloud code validation statusCode: ', res.statusCode);
 
         var data="";
         res.on('data', function(chunk) {
@@ -154,22 +157,44 @@ exports.listMedia = function(tokens) {
                 console.log('soundcloud list musics error: ', results.error.message);
                 deferred.reject(results.error);
             } else {
-                             
+                                
+                var counts={
+                    playback:0, 
+                    download:0, 
+                    like:0, 
+                    comment:0
+                };
+                var getStat = function(name) {
+                    return { name : name, value : counts[name]};
+                };
+                var listSounds = results.map(function(music) {
+                    counts.playback += music.playback_count;
+                    counts.download += music.download_count;
+                    counts.like += music.favoritings_count;
+                    counts.comment += music.comment_count;
+                    return {
+                        id : music.id,
+                        title : music.title,
+                        creationDate : new Date(music.created_at),
+                        permalinkURL : music.permalink_url,
+                        thumbnailURL : music.artwork_url,
+                        description : music.description,
+                        counts : {
+                            playback : music.playback_count,
+                            download : music.download_count,
+                            like : music.favoritings_count,
+                            comment : music.comment_count
+                        }
+                    };
+                });
                 deferred.resolve({
-                    list :results.map(function(music) {
-                        return {
-                            id : music.id,
-                            title : music.title,
-                            creationDate : music.created_at,
-                            streamURL : music.stream_url,
-                            thumbnailURL : music.artwork_url,
-                            description : music.description,
-                            playbackCount : music.playback_count,
-                            downloadCount : music.download_count,
-                            likes : music.favoritings_count,
-                            commentsCount : music.comment_count
-                        };
-                    })
+                    list : listSounds, 
+                    stats : [
+                        getStat('playback'),
+                        getStat('download'),
+                        getStat('like'),
+                        getStat('comment')
+                    ]
                 });
             }
         });

@@ -36,10 +36,10 @@
             <tbody>
                 <tr ng-repeat="video in displayedCollection">
                     <td>{{video.title}}</td>
-                    <td>{{video.creationDate | date:"dd/MM/yyyy HH'h'mm" }}</td>
+                    <td>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</td>
                     <td>{{video.description}}</td>
                     <td>
-                       <a ng-href="{{media.getURL(video.id)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>
+                       <a ng-href="{{media.getURL(video.id, $index)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>
                     </td>
                     <td>
                         <div class="btn-group" uib-dropdown>

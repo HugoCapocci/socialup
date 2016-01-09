@@ -20,9 +20,9 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">22.46% </span>
+        <span class="strong">20.69% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>42/187</span>
+        <span class='fraction'>42/203</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">2.27% </span>
@@ -30,14 +30,14 @@
         <span class='fraction'>1/44</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">9.38% </span>
+        <span class="strong">8.57% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>3/32</span>
+        <span class='fraction'>3/35</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">22.46% </span>
+        <span class="strong">20.69% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>42/187</span>
+        <span class='fraction'>42/203</span>
       </div>
     </div>
   </div>
@@ -478,7 +478,48 @@
 433
 434
 435
-436</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -611,6 +652,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -619,6 +664,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -629,6 +685,32 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1041,10 +1123,14 @@ exports.listCategories = <span class="fstat-no" title="function not covered" >fu
 };
 &nbsp;
 // see https://developers.google.com/youtube/v3/docs/search/list#forMine
-exports.listMedia = <span class="fstat-no" title="function not covered" >function(tokens) {</span>
+exports.listMedia = <span class="fstat-no" title="function not covered" >function(tokens, userId) {</span>
     
 <span class="cstat-no" title="statement not covered" >    oauth2Client.setCredentials(tokens);</span>
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
+    
+    //var channelId = 'UCwe1fNRckYTpUwRfngtOK0w';
+    //youtubeAPI.channels.list({part : 'snippet', id : channelId}, function(err, response) {
+<span class="cstat-no" title="statement not covered" >    var videoIDs = [];   </span>
     //youtubeAPI.videos.list({part:'snippet', regionCode:'fr', hl:'fr_FR', chart : 'mostPopular'}
 <span class="cstat-no" title="statement not covered" >    youtubeAPI.search.list({part:'snippet', forMine : true, type : 'video'}, <span class="fstat-no" title="function not covered" >function(err, response) {</span></span>
         //console.log("listVideos response: ",response);
@@ -1053,8 +1139,19 @@ exports.listMedia = <span class="fstat-no" title="function not covered" >functio
 <span class="cstat-no" title="statement not covered" >            deferred.reject(err);</span>
         else {
 <span class="cstat-no" title="statement not covered" >            var videos = [];</span>
+<span class="cstat-no" title="statement not covered" >            var counts={</span>
+                view:0,
+                like:0,
+                dislike:0,
+                favorite:0,
+                comment:0
+            };
+<span class="cstat-no" title="statement not covered" >            var getStat = <span class="fstat-no" title="function not covered" >function(name) {</span></span>
+<span class="cstat-no" title="statement not covered" >                return { name : name, value : counts[name]};</span>
+            };
 <span class="cstat-no" title="statement not covered" >            response.items.forEach(<span class="fstat-no" title="function not covered" >function(item) {</span></span>
-<span class="cstat-no" title="statement not covered" >                console.log('youtube item: ', item);</span>
+                //console.log('youtube item: ', item);
+<span class="cstat-no" title="statement not covered" >                videoIDs.push(item.id.videoId);</span>
 <span class="cstat-no" title="statement not covered" >                videos.push({</span>
                     id : item.id.videoId,
                     creationDate : item.snippet.publishedAt,
@@ -1063,7 +1160,33 @@ exports.listMedia = <span class="fstat-no" title="function not covered" >functio
                     thumbnailURL : item.snippet.thumbnails['default'].url
                 });
             });
-<span class="cstat-no" title="statement not covered" >            deferred.resolve(videos);</span>
+<span class="cstat-no" title="statement not covered" >            youtubeAPI.videos.list({part:'statistics', id : videoIDs.toString()}, <span class="fstat-no" title="function not covered" >function(e, res) {</span></span>
+                //console.log("videos.list ",res);
+<span class="cstat-no" title="statement not covered" >                var i=0;</span>
+<span class="cstat-no" title="statement not covered" >                res.items.forEach(<span class="fstat-no" title="function not covered" >function(item) {</span></span>
+<span class="cstat-no" title="statement not covered" >                    console.log("videos.list item ",item);</span>
+<span class="cstat-no" title="statement not covered" >                    console.log("videos[i].id === item.id ? ", videos[i].id === item.id);</span>
+<span class="cstat-no" title="statement not covered" >                    videos[i].counts = item.statistics;</span>
+<span class="cstat-no" title="statement not covered" >                    counts.view += parseInt(item.statistics.viewCount);</span>
+<span class="cstat-no" title="statement not covered" >                    counts.like += parseInt(item.statistics.likeCount);</span>
+<span class="cstat-no" title="statement not covered" >                    counts.dislike += parseInt(item.statistics.dislikeCount);</span>
+<span class="cstat-no" title="statement not covered" >                    counts.favorite += parseInt(item.statistics.favoriteCount);</span>
+<span class="cstat-no" title="statement not covered" >                    counts.comment += parseInt(item.statistics.commentCount);</span>
+<span class="cstat-no" title="statement not covered" >                    i++;</span>
+                });
+                
+<span class="cstat-no" title="statement not covered" >                deferred.resolve({</span>
+                    list : videos,
+                    stats : [
+                        getStat('view'),
+                        getStat('like'),
+                        getStat('dislike'),
+                        getStat('favorite'),
+                        getStat('comment')
+                    ]
+                });
+                
+            });
         }
     });
 <span class="cstat-no" title="statement not covered" >    return deferred.promise;</span>
@@ -1354,7 +1477,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Jan 06 2016 19:50:31 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Jan 09 2016 15:40:28 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>
