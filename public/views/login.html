@@ -13,7 +13,7 @@
                         
                          <div class="row">
                              <div class="col-xs-5 col-md-5 col-lg-6">
-                                <form name="signIn" id="loginForm" class="form-signin" ng-submit="create()">
+                                <form name="create" id="createForm" class="form-signin" ng-submit="create()">
                                     <fieldset>
                                          <div class="form-group">
                                             <input type="text" id="firstName" class="form-control" placeholder="Prénom" ng-model="form.firstName"/>
@@ -34,7 +34,7 @@
                                         <!-- captcha pour éviter les bots -->
                                         <div vc-recaptcha key="'6LdYdAUTAAAAACh8N-aW_9k1dPMg0I-u5uWnULnW'" ></div>
                                         
-                                        <button id="login-butt" class="btn btn-primary" type="submit">inscrivez-vous</button>
+                                        <button id="createButt" class="btn btn-primary" type="submit">inscrivez-vous</button>
                                         
                                     </fieldset>
                                 </form>
@@ -42,10 +42,7 @@
                             </div>
                              
                             <div class="col-xs-5 col-md-5 col-lg-6">
-                                <pan>TODO</pan>
-                               <!-- <img src="images/facebook-connect-button.png" ng-click="socialSubscribe('facebook')">
-                                <img src="images/google-connect-button.png" ng-click="socialSubscribe('google')">
-                                <img src="images/twitter-connect-button.png" ng-click="socialSubscribe('twitter')">-->
+                                
                             </div>
                              
                         </div>
@@ -54,31 +51,34 @@
                 <uib-tab heading="Connectez-vous" active="true">
 
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-5 col-md-5 col-lg-6">
-                                <form name="signIn" id="login" class="form-signin" ng-submit="authenticate()">
-		                            <fieldset>
+                       
+                        <form name="signIn" id="signInForm" class="form-signin" ng-submit="authenticate()">
+                            <fieldset>                                        
+                                <div class="row">
+                                    <div class="col-xs-5 col-md-5 col-lg-6 "> 
                                         <div class="form-group">
                                             <input type="text" id="log" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
-                                        </div>
+                                        </div>                              
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-5 col-md-5 col-lg-6">
                                         <div class="form-group">
-		                                    <input type="password" id="pswd" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
-		                                </div>
-                                        <button id="login-butt" class="btn btn-primary" type="submit">connectez-vous</button>
-	                                </fieldset>
-                                </form>
-                            </div>
-                            <div class="col-xs-5 col-md-5 col-lg-6">
-                                TODO
-                                <!--<img src="images/facebook-connect-button.png" ng-click="socialConnect('facebook')">
-                                <img src="images/google-connect-button.png" ng-click="socialConnect('google')">
-                                <img src="images/twitter-connect-button.png" ng-click="socialConnect('twitter')">-->
-                            </div>
+                                            <input type="password" id="pswd" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
+                                        </div>                                
+                                    </div>
+                                    <div class="col-xs-5 col-md-5 col-lg-6 col-lg-offset-0">
+                                        <button id="signInButt" class="btn btn-primary" type="submit">connectez-vous</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <div class="clean">
+                            <hr style="margin-bottom:0px;"/>
                         </div>
-                        <div class="clean"></div>
                         <div class="row">
-                            <div class="col-xs-5 col-md-5 col-lg-6 col-md-offset-3">
-                                Mot de passe oublié ?
+                            <div class="col-xs-8 col-md-8 col-lg-9 col-md-offset-2">
+                                <h3>Mot de passe oublié ?</h3>
                             </div>
                             <div class="col-xs-5 col-md-5 col-lg-6">
                                 <input type="text" class="form-control" placeholder="Email (login)" ng-model="form.loginPasswordRetrieve"/>

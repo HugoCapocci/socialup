@@ -2,10 +2,9 @@ define(['./module'], function (appModule) {
     
     'use strict';
     
-    appModule.controller('CloudExplorerController', ['$scope', '$window', '$timeout', '$uibModal', 'cloudService', 'alertsService', 'FileUploader', 
-        function($scope, $window, $timeout, $uibModal, cloudService, alertsService, FileUploader) {
-        
-        var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
+    appModule.controller('CloudExplorerController', ['$scope', '$window', '$timeout', '$uibModal', '$q', 'cloudService', 'alertsService', 'userService', 'FileUploader', 
+        function($scope, $window, $timeout, $uibModal, $q, cloudService, alertsService, userService, FileUploader) {
+    
         $scope.isLoading=false;
         $scope.treeOptions = {
             nodeChildren: "children",
@@ -26,11 +25,19 @@ define(['./module'], function (appModule) {
         };
         $scope.dataForTheTree = [];
         $scope.cloudExplorer = {
-            providers : ['google', 'dropbox'],
+            providers : [],
             provider : null,
             selectedFile :null
         };
         
+        //user providers: 
+        var activeProviders = Object.keys( userService.getActiveProviders() );
+        console.log("activeProviders: ",activeProviders);
+        if(activeProviders.indexOf('google')!==-1)
+            $scope.cloudExplorer.providers.push('google');
+        if(activeProviders.indexOf('dropbox')!==-1)
+            $scope.cloudExplorer.providers.push('dropbox');
+            
         $scope.publishFile = function() {
             
             //selon le type de fichier
@@ -160,29 +167,41 @@ define(['./module'], function (appModule) {
             tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%var units=['o', 'Ko', 'Mo', 'Go', 'To']; var unitIndex=0; var reducedValue=value; while((reducedValue/1024)>1) {reducedValue=reducedValue/1024;unitIndex++;} %><%=reducedValue.toFixed(2)%> <%=units[unitIndex]%>"
         };
         
-        var total, dropboxUsed, gDriveUsed;
+        var total=0;
         var spaceUsage = {};
-        
-        cloudService.getSpaceUsage('dropbox').then(function(response) {
-            $scope.labels=["Espace utilisé sur dropbox", "Espace utilisé sur google", "Espace total disponible"];
-            spaceUsage.dropbox=response.data;
-            dropboxUsed=response.data.used;
-            total = response.data.total;
-            $scope.data=[dropboxUsed];
-            console.log("dropbox space usage ", response.data);
-            
-            return cloudService.getSpaceUsage('google');
-        }).then(function(gooleDriveUsage) {
-            spaceUsage.google=gooleDriveUsage.data;
-            gDriveUsed=gooleDriveUsage.data.used;
-            $scope.data.push(gDriveUsed);
-            total+=gooleDriveUsage.data.total;
-            $scope.data.push( total-(dropboxUsed+gDriveUsed) );
-            console.log("gooleDriveUsage: ",gooleDriveUsage.data);            
-            console.log("$scope.data? ",$scope.data);
+        $scope.data=[];
+        $scope.labels=[];
+        getGlobalSpaceUsage($scope.cloudExplorer.providers).then(function() {
+            Object.keys(spaceUsage).forEach(function(provider) {
+                total = total - spaceUsage[provider].used;
+            });
+            $scope.data.push(total);
+            $scope.labels.push("Espace total disponible");
         });
+            
+        function getGlobalSpaceUsage(providers) {
+            var results = [];
+            providers.forEach(function(provider) {
+                results.push(getSpaceUsage(provider));
+            });
+            return $q.all(results);            
+        }
+        function getSpaceUsage(provider) {
+            
+            var deferred = $q.defer();
+            cloudService.getSpaceUsage(provider).then(function(response) {           
+                spaceUsage[provider]=response.data;
+                total += response.data.total;
+                $scope.data.push(response.data.used);
+                $scope.labels.push("Espace utilisé sur "+provider);
+                deferred.resolve();
+            }, function(err){
+               deferred.reject(err); 
+            });
+            return deferred.promise;
+        }
         
-        $scope.cloudUploader = new FileUploader({url : '/uploadFileToCloud/'+localData.user.id});
+        $scope.cloudUploader = new FileUploader({url : '/uploadFileToCloud/'+userService.getUserData().id});
             
         $scope.cloudUploader.onAfterAddingFile = function(fileItem) {
             console.info('onAfterAddingFile', fileItem);

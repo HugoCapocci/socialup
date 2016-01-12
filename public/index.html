@@ -6,6 +6,11 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Social Up</title>
+        <!-- player youtube API -->
+        <script src="https://www.youtube.com/iframe_api"></script>
+        <!-- player dailymotion API -->
+        <script src="https://api.dmcdn.net/all.js"></script>
+         <script>document.write('<base href="' + document.location + '" />');</script>
         <!-- build:js -->
         <script data-main="js/app/main.js" src="./require.js"></script>
         <!-- endbuild -->
@@ -113,6 +118,16 @@
             .selected a {
                 color: #EEE !important;
             }
+            
+            /*nav right*/
+            .nav-rtl {
+                padding-left:40px;
+                padding-right:0px;
+
+            }
+            .nav-rtl li {
+                float:right;
+            }
         </style>
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
@@ -133,26 +148,35 @@
             </div>
             <div id="navbar" class="collapse navbar-collapse" ng-class="{'in':!navCollapsed}">
                 <ul class="nav navbar-nav">
-                    <li class="dropdown" uib-dropdown>
+                    <li ng-if="$root.user" class="dropdown" uib-dropdown>
                       <a href uib-dropdown-toggle class="dropdown-toggle">Publier <i class="glyphicon glyphicon-open-file"></i><span class="caret"></span></a>
                       <ul class="dropdown-menu">
                         <li><a href="#/uploadFile" ng-click="navCollapsed=true">Publier une vidéo <i class="glyphicon glyphicon-film"></i></a></li>
                         <li><a href="#/uploadMusic" ng-click="navCollapsed=true">Publier un son <i class="glyphicon glyphicon-music"></i></a></li>
                       </ul>
                     </li>
-                    <li><a href="#/cloudExplorer" ng-click="navCollapsed=true">Explorer clouds <i class="glyphicon glyphicon-cloud"></i></a></li>
-                    <li><a href="#/postMessage" ng-click="navCollapsed=true">Poster un message <i class="glyphicon glyphicon-comment"></i></a></li>
-                    <li class="dropdown" uib-dropdown>
+                    <li ng-if="$root.user"><a href="#/cloudExplorer" ng-click="navCollapsed=true">Explorer clouds <i class="glyphicon glyphicon-cloud"></i></a></li>
+                    <li ng-if="$root.user"><a href="#/postMessage" ng-click="navCollapsed=true">Poster un message <i class="glyphicon glyphicon-comment"></i></a></li>
+                    <li ng-if="$root.user" class="dropdown" uib-dropdown>
                       <a href uib-dropdown-toggle class="dropdown-toggle">Evènements <span class="caret"></span></a>
                       <ul class="dropdown-menu">
                         <li><a href="#/scheduledEvents" ng-click="navCollapsed=true">Voir actions programmées <i class="glyphicon glyphicon-calendar"></i></a></li>
                         <li><a href="#/tracedEvents" ng-click="navCollapsed=true">Historique des actions</a></li>
                       </ul>
                     </li>
-                    <li><a href="#/videos" ng-click="navCollapsed=true">Voir videos <i class="glyphicon glyphicon-film"></i></a></li>  
-                    <li><a href="#/manageSocialNetworks" ng-click="navCollapsed=true">Gestion des authentifications <i class="glyphicon glyphicon-cog"></i></a></li>
-                    <li><a href="#/facebookStats" ng-click="navCollapsed=true">Stats <i class="glyphicon glyphicon-stats"></i></a></li>                    
-                    <!--<li class="active"><a href="#/login">Login / Registration</a></li>-->
+                    <li  class="dropdown" uib-dropdown>                                               
+                        <a href uib-dropdown-toggle class="dropdown-toggle">Media <i class="glyphicon glyphicon-open-film"></i><span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#/searchVideo" ng-click="navCollapsed=true">Rechercher une vidéo <i class="glyphicon glyphicon-film"></i></a></li>
+                            <li ng-if="$root.user"><a href="#/videos" ng-click="navCollapsed=true">Vos media publiés <i class="glyphicon"></i></a></li>                           
+                        </ul>
+                    </li>
+                    
+                    <li ng-if="$root.user"><a href="#/manageSocialNetworks" ng-click="navCollapsed=true">Gestion des authentifications <i class="glyphicon glyphicon-cog"></i></a></li>
+                    <li ng-if="$root.user"><a href="#/facebookStats" ng-click="navCollapsed=true">Stats <i class="glyphicon glyphicon-stats"></i></a></li>                    
+                    <li ng-if="$root.user"><a href="#/login" ng-click="navCollapsed=true;signout()">Sign Out <i class="glyphicon glyphicon-off"></i></a></li>
+                    
+                    <li ng-if="!$root.user"><a href="#/login">Login / Registration</a></li>
                 </ul>
                 
             </div><!--/.nav-collapse -->

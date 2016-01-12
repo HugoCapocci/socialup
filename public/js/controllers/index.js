@@ -11,6 +11,7 @@ define([
     './chainedEvents',
     './tracedEvents',
     './videos',
+    './searchVideo',
     './facebookStats',
     './manageSocialNetworks',
     './providers/facebookOptions',

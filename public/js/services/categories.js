@@ -3,11 +3,9 @@ define(['./module'], function (appModule) {
     'use strict';
     
     appModule.service('categoriesService',
-        ['$http', '$q', '$window',
-        function categoriesService($http, $q, $window) {
-            
-            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
-                                 
+        ['$http', '$q',
+        function categoriesService($http, $q) {
+                                             
             this.getCategories = function() {
                 var deferred = $q.defer();
                 $http.get('/categories/google')

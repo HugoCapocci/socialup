@@ -16,7 +16,8 @@ define(['../module'], function(appModule) {
                 privacyStatuses : ['private', 'public', 'unlisted']
             };
             
-            eventService.getCategories('google').then(function(categories) {            
+            eventService.getCategories('google').then(function(categories) {
+                console.log("google categories: ", categories);
                 $rootScope.providersOptions.google.categories=categories;            
             });
         } else {

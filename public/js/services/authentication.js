@@ -3,22 +3,18 @@ define(['./module'], function(appModule) {
     'use strict';
     
     appModule.service('authService', 
-        ['$http', '$q', '$window',
-        function($http, $q, $window) {
-
-            var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
+        ['$rootScope', '$http', '$q', '$window',
+        function($rootScope, $http, $q, $window) {
 
             //authentication is made by provider callbacks
             this.getProviderURL = function (provider) {
 
                 var deferred = $q.defer();
-                $http.get('/oauthURL/'+provider+'/'+localData.user.id)
+                $http.get('/oauthURL/'+provider+'/'+$rootScope.user.id)
                 .then(function(response) {
-                    
-                    console.log('response for provider '+provider+': ', response);
+                    //console.log('response for provider '+provider+': ', response);
                     deferred.resolve(response.data);
                 }, function(err) {
-                    
                     console.log("err: ", err);
                     deferred.reject(err);
                 });
@@ -38,7 +34,7 @@ define(['./module'], function(appModule) {
                         id : response.data._id,
                         providers : response.data.providers
                     };
-                    $window.localStorage.setItem('SocialUp', JSON.stringify({user: userData, timestamp : new Date().getTime()}));
+                    //$window.localStorage.setItem('SocialUp', JSON.stringify({user: userData, timestamp : new Date().getTime()}));
                     deferred.resolve(userData);
                 }, function (err) {
                     deferred.reject(err);
@@ -63,13 +59,13 @@ define(['./module'], function(appModule) {
             };
             
             this.getUserTokens = function() {
-                return localData.user.tokens;
+                return $rootScope.tokens;
             };
             
             this.deleteToken = function(provider) {
                 
                 var deferred = $q.defer();
-                $http.delete('/token/'+provider+'/'+localData.user.id).then(function(response) {
+                $http.delete('/token/'+provider+'/'+$rootScope.user.id).then(function(response) {
                     console.log('response for eventService.deleteEvent: ', response);
                     deferred.resolve();
                 }, function (err) {
@@ -82,7 +78,7 @@ define(['./module'], function(appModule) {
             this.refreshToken =function(provider) {
                 
                 var deferred = $q.defer();
-                $http.get('/refreshToken/'+provider+'/'+localData.user.id).then(function(response) {
+                $http.get('/refreshToken/'+provider+'/'+$rootScope.user.id).then(function(response) {
                     console.log('response for eventService.refreshToken: ', response);
                     deferred.resolve();
                 }, function (err) {
@@ -92,10 +88,10 @@ define(['./module'], function(appModule) {
                 return deferred.promise;
             };
             
-            this.getUserData = function() {
+       /*     this.getUserData = function() {
                 
                 var deferred = $q.defer();
-                $http.get('/user/'+localData.user.id).then(function (response) {
+                $http.get('/user/'+$rootScope.user.id).then(function (response) {
      
                     var userData = {
                         firstName :  response.data.firstName,
@@ -110,7 +106,7 @@ define(['./module'], function(appModule) {
                     deferred.reject(err);
                 });
                 return deferred.promise;
-            };
+            };*/
             
             this.resetPassword = function(userEmail) {
                 

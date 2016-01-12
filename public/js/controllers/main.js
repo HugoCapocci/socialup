@@ -63,22 +63,28 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
     
     appModule.controller(
         'MainController',
-        ['$scope', '$rootScope', '$location', '$window', 'alertsService',
-        function mainController($scope, $rootScope, $location, $window, alertsService) {
+        ['$scope', '$rootScope', '$location', '$window', 'alertsService', 'userService',
+        function mainController($scope, $rootScope, $location, $window, alertsService, userService) {
             
             var parameters= $location.search();
             if(parameters.close) {
                 alertsService.success('OAuth authentication sucessfull');
                 $window.close();
-            }  
-            var localData = $window.localStorage.getItem('SocialUp');
-            //console.log("localData found: ",localData);
+            }
+            
+            var localData = userService.getUserData();
+            console.log("localData found: ",localData);
             if(!localData)
                 $location.path('/login');
             $scope.closeAlert=function() {
                 delete $rootScope.alert;
             };
             //MENU
+            
+                        
+            $scope.signout = function() {
+                userService.deleteData();
+            };
 
         }]
     );

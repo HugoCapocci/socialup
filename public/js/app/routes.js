@@ -20,7 +20,8 @@ define(['angular', 'app'], function(angular, app) {
             'resetPassword', 
             'scheduledEvents', 
             'tracedEvents', 
-            'videos', 
+            'videos',
+            'searchVideo', 
             'facebookStats', 
             'manageSocialNetworks'];
         routes.forEach(function(route) {

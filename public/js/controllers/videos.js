@@ -3,13 +3,14 @@ define(['./module', 'moment'], function(appModule, moment) {
     'use strict';
     
     appModule.controller('VideosController',
-    ['$scope', '$location', '$uibModal', 'videosService', 'alertsService', 
-    function($scope,  $location, $uibModal, videosService, alertsService) {
+    ['$scope', '$location', '$uibModal', 'videosService', 'alertsService', 'userService', 
+    function($scope,  $location, $uibModal, videosService, alertsService, userService) {
 
+        var providersAvailable = ['google', 'dailymotion', 'vimeo', 'soundcloud', 'mixcloud'];
         $scope.isLoading = false;
         $scope.media = {
             provider : null,
-            providers: ['google', 'dailymotion', 'vimeo', 'soundcloud', 'mixcloud'],
+            providers: [],
             list : [],
             changeProvider : function() {
                 console.log("changeProvider -> ",$scope.media.provider);
@@ -74,6 +75,13 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.displayedCollection = [].concat($scope.media.list);
         $scope.animationsEnabled = true;
       
+        var activeProviders = Object.keys( userService.getActiveProviders() );
+        console.log("activeProviders: ",activeProviders);
+        providersAvailable.forEach(function(provider) {
+            if(activeProviders.indexOf(provider)!==-1)
+            $scope.media.providers.push(provider);
+        });
+        
         function openModal(controller, eventId) {
 
             var modalInstance = $uibModal.open({

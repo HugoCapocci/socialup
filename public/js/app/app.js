@@ -14,7 +14,8 @@ define([
     'ng-videosharing-embed',
     'angular-chart',
     '../services/index',
-    '../controllers/index'
+    '../controllers/index',
+    './directives'
     ], function (angular) {
     
         'use strict';
@@ -32,7 +33,8 @@ define([
             'videosharing-embed',
             'chart.js',
             'SocialUp.services',
-            'SocialUp.controllers'
+            'SocialUp.controllers',
+            'SocialUp.directives'
         ]);
 });
 

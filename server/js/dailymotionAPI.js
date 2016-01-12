@@ -163,7 +163,38 @@ exports.listMedia = function(tokens) {
     });
 };
 
+exports.searchVideo = function(videoName, order) {
+    
+    //sort : recent(old), visited, relevance, ranking
+    var maxResults = 10;
+    return processGetRequest(undefined,'/videos?fields=id,thumbnail_120_url,title,description,status,created_time,views_total,comments_total&search='+encodeURI(videoName)+'&sort=relevance&limit='+maxResults, function(results) {
+        
+        //console.log("dailymotion results: ", results);
+        return {
+            videos : results.list.map(function(video) {
+                //console.log(" video", video);
+                video.thumbnailURL = video.thumbnail_120_url;
+                video.creationDate = new Date(video.created_time*1000);
+                video.counts = {
+                    view : video.views_total,
+                    comment : video.comments_total
+                };
+                delete video.views_total;
+                delete video.comments_total;
+                delete video.thumbnail_120_url;
+                delete video.created_time;
+                return video;
+            }),
+            totalResults :  results.total,
+            has_more : results.has_more,
+            page : results.page
+        };
+    });    
+};
+
 function sendVideo(tokens, file, userId, params, providerOptions) {
+    
+    //console.log("dailymotion send Video");
     
     var deferred = Q.defer();
     //always check tokens validity before use
@@ -190,6 +221,8 @@ function sendVideo(tokens, file, userId, params, providerOptions) {
                 publishVideo(videoURL, tokens, params, providerOptions, deferred);
             }
         });
+    }, function(err) {
+        deferred.reject(err);
     });
     return deferred.promise;
 }
@@ -210,22 +243,16 @@ function publishVideo(videoURL, tokens, params, providerOptions, deferred) {
             description : params.description,
             tags : params.tags,
             published : true,
-            private : providerOptions.private ? providerOptions.private : false/*,
-            password : 'zadazdazdazd',
-            rental_duration : '3' '24' '48' ,
-            rental_price : '1.14',
-            rental_start_time : 10*/ 
+            private : providerOptions.private ? providerOptions.private : false
         }
     }, function(err, response, body) {
 
         if(err) {
             console.log("cannot publish the video. Err: ",err);
             deferred.reject(new Error(err));
-        } else {
-            
+        } else {            
             var results = JSON.parse(body);
-            console.log('video published on dailymotion with results ?', results);
-            //{ id: 'x3godf5', title: 'chat', channel: 'news', owner: 'xglgo' }
+            //console.log('video published on dailymotion with results ?', results);
             if(results.error) {
                 deferred.reject(new Error(results.error.message));
             } else {
@@ -258,9 +285,10 @@ exports.listCategories = function(tokens, userId) {
     checkAccessTokenValidity(tokens, userId).then(function(validTokens) {
         deferred.resolve(
             processGetRequest(validTokens.access_token,'/channels', function(results) {
-                return results.list.map(function(categorie) {
-                    delete categorie.description;
-                    return categorie;
+                return results.list.map(function(channel) {
+                    //console.log("google channel", channel);
+                    delete channel.description;
+                    return channel;
                 });
             })
         );
@@ -278,11 +306,12 @@ function processGetRequest(access_token, path, callback) {
         host: 'api.dailymotion.com',
         port: 443,
         path: path,
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer '+access_token
-        }
+        method: 'GET'
     };
+    if(access_token)
+        req_options.headers = {
+            'Authorization': 'Bearer '+access_token
+        };
 
     var req = https.request(req_options, function(res) {
         var data="";

@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="event in displayedCollection" ng-click="setSelected(event.id, $index)" ng-class="{selected: event === selectedEvent}">
+            <tr ng-repeat="event in displayedCollection" ng-click="setSelected($index)" ng-class="{selected: event === selectedEvent}">
                 <td>{{event.type}}</td>
                 <td>{{formatDate(event.date)}}</td>
                 <td> 

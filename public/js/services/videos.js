@@ -21,6 +21,23 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             };
+            
+            this.searchVideo = function(provider, videoName, order) {
+
+                var deferred = $q.defer();      
+                var url = 'search/video/'+provider+'?videoName='+encodeURI(videoName);
+                if(order)
+                    url += "&order="+order;
+                $http.get(url)
+                .then(function(response) {
+                    console.log('searchVideo response data for provider '+provider+': ', response.data);
+                    deferred.resolve(response.data);
+                }, function (err) {
+                    console.error("err: ", err);
+                    deferred.reject(err);
+                });
+                return deferred.promise;
+            };
 
         }]
     );

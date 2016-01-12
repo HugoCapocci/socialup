@@ -5,5 +5,6 @@ define([
     './event',
     './alerts',
     './publishFile',
-    './videos'
+    './videos',
+    './user'
 ], function () {});

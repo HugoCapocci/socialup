@@ -54,7 +54,7 @@ define(['./module', 'moment'], function(appModule, moment) {
             return date.getTime();
         };
         
-        $scope.setSelected = function (idSelectedEvent, $index) {
+        $scope.setSelected = function ($index) {
             $scope.selectedEvent = $scope.displayedCollection[$index];
             /*$scope.selectedEvent.results = [{url:'https://www.facebook.com/video/embed?video_id=10153388750752499'}];            
             console.log("selectedEvent: ", $scope.selectedEvent);*/

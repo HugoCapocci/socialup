@@ -1,0 +1,66 @@
+<div class="row">
+    
+     <div class="col-md-5 colg-lg-5">
+        <div class="input-group">
+            <span class="input-group-addon">Trier par : </span>
+            <select class="form-control" ng-model="searchVideoForm.order" ng-options="option for option in searchVideoForm.orders" style="min-width:150px;"></select>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-4">
+        <!--<input class = "form-control" id = "focusedInput" type = "text" value = "This is focused...">-->
+        <input type="text" class="form-control" ng-model="searchVideoForm.videoName" placeholder="Vidéo à rechercher" value="Title"/>
+    </div>
+    <div class="col-md-3 col-lg-3">
+        <button id="signInButt" class="btn btn-primary" ng-click="searchVideo()">Rechercher</button>
+    </div>
+    
+</div>
+
+<div class="row" ng-if="searchVideoForm.selected" >
+     
+    <div ts-video-player video-provider="{{searchVideoForm.selected.provider}}" video-id="{{searchVideoForm.selected.video.id}}"></div>
+    
+</div>
+
+<div class="row">
+    
+    <uib-tabset  class="panel panel-default">
+                            
+        <uib-tab ng-repeat="provider in providers">
+            <uib-tab-heading>
+                <span>{{provider}}</span>                              
+            </uib-tab-heading>
+            <div class="panel-body">
+    
+                 <table st-table="videos[provider]" class="table table-striped">
+                    <tbody>
+                        <tr ng-repeat="video in videos[provider]" ng-click="setSelected(provider, $index)" ng-class="{selected: video === searchVideoForm.selected.video}">
+                            <td><img ng-src="{{video.thumbnailURL}}" ></td>
+                            <td>
+                                <p>{{video.title}}</p>
+                                <p>{{video.counts.view}} vues</p>
+                                <p ng-if="video.counts.like">
+                                    {{video.counts.like}} <i class="glyphicon glyphicon-thumbs-up" style="color:green;"></i>&nbsp;
+                                    <span ng-if="video.counts.dislike">{{video.counts.dislike}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i></span>
+                                </p>
+                            </td>            
+                            <td>{{video.description}}</td>
+                            <td>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</td>
+                        </tr>
+                    </tbody>
+                     <tfoot>
+                        <tr>
+                            <td colspan="4" class="text-center">
+                                <div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+            </div>
+        </uib-tab>
+    </uib-tabset>
+    
+   
+    
+</div>
