@@ -7,7 +7,6 @@
         </div>
     </div>
     <div class="col-md-4 col-lg-4">
-        <!--<input class = "form-control" id = "focusedInput" type = "text" value = "This is focused...">-->
         <input type="text" class="form-control" ng-model="searchVideoForm.videoName" placeholder="Vidéo à rechercher" value="Title"/>
     </div>
     <div class="col-md-3 col-lg-3">
@@ -16,25 +15,36 @@
     
 </div>
 
-<div class="row" ng-if="searchVideoForm.selected" >
-     
-    <div ts-video-player video-provider="{{searchVideoForm.selected.provider}}" video-id="{{searchVideoForm.selected.video.id}}"></div>
-    
+<div class="row" ng-if="searchVideoForm.selected!==undefined" >
+    <div class="col-md-8 colg-lg-8">
+        <div ts-video-player video-provider="{{searchVideoForm.playlist[searchVideoForm.selected].provider}}" video-id="{{searchVideoForm.playlist[searchVideoForm.selected].video.id}}"></div>
+    </div>
+    <div class="col-md-4 colg-lg-4">
+        <uib-accordion close-others="false">
+            <uib-accordion-group heading="Playlist" is-open="true" is-disabled="false">
+                <span ng-if="searchVideoForm.playlist.length===0"> Pas de contenu </span>
+                <div ng-repeat="element in searchVideoForm.playlist" ng-class="{selected: $index === searchVideoForm.selected}" ng-click="setSelected($index)">
+                    <img ng-src="{{element.video.thumbnailURL}}"><br/>
+                    <span>{{element.video.title}}</span>
+                </div>
+            </uib-accordion-group>
+        </uib-accordion>
+    </div>
 </div>
 
 <div class="row">
     
     <uib-tabset  class="panel panel-default">
-                            
         <uib-tab ng-repeat="provider in providers">
             <uib-tab-heading>
                 <span>{{provider}}</span>                              
             </uib-tab-heading>
+            
             <div class="panel-body">
-    
+
                  <table st-table="videos[provider]" class="table table-striped">
                     <tbody>
-                        <tr ng-repeat="video in videos[provider]" ng-click="setSelected(provider, $index)" ng-class="{selected: video === searchVideoForm.selected.video}">
+                        <tr ng-repeat="video in videos[provider]" ng-click="addToPlaylist(provider, $index)">
                             <td><img ng-src="{{video.thumbnailURL}}" ></td>
                             <td>
                                 <p>{{video.title}}</p>
