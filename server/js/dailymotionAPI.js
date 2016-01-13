@@ -175,13 +175,17 @@ exports.searchVideo = function(videoName, order) {
     if(sort)
         url += '&sort='+sort;
     
-    console.log("dailymotion searchVideo URL: ", url);
+    //console.log("dailymotion searchVideo URL: ", url);
 
     return processGetRequest(undefined, url, function(results) {
         
         //console.log("dailymotion results: ", results);
         return {
             videos : results.list.map(function(video) {
+                //tronque la description
+                if(video.description && video.description.search('<br ?/>')!==-1)
+                    video.description = video.description.substr(0, video.description.search('<br ?/>'));
+                
                 //console.log("dailymotion video", video);
                 video.thumbnailURL = video.thumbnail_120_url;
                 video.creationDate = new Date(video.created_time*1000);

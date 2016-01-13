@@ -7,7 +7,7 @@ define(['./module', 'moment'], function(appModule, moment) {
     function($scope,  $location, videosService, alertsService) {
         
         $scope.searchVideoForm =  {
-            orders : ["date", "rating"/* best ratio like/dislike on youtube */, "relevance", /*"title", */"viewCount"],
+            orders : ["date", "rating"/* best ratio like/dislike on youtube */, "relevance", "viewCount"],
             order : "relevance",        
             playlist : []
         };
@@ -17,7 +17,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.providers = ['google', 'dailymotion'];
         $scope.searchVideo = function() {
             if($scope.searchVideoForm.videoName && $scope.searchVideoForm.videoName.length>1)
-                // recherches en parallèle
+                //search for all video providers at the same time
                 $scope.providers.forEach(function(provider)  {
                     searchVideo(provider, $scope.searchVideoForm.videoName, $scope.searchVideoForm.order);
                 });
@@ -25,9 +25,9 @@ define(['./module', 'moment'], function(appModule, moment) {
                 alertsService.warn("Veuillez taper un titre à rechercher ");
         };
          
-        $scope.setSelected = function($index) {
-            console.log("setSelected $index ",$index);
-            $scope.searchVideoForm.selected = $index;
+        $scope.setSelected = function(element) {
+            console.log("setSelected element ",element);
+            $scope.searchVideoForm.selected = element;
         };
         $scope.addToPlaylist = function(provider, $index) {
              
@@ -37,14 +37,14 @@ define(['./module', 'moment'], function(appModule, moment) {
             };
             
             if(isAlreadySelected(selected.video.id, provider)) {
-                alertsService.warn("Vidéo déjà dans la playlist");
+                alertsService.warn("La vidéo sélectionnée est déjà dans la playlist");
                 return;
             }
             $scope.searchVideoForm.playlist.push(selected);
             if($scope.searchVideoForm.selected===undefined)
-                $scope.searchVideoForm.selected = $scope.searchVideoForm.playlist.length-1;
+                $scope.searchVideoForm.selected = $scope.searchVideoForm.playlist[$scope.searchVideoForm.playlist.length-1];
             console.log('$scope.searchVideoForm.selected: ',$scope.searchVideoForm.selected);
-            console.log("Selected Video: ", $scope.searchVideoForm.playlist[$scope.searchVideoForm.selected].video);
+            console.log("Selected Video: ", $scope.searchVideoForm.selected.video);
         };
         
         function isAlreadySelected(videoId, provider) {
@@ -57,6 +57,18 @@ define(['./module', 'moment'], function(appModule, moment) {
             });
             return isSelected;
         }
+        
+        function getPlaylistIndex(element) {
+            
+            for(var i=0; i<$scope.searchVideoForm.playlist.length;i++) {
+                var row = $scope.searchVideoForm.playlist[i];
+                if(element.provider===row.provider && element.video.id===row.video.id) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+        $scope.getPlaylistIndex=getPlaylistIndex;
     
         function searchVideo(provider, videoName, order) {
             videosService.searchVideo(provider, videoName, order).then(function(data) {
@@ -75,16 +87,17 @@ define(['./module', 'moment'], function(appModule, moment) {
         //videoFinished
         $scope.$on('videoFinished', function(/*args*/) {
            //lit la video suivante !
-            if($scope.searchVideoForm.playlist.length-1 > $scope.searchVideoForm.selected)  {
+            var selectedIndex = getPlaylistIndex($scope.searchVideoForm.selected);
+            if($scope.searchVideoForm.playlist.length-1 > selectedIndex)  {
                 console.log("next video");
                 $scope.$apply(function () {
-                   $scope.searchVideoForm.selected=$scope.searchVideoForm.selected+1;
+                   $scope.searchVideoForm.selected=$scope.searchVideoForm.playlist[selectedIndex+1];
                 });
                 
             } else {
                 console.log("reset video");
                 $scope.$apply(function () {
-                    $scope.searchVideoForm.selected=0;
+                    $scope.searchVideoForm.selected=$scope.searchVideoForm.playlist[0];
                 });
             }
         });
