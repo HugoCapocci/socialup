@@ -18,7 +18,7 @@ define(['angular'], function(angular) {
     .directive('tsVideoPlayer', ['$window', '$timeout','$compile', function ($window, $timeout, $compile) {
        
         var player = {};
-        var fullScreen = false;
+        var width = "800", height = "530";
         
         return {
             restrict : 'AE',
@@ -70,7 +70,6 @@ define(['angular'], function(angular) {
                             createDailymotionPlayer();
                         else {
                             player.dailymotion.load(scope.videoId);
-                            player.dailymotion.setFullscreen(true);
                         }
                     } else {
                         console.error(scope.videoProvider+" player not set ");
@@ -101,8 +100,8 @@ define(['angular'], function(angular) {
                     } else {
                         player.dailymotion = DM.player(document.getElementById("videoPlayer"), {
                             video: scope.videoId,                           
-                            width: "640",
-                            height: "390",
+                            width: width,
+                            height: height,
                             params: {
                                 autoplay: true,
                                 mute: false,
@@ -148,8 +147,8 @@ define(['angular'], function(angular) {
                 function onYouTubePlayerAPIReady() {
 
                     player.google = new YT.Player(document.getElementById("videoPlayer"), {
-                        height : '390',
-                        width : '640',
+                        height : height,
+                        width : width,
                         videoId : scope.videoId,
                         events : {
                             'onReady': function(event) {

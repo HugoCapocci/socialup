@@ -13,6 +13,7 @@ define([
     'checklist-model',
     'ng-videosharing-embed',
     'angular-chart',
+    'angular-drag-and-drop-lists',
     '../services/index',
     '../controllers/index',
     './directives'
@@ -32,6 +33,7 @@ define([
             'checklist-model',
             'videosharing-embed',
             'chart.js',
+            'dndLists',
             'SocialUp.services',
             'SocialUp.controllers',
             'SocialUp.directives'

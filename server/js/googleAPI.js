@@ -221,10 +221,11 @@ exports.searchVideo = function(videoName, order) {
             nextPageToken = response.nextPageToken;
             var videos = [];
             response.items.forEach(function(item) {
-                //console.log('youtube item thumbnails: ', item.snippet.thumbnails);
+                //console.log('youtube item: ', item);
                 videoIDs.push(item.id.videoId);
                 videos.push({
                     id : item.id.videoId,
+                    channel : item.snippet.channelTitle,
                     creationDate : item.snippet.publishedAt,
                     title : item.snippet.title,
                     description : item.snippet.description,

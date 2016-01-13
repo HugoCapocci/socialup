@@ -16,19 +16,26 @@
 </div>
 
 <div class="row" ng-if="searchVideoForm.selected!==undefined" >
-    <div class="col-md-8 colg-lg-8">
+    <div class="col-md-9 colg-lg-9">
         <div ts-video-player video-provider="{{searchVideoForm.playlist[searchVideoForm.selected].provider}}" video-id="{{searchVideoForm.playlist[searchVideoForm.selected].video.id}}"></div>
     </div>
-    <div class="col-md-4 colg-lg-4">
-        <uib-accordion close-others="false">
-            <uib-accordion-group heading="Playlist" is-open="true" is-disabled="false">
-                <span ng-if="searchVideoForm.playlist.length===0"> Pas de contenu </span>
-                <div ng-repeat="element in searchVideoForm.playlist" ng-class="{selected: $index === searchVideoForm.selected}" ng-click="setSelected($index)">
-                    <img ng-src="{{element.video.thumbnailURL}}"><br/>
-                    <span>{{element.video.title}}</span>
-                </div>
-            </uib-accordion-group>
-        </uib-accordion>
+    <div class="col-md-3 colg-lg-3">
+        
+        <span ng-if="searchVideoForm.playlist.length===0"> Playlist vide </span>
+
+        <ul ng-if="searchVideoForm.playlist.length>0" dnd-list="searchVideoForm.playlist">
+            <li ng-repeat="element in searchVideoForm.playlist"
+                dnd-draggable="element"
+                dnd-moved="searchVideoForm.playlist.splice($index, 1)"
+                dnd-effect-allowed="move"
+                dnd-selected="setSelected($index)"               
+                ng-class="{selected: $index === searchVideoForm.selected}" >
+                <h6>{{element.video.title}}</h6>
+                <img ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px">
+                <h6>{{element.video.channel}}</h6>
+            </li>
+        </ul>
+
     </div>
 </div>
 
@@ -45,7 +52,7 @@
                  <table st-table="videos[provider]" class="table table-striped">
                     <tbody>
                         <tr ng-repeat="video in videos[provider]" ng-click="addToPlaylist(provider, $index)">
-                            <td><img ng-src="{{video.thumbnailURL}}" ></td>
+                            <td><img ng-src="{{video.thumbnailURL}}" style="max-height:90px; max-width:120px"></td>
                             <td>
                                 <p>{{video.title}}</p>
                                 <p>{{video.counts.view}} vues</p>
@@ -53,6 +60,7 @@
                                     {{video.counts.like}} <i class="glyphicon glyphicon-thumbs-up" style="color:green;"></i>&nbsp;
                                     <span ng-if="video.counts.dislike">{{video.counts.dislike}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i></span>
                                 </p>
+                                <p>{{video.channel}}</p>
                             </td>            
                             <td>{{video.description}}</td>
                             <td>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</td>

@@ -7,7 +7,7 @@ define(['./module', 'moment'], function(appModule, moment) {
     function($scope,  $location, videosService, alertsService) {
         
         $scope.searchVideoForm =  {
-            orders : ["date", "rating"/* best ratio like/dislike on youtube */, "relevance", "title", "viewCount"],
+            orders : ["date", "rating"/* best ratio like/dislike on youtube */, "relevance", /*"title", */"viewCount"],
             order : "relevance",        
             playlist : []
         };
@@ -88,21 +88,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                 });
             }
         });
-        
-        //test listeners
-        $scope.$on("fullscreenchange", function(e) {
-            console.log("fullscreenchange event! ", e);
-        });
-        $scope.$on("mozfullscreenchange", function(e) {
-            console.log("mozfullscreenchange event! ", e);
-        });
-        $scope.$on("webkitfullscreenchange", function(e) {
-            console.log("webkitfullscreenchange event! ", e);
-        });
-        $scope.$on("msfullscreenchange", function(e) {
-            console.log("msfullscreenchange event! ", e);
-        });
-        
+    
     }]);    
     
 });

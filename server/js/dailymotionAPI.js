@@ -167,18 +167,30 @@ exports.searchVideo = function(videoName, order) {
     
     //sort : recent(old), visited, relevance, ranking
     var maxResults = 10;
-    return processGetRequest(undefined,'/videos?fields=id,thumbnail_120_url,title,description,status,created_time,views_total,comments_total&search='+encodeURI(videoName)+'&sort=relevance&limit='+maxResults, function(results) {
+    var fields = 'id,thumbnail_120_url,title,description,status,created_time,views_total,comments_total,owner.username';
+    
+    //process Order
+    var sort = processOrder(order);    
+    var url = '/videos?fields='+fields+'&search='+encodeURI(videoName)+'&limit='+maxResults;
+    if(sort)
+        url += '&sort='+sort;
+    
+    console.log("dailymotion searchVideo URL: ", url);
+
+    return processGetRequest(undefined, url, function(results) {
         
         //console.log("dailymotion results: ", results);
         return {
             videos : results.list.map(function(video) {
-                //console.log(" video", video);
+                //console.log("dailymotion video", video);
                 video.thumbnailURL = video.thumbnail_120_url;
                 video.creationDate = new Date(video.created_time*1000);
                 video.counts = {
                     view : video.views_total,
                     comment : video.comments_total
                 };
+                video.channel = video['owner.username'];
+                delete video['owner.username'];
                 delete video.views_total;
                 delete video.comments_total;
                 delete video.thumbnail_120_url;
@@ -191,6 +203,23 @@ exports.searchVideo = function(videoName, order) {
         };
     });    
 };
+
+function processOrder(order) {
+ 
+    switch(order) {
+        case 'date' :
+            return 'recent';
+        case 'rating' :
+            return 'trending';
+        case 'relevance' :
+            return 'relevance';
+        case 'viewCount' :
+            return 'visited';
+        default :
+            return undefined;
+    }
+
+}
 
 function sendVideo(tokens, file, userId, params, providerOptions) {
     

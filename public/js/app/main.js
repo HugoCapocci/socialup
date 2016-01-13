@@ -16,7 +16,8 @@ require.config({
         'moment' : '../../bower_components/moment/moment',
         'ng-videosharing-embed' : '../../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min',
         'angular-chart' : '../../bower_components/angular-chart.js/dist/angular-chart.min',
-        'chart' :  '../../bower_components/Chart.js/Chart.min'
+        'chart' :  '../../bower_components/Chart.js/Chart.min',
+        'angular-drag-and-drop-lists' : '../../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min'
     },
     shim : {
         'angular' : {
@@ -52,6 +53,9 @@ require.config({
         },
         'angular-chart' : {
              deps : ['angular', 'chart']
+        },
+        'angular-drag-and-drop-lists' : {
+             deps : ['angular']
         }
     },
     // kick start application

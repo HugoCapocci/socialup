@@ -119,14 +119,67 @@
                 color: #EEE !important;
             }
             
-            /*nav right*/
-            .nav-rtl {
-                padding-left:40px;
-                padding-right:0px;
-
+            /* DnD */
+            
+            ul[dnd-list],
+            ul[dnd-list] > li {
+                position: relative;
             }
-            .nav-rtl li {
-                float:right;
+
+            /**
+             * The dnd-list should always have a min-height,
+             * otherwise you can't drop to it once it's empty
+             */
+            ul[dnd-list] {
+                min-height: 42px;
+                padding-left: 0px;
+            }
+
+            /**
+             * The dndDraggingSource class will be applied to
+             * the source element of a drag operation. It makes
+             * sense to hide it to give the user the feeling
+             * that he's actually moving it.
+             */
+            ul[dnd-list] .dndDraggingSource {
+                display: none;              
+            }
+
+            /**
+             * An element with .dndPlaceholder class will be
+             * added to the dnd-list while the user is dragging
+             * over it.
+             */
+            ul[dnd-list] .dndPlaceholder {
+                display: block;
+                background-color: #ddd;
+                min-height: 50px; /*42 */
+                min-width: 200px; /*new*/
+            }
+
+            /**
+             * The dnd-lists's child elements currently MUST have
+             * position: relative. Otherwise we can not determine
+             * whether the mouse pointer is in the upper or lower
+             * half of the element we are dragging over. In other
+             * browsers we can use event.offsetY for this.
+             */
+            ul[dnd-list] li {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-top-right-radius: 4px;
+                border-top-left-radius: 4px;
+                display: block;
+                padding: 10px 15px;
+                margin-bottom: -1px;
+            }
+
+            /**
+             * Show selected elements in green
+             */
+            ul[dnd-list] li.selected {
+                background-color: #dff0d8;
+                color: #3c763d;
             }
         </style>
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
@@ -170,12 +223,10 @@
                             <li><a href="#/searchVideo" ng-click="navCollapsed=true">Rechercher une vidéo <i class="glyphicon glyphicon-film"></i></a></li>
                             <li ng-if="$root.user"><a href="#/videos" ng-click="navCollapsed=true">Vos media publiés <i class="glyphicon"></i></a></li>                           
                         </ul>
-                    </li>
-                    
+                    </li>                    
                     <li ng-if="$root.user"><a href="#/manageSocialNetworks" ng-click="navCollapsed=true">Gestion des authentifications <i class="glyphicon glyphicon-cog"></i></a></li>
                     <li ng-if="$root.user"><a href="#/facebookStats" ng-click="navCollapsed=true">Stats <i class="glyphicon glyphicon-stats"></i></a></li>                    
-                    <li ng-if="$root.user"><a href="#/login" ng-click="navCollapsed=true;signout()">Sign Out <i class="glyphicon glyphicon-off"></i></a></li>
-                    
+                    <li ng-if="$root.user"><a href="#/login" ng-click="navCollapsed=true;signout()">Sign Out <i class="glyphicon glyphicon-off"></i></a></li>  
                     <li ng-if="!$root.user"><a href="#/login">Login / Registration</a></li>
                 </ul>
                 
@@ -186,12 +237,12 @@
         <div class="container" style="width:100%">             
             <div class="row">
                 <div class="col-lg-2 col-md-1">
-                    <form method="post" action="http://poll.pollcode.com/24296279" target="_blank"><div style="background-color:#EEEEEE;padding:2px;width:175px;font-family:Arial;font-size:small;color:#000000;"><div style="padding:2px 0px 4px 2px;"><strong>Quel fournisseur de cloud ajouter ?</strong></div><input type="radio" name="answer" value="1" id="answer242962791" style="float:left;" /><label for="answer242962791" style="float:left;width:150px;">amazon cloud drive (amazon web services)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="2" id="answer242962792" style="float:left;" /><label for="answer242962792" style="float:left;width:150px;">microsoft one drive (microsoft azure)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="3" id="answer242962793" style="float:left;" /><label for="answer242962793" style="float:left;width:150px;">apple iCloud (apple)</label><div style="clear:both;height:2px;"></div><div align="center" style="padding:3px;"><input type="submit" value=" Vote ">&nbsp;<input type="submit" name="view" value=" View "></div><div align="right" style="font-size:10px">pollcode.com <a href="http://pollcode.com/">free polls</a></div></div></form>
+                    <!--<form method="post" action="http://poll.pollcode.com/24296279" target="_blank"><div style="background-color:#EEEEEE;padding:2px;width:175px;font-family:Arial;font-size:small;color:#000000;"><div style="padding:2px 0px 4px 2px;"><strong>Quel fournisseur de cloud ajouter ?</strong></div><input type="radio" name="answer" value="1" id="answer242962791" style="float:left;" /><label for="answer242962791" style="float:left;width:150px;">amazon cloud drive (amazon web services)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="2" id="answer242962792" style="float:left;" /><label for="answer242962792" style="float:left;width:150px;">microsoft one drive (microsoft azure)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="3" id="answer242962793" style="float:left;" /><label for="answer242962793" style="float:left;width:150px;">apple iCloud (apple)</label><div style="clear:both;height:2px;"></div><div align="center" style="padding:3px;"><input type="submit" value=" Vote ">&nbsp;<input type="submit" name="view" value=" View "></div><div align="right" style="font-size:10px">pollcode.com <a href="http://pollcode.com/">free polls</a></div></div></form>-->
                 </div>
-                <div class="col-lg-7 col-md-9">
+                <div class="col-lg-8 col-md-9">
                     <div ng-view></div>
                 </div>
-                <div class="col-lg-3 col-md-2">
+                <div class="col-lg-2 col-md-2">
                     <uib-alert ng-if="$root.alert" type="{{$root.alert.type}}" style="opacity:{{$root.alert.opacity}};" close="closeAlert()">{{$root.alert.msg}}</uib-alert>
                 </div>
             </div>
