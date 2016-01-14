@@ -860,12 +860,16 @@ app.get('/search/video/:provider', function(req, res) {
     var videoName = req.query.videoName;
     //opt
     var order = req.query.order;
-    
-    providersAPI[provider].searchVideo(videoName, order).then(function(videos) {
-        res.send(videos);
-    }).fail(function(err) {
-        res.status(403).send(err);
-    }); 
+    var next = req.query.next;
+    var limit = req.query.limit;
+    if(!limit || parseInt(limit)<10 || parseInt(limit)>50)
+        res.status(422).send('limit field not properly set (must be >= 10 and <=50)');
+    else
+        providersAPI[provider].searchVideo(videoName, limit, order, next).then(function(videos) {
+            res.send(videos);
+        }).fail(function(err) {
+            res.status(403).send(err);
+        }); 
 });
 
 app.get('/media/:provider/:userId', function(req, res) {

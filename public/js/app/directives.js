@@ -18,7 +18,7 @@ define(['angular'], function(angular) {
     .directive('tsVideoPlayer', ['$window', '$timeout','$compile', function ($window, $timeout, $compile) {
        
         var player = {};
-        var width = "800", height = "530";
+        var width = "830", height = "530";
         
         return {
             restrict : 'AE',

@@ -191,9 +191,8 @@ exports.listMedia = function(tokens, userId) {
 };
 
 // see https://developers.google.com/youtube/v3/docs/search/list#
-exports.searchVideo = function(videoName, order) {
+exports.searchVideo = function(videoName, maxResults, order, pageToken) {
 
-    var maxResults = 10;
     var deferred = Q.defer();
     var videoIDs = [];
     var query = {
@@ -206,12 +205,12 @@ exports.searchVideo = function(videoName, order) {
     };
     if(order)
         query.order=order;
+    if(pageToken)
+        query.pageToken=pageToken;
     
-    var totalResults;
-    var nextPageToken;
+    var totalResults, nextPageToken, prevPageToken ;
     
     youtubeAPI.search.list(query, function(err, response) {
-
         //console.log("searchVideo, err? ", err);
         if(err)
             deferred.reject(err);
@@ -219,6 +218,7 @@ exports.searchVideo = function(videoName, order) {
             //console.log("searchVideo, response? ", response);            
             totalResults = response.pageInfo.totalResults;
             nextPageToken = response.nextPageToken;
+            prevPageToken = response.prevPageToken;
             var videos = [];
             response.items.forEach(function(item) {
                 //console.log('youtube item: ', item);
@@ -256,7 +256,8 @@ exports.searchVideo = function(videoName, order) {
                     deferred.resolve({
                         videos : videos,
                         totalResults :  totalResults,
-                        nextPageToken : nextPageToken
+                        nextPageToken : nextPageToken,
+                        prevPageToken : prevPageToken
                     });
                 }
             });

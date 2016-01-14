@@ -1,27 +1,10 @@
-<div class="row">
+<div class="row" ng-if="searchVideoForm.selected">
     
-     <div class="col-md-5 colg-lg-5">
-        <div class="input-group">
-            <span class="input-group-addon">Trier par : </span>
-            <select class="form-control" ng-model="searchVideoForm.order" ng-options="option for option in searchVideoForm.orders" style="min-width:150px;"></select>
-        </div>
-    </div>
-    <div class="col-md-4 col-lg-4">
-        <input type="text" class="form-control" ng-model="searchVideoForm.videoName" placeholder="Vidéo à rechercher" value="Title"/>
-    </div>
-    <div class="col-md-3 col-lg-3">
-        <button id="signInButt" class="btn btn-primary" ng-click="searchVideo()">Rechercher</button>
-    </div>
-    
-</div>
-
-<div class="row" ng-if="searchVideoForm.selected" >
-    
-    <div class="col-md-9 colg-lg-9">
+    <div class="col-md-8 colg-lg-8">
         <div ts-video-player video-provider="{{searchVideoForm.selected.provider}}" video-id="{{searchVideoForm.selected.video.id}}"></div>
     </div>
     
-    <div class="col-md-3 colg-lg-3" style="max-height:530px; overflow-y: auto; "> 
+    <div class="col-md-4 colg-lg-4" style="max-height:530px; overflow-y: auto;"> 
         
         <span ng-if="searchVideoForm.playlist.length===0"> Playlist vide </span>
         <ul ng-if="searchVideoForm.playlist.length>0" dnd-list="searchVideoForm.playlist">
@@ -31,27 +14,45 @@
                 dnd-effect-allowed="move"
                 dnd-selected="setSelected(element)"               
                 ng-class="{selected: getPlaylistIndex(searchVideoForm.selected) === $index}" >
-                <h6 style="margin-top:0px;">{{element.video.title}}</h6>
-                <img ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px">
-                <h6 style="margin-bottom:0px;">{{element.video.channel}}</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <img ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px">
+                    </div>
+                    <div  class="col-md-9">
+                        <h5 style="margin-top:0px;">{{element.video.title}}</h5>
+                        <h6 style="margin-bottom:0px;">{{element.video.channel}}</h6>
+                    </div>
+                </div>
             </li>
         </ul>
     </div>
 </div>
-
-<div class="row">
+ 
     
-    <uib-tabset  class="panel panel-default">
+<div class="input-group" style="margin-top:20px;">
+    <span class="input-group-addon">Trier par :</span>
+    <select class="form-control" ng-model="searchVideoForm.order" ng-options="option.label for option in searchVideoForm.orders"></select>
+    <span class="input-group-addon">Titre :</span>
+    <input type="text" class="form-control" ng-model="searchVideoForm.videoName" placeholder="Vidéo à rechercher" value="Title"/>
+    <span class="input-group-addon">Résultats / page</span>
+    <input type="number" class="form-control" ng-model="searchVideoForm.limit" min="10" max="50" step="5" placeholder="Limite" value="Limit"/>
+    <span class="input-group-btn">
+        <button id="signInButt" class="btn btn-primary" ng-click="searchVideo()">Rechercher</button>
+    </span>
+</div>
+
+<div class="row" style="margin-top:20px;">
+    
+    <uib-tabset ng-if="!isEmpty(searchVideoForm.results)" class="panel panel-default">
         <uib-tab ng-repeat="provider in providers">
             <uib-tab-heading>
-                <span>{{provider}}</span>                              
+                <span>{{provider}}</span> ({{searchVideoForm.results[provider].totalResults}})
             </uib-tab-heading>
             
-            <div class="panel-body">
-
-                 <table st-table="videos[provider]" class="table table-striped">
+            <div class="panel-body" style="max-height:600px; overflow-y: auto;">
+                 <table st-table="searchVideoForm.results[provider].videos" class="table table-striped">
                     <tbody>
-                        <tr ng-repeat="video in videos[provider]" ng-click="addToPlaylist(provider, $index)">
+                        <tr ng-repeat="video in searchVideoForm.results[provider].videos" ng-click="addToPlaylist(provider, $index)">
                             <td><img ng-src="{{video.thumbnailURL}}" style="max-height:90px; max-width:120px"></td>
                             <td>
                                 <p>{{video.title}}</p>
@@ -62,25 +63,52 @@
                                         <span ng-if="video.counts.dislike">{{video.counts.dislike}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i></span>
                                     </span>
                                 </p>
-                                <p>{{video.channel}}</p>
+                                <h6 style="margin-bottom:0px;">{{video.channel}}</h6>
                             </td>            
-                            <td>{{video.description}}</td>
-                            <td>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</td>
-                        </tr>
-                    </tbody>
-                     <tfoot>
-                        <tr>
-                            <td colspan="4" class="text-center">
-                                <div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
+                            <td>
+                                <p>{{video.description}}</p>
+                            </td>
+                            <td>
+                                <h6>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</h6>
                             </td>
                         </tr>
-                    </tfoot>
+                    </tbody>
                 </table>
-                
             </div>
+            <div class="text-center" style="margin-top:5px; margin-bottom:10px;">
+
+                <hr/>                
+                <span ng-if="searchVideoForm.results[provider].prevPageToken">                                    
+                    <button type="button" ng-click="searchVideoForm.changeStep(provider, 'backward')" class="btn btn-sm btn-primary" uib-tooltip="Résultats précédents">
+                        <i class="glyphicon glyphicon-step-backward"></i>
+                    </button>                               
+                </span>                                
+                <span ng-if="!searchVideoForm.results[provider].page">
+                    &nbsp;<label> - </label>&nbsp;
+                </span>                                
+                <span ng-if="searchVideoForm.results[provider].nextPageToken">                                    
+                    <button type="button" ng-click="searchVideoForm.changeStep(provider, 'forward')" class="btn btn-sm btn-primary" uib-tooltip="Résultats suivants">
+                        <i class="glyphicon glyphicon-step-forward"></i>
+                    </button>
+                </span>
+
+                <span ng-if="searchVideoForm.results[provider].page">
+                    <uib-pagination 
+                        total-items="searchVideoForm.results[provider].totalPages" 
+                        items-per-page="10" 
+                        max-size="10" 
+                        ng-model="searchVideoForm.currentPage" 
+                        ng-change="searchVideoForm.changePage(provider)" 
+                        boundary-links="true" 
+                        previous-text="&lsaquo;" 
+                        next-text="&rsaquo;" 
+                        first-text="&laquo;" 
+                        last-text="&raquo;"
+                        ></uib-pagination>
+                </span>                
+            </div>            
+            
         </uib-tab>
     </uib-tabset>
-    
-   
-    
+
 </div>

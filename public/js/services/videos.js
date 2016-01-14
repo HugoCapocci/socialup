@@ -22,12 +22,14 @@ define(['./module'], function (appModule) {
                 return deferred.promise;
             };
             
-            this.searchVideo = function(provider, videoName, order) {
+            this.searchVideo = function(provider, videoName, limit, order, next) {
 
                 var deferred = $q.defer();      
-                var url = 'search/video/'+provider+'?videoName='+encodeURI(videoName);
+                var url = 'search/video/'+provider+'?videoName='+encodeURI(videoName)+'&limit='+limit;
                 if(order)
                     url += "&order="+order;
+                if(next)
+                    url += "&next="+next;
                 $http.get(url)
                 .then(function(response) {
                     console.log('searchVideo response data for provider '+provider+': ', response.data);

@@ -110,43 +110,6 @@ function retrieveAllFiles(token, path, typeFilter) {
     return deferred.promise;
 }
 
-/*function searchFiles(token, path, typeFilter) {
-    
-    var deferred = Q.defer();
-  
-    var post_data = {
-        path: path,
-        query : '*',
-        mode: 'filename'
-    };
-
-    request({
-        uri: 'https://'+END_POINT+'/2/files/search',
-        auth: {
-            bearer: token.access_token
-        },
-        method: "POST",
-        json: true,
-        body: post_data
-    }, function (error, response, body){
-        console.log(response);
-        if(error)
-            deferred.reject(error);
-        else {   
-            if(body.matches) {
-                console.log("files found ", body.matches);
-                deferred.resolve(body.matches.map(function(entry) {
-                    return {
-                       name : entry.name, id: entry.path_lower, mimeType : entry['.tag'], isFolder : entry['.tag'] === 'folder'
-                    };
-                }));
-            } else
-                deferred.resolve();
-        }
-    });
-    return deferred.promise;
-}*/
-
 exports.getSpaceUsage = function(tokens) {
   
     //post /2/users/get_space_usage

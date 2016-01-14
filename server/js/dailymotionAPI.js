@@ -163,17 +163,18 @@ exports.listMedia = function(tokens) {
     });
 };
 
-exports.searchVideo = function(videoName, order) {
+exports.searchVideo = function(videoName, limit, order, page) {
     
     //sort : recent(old), visited, relevance, ranking
-    var maxResults = 10;
     var fields = 'id,thumbnail_120_url,title,description,status,created_time,views_total,comments_total,owner.username';
     
     //process Order
     var sort = processOrder(order);    
-    var url = '/videos?fields='+fields+'&search='+encodeURI(videoName)+'&limit='+maxResults;
+    var url = '/videos?fields='+fields+'&search='+encodeURI(videoName)+'&limit='+limit;
     if(sort)
         url += '&sort='+sort;
+    if(page)
+        url += '&page='+page;
     
     //console.log("dailymotion searchVideo URL: ", url);
 
