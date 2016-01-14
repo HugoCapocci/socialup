@@ -1,13 +1,16 @@
-<div class="row" ng-if="searchVideoForm.selected">
+<div class="row">
     
     <div class="col-md-8 colg-lg-8">
-        <div ts-video-player video-provider="{{searchVideoForm.selected.provider}}" video-id="{{searchVideoForm.selected.video.id}}"></div>
+        <div ts-video-player video-provider="{{searchVideoForm.selected.provider}}" video-id="{{searchVideoForm.selected.video.id}}" ng-if="searchVideoForm.selected"></div>
+        
+        <div ng-if="!isEmpty(searchVideoForm.results) && !searchVideoForm.selected" class="text-center">
+            <h6>Aucune vidéo sélectionnée</h6>
+        </div>
     </div>
     
-    <div class="col-md-4 colg-lg-4" style="max-height:530px; overflow-y: auto;"> 
-        
-        <span ng-if="searchVideoForm.playlist.length===0"> Playlist vide </span>
-        <ul ng-if="searchVideoForm.playlist.length>0" dnd-list="searchVideoForm.playlist">
+    <div class="col-md-4 colg-lg-4" style="max-height:530px; overflow-y: auto;">
+    
+        <ul dnd-list="searchVideoForm.playlist">
             <li ng-repeat="element in searchVideoForm.playlist"
                 dnd-draggable="element"
                 dnd-moved="searchVideoForm.playlist.splice($index, 1)"
@@ -18,16 +21,20 @@
                     <div class="col-md-3">
                         <img ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px">
                     </div>
-                    <div  class="col-md-9">
-                        <h5 style="margin-top:0px;">{{element.video.title}}</h5>
+                    <div  class="col-md-7">
+                        <h5 style="margin-top:0px;"><label>{{ (element.video.title.length > 50 ? element.video.title.substr(0,50) : element.video.title)}}</label></h5>
                         <h6 style="margin-bottom:0px;">{{element.video.channel}}</h6>
+                    </div>
+                    <div class="col-md-2">
+                        &nbsp;<button type="button" ng-click="removeFromPlaylist(element); $event.stopPropagation();" class="btn btn-xs btn-danger" style="height:20px;">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </button>
                     </div>
                 </div>
             </li>
         </ul>
     </div>
 </div>
- 
     
 <div class="input-group" style="margin-top:20px;">
     <span class="input-group-addon">Trier par :</span>
@@ -55,28 +62,39 @@
                         <tr ng-repeat="video in searchVideoForm.results[provider].videos" ng-click="addToPlaylist(provider, $index)">
                             <td><img ng-src="{{video.thumbnailURL}}" style="max-height:90px; max-width:120px"></td>
                             <td>
-                                <p>{{video.title}}</p>
-                                <p>
-                                    {{video.counts.view}} vues&nbsp;
-                                    <span ng-if="video.counts.like">
-                                        {{video.counts.like}} <i class="glyphicon glyphicon-thumbs-up" style="color:green;"></i>&nbsp;
-                                        <span ng-if="video.counts.dislike">{{video.counts.dislike}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i></span>
-                                    </span>
-                                </p>
-                                <h6 style="margin-bottom:0px;">{{video.channel}}</h6>
-                            </td>            
-                            <td>
-                                <p>{{video.description}}</p>
-                            </td>
-                            <td>
-                                <h6>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</h6>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <label>{{video.title}}</label>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <h6 style="margin-bottom:0px;margin-top:0px">{{video.channel}}</h6>
+                                        <h5>
+                                            <a href="" uib-tooltip="Publié le {{video.creationDate | date : 'dd MMMM yyyy à&nbsp;HH\'h\'mm'}}">
+                                                Il y a {{formatDate(video.creationDate)}}
+                                            </a>
+                                        </h5>                                    
+                                      <!--  <h6>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm"}}</h6>  -->                         
+                                        <h6 ng-if="video.duration">Durée {{formatDuration(video.duration)}}</h6>
+                                        <h6>
+                                            {{formatNumber(video.counts.view)}} vues&nbsp;
+                                            <span ng-if="video.counts.like">
+                                                {{formatNumber(video.counts.like)}} <i class="glyphicon glyphicon-thumbs-up" style="color:green;"></i>&nbsp;
+                                                <span ng-if="video.counts.dislike">
+                                                    {{formatNumber(video.counts.dislike)}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i>
+                                                </span>
+                                            </span>
+                                        </h6>
+                                    </div>
+                                    <div class="col-lg-10">
+                                        <div ng-bind-html="sanitize(video.description)"></div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="text-center" style="margin-top:5px; margin-bottom:10px;">
-
                 <hr/>                
                 <span ng-if="searchVideoForm.results[provider].prevPageToken">                                    
                     <button type="button" ng-click="searchVideoForm.changeStep(provider, 'backward')" class="btn btn-sm btn-primary" uib-tooltip="Résultats précédents">

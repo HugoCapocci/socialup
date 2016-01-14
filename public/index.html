@@ -58,19 +58,9 @@
                 }
             }
             
-            /* Heroixc Template */
             body {
-                padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
-            }
-            .hero-spacer {
-                margin-top: 50px;
-            }
-            .hero-feature {
-                margin-bottom: 30px;
-            }
-            footer {
-                margin: 50px 0;
-            }
+               /* padding-top: 70px;  Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+            }           
 
             /* hex: #a1bbc5 */
             .oddResults {
@@ -181,6 +171,26 @@
                 background-color: #dff0d8;
                 color: #3c763d;
             }
+            
+           /* Sticky footer styles
+            -------------------------------------------------- */
+            html {
+                position: relative;
+                min-height: 100%;
+            }
+            body {
+                /* Margin bottom by footer height */
+                margin-bottom: 30px;
+            }
+            .footer {
+                margin-top: 5px;
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                /* Set the fixed height of the footer here */
+                height: 30px;
+                background-color: #f5f5f5;
+            }
         </style>
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
@@ -188,8 +198,8 @@
     </head>
     <body ng-controller="MainController">
         
-        <nav class="navbar navbar-inverse navbar-fixed-top">
-          <div class="container" style="width:90%">
+        <nav class="navbar navbar-inverse navbar-static-top"> <!--navbar-fixed-top-->
+          <div class="container">
             <div class="navbar-header">               
                 <button type="button" uib-dropdown-toggle ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                     <span class="sr-only">Toggle navigation</span>
@@ -234,7 +244,7 @@
           </div>
         </nav>
     
-        <div class="container" style="width:100%">             
+        <div class="container" style="width:100%">
             <div class="row">
                 <div class="col-lg-2 col-md-2 col-sm-0">
                     <uib-alert ng-if="$root.alert" type="{{$root.alert.type}}" style="opacity:{{$root.alert.opacity}};" close="closeAlert()">{{$root.alert.msg}}</uib-alert>
@@ -245,17 +255,18 @@
                 <div class="col-lg-1 col-md-1 col-sm-0">
                     <!--<form method="post" action="http://poll.pollcode.com/24296279" target="_blank"><div style="background-color:#EEEEEE;padding:2px;width:175px;font-family:Arial;font-size:small;color:#000000;"><div style="padding:2px 0px 4px 2px;"><strong>Quel fournisseur de cloud ajouter ?</strong></div><input type="radio" name="answer" value="1" id="answer242962791" style="float:left;" /><label for="answer242962791" style="float:left;width:150px;">amazon cloud drive (amazon web services)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="2" id="answer242962792" style="float:left;" /><label for="answer242962792" style="float:left;width:150px;">microsoft one drive (microsoft azure)</label><div style="clear:both;height:2px;"></div><input type="radio" name="answer" value="3" id="answer242962793" style="float:left;" /><label for="answer242962793" style="float:left;width:150px;">apple iCloud (apple)</label><div style="clear:both;height:2px;"></div><div align="center" style="padding:3px;"><input type="submit" value=" Vote ">&nbsp;<input type="submit" name="view" value=" View "></div><div align="right" style="font-size:10px">pollcode.com <a href="http://pollcode.com/">free polls</a></div></div></form>-->
                 </div>
-            </div>
-            <footer>
-                <div class="row text-center">
-                    <div class="col-lg-12">
-                        <p>
-                            Copyright &copy; Social Up 2015-2016. - Version <!-- build:version -->x<!-- endbuild -->
-                        </p>
-                    </div>
-                </div>
-            </footer>
+            </div>            
         </div>
+        
+        <footer class="footer">
+            <div class="container">
+                <div class="row text-center">
+                    <p> 
+                        Copyright &copy; Social Up 2015-2016. - Version <!-- build:version -->x<!-- endbuild -->
+                    </p>
+                </div>
+            </div>
+        </footer>
         
         <!-- modal window -->
         <script type="text/ng-template" id="modalContent.html">

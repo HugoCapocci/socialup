@@ -36,8 +36,8 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
             dd : "%d jours",
             M : "un mois",
             MM : "%d mois",
-            y : "une année",
-            yy : "%d années"
+            y : "un an",
+            yy : "%d ans"
         },
         ordinalParse : /\d{1,2}(er|ème)/,
         ordinal : function (number) {

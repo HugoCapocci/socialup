@@ -1,4 +1,4 @@
-define(['./module', 'moment'], function(appModule, moment) {
+define(['./module'], function(appModule) {
     
     'use strict';
     

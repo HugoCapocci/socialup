@@ -120,8 +120,19 @@ function sendVideo(token, file, user, params, providerOptions) {
     //post on group 
     if(providerOptions.group !== undefined)
         targetId = providerOptions.group.id;
-    //post on page 
-    //TODO
+    
+    var formData = {
+        access_token : token.access_token,
+        source: fs.createReadStream(file.path),
+        title : params.title,
+        description : params.description + tagsAsHashtags(params.tags)
+    };
+
+    if(providerOptions===undefined)
+        formData["privacy.value"] = 'SELF';
+    else
+       formData["privacy.value"] = providerOptions.visibility;
+ 
  /*   if(providerOptions===undefined)
         data.privacy = {'value':'SELF'};
     else
@@ -129,12 +140,7 @@ function sendVideo(token, file, user, params, providerOptions) {
     request({
         method: 'POST',
         uri: 'https://graph-video.facebook.com/v2.5/'+targetId+'/videos',
-        formData: {
-            access_token : token.access_token,
-            source: fs.createReadStream(file.path),
-            title : params.title,
-            description : params.description + tagsAsHashtags(params.tags)
-        }
+        formData: formData
 
     }, function(err, response, body) {
 
@@ -182,9 +188,9 @@ function publishOnFeed(tokens, data, providerOptions) {
     data.access_token = tokens.access_token;
     //console.log("publishOnFeed data: ", data);
     if(providerOptions===undefined)
-        data.privacy = {'value':'SELF'};
+        data["privacy.value"] = 'SELF';
     else
-       data.privacy = {'value':providerOptions.visibility};
+       data["privacy.value"] = providerOptions.visibility;
 
     var deferred = Q.defer();
     request({
@@ -199,6 +205,7 @@ function publishOnFeed(tokens, data, providerOptions) {
         else {
             console.log("publishOnFeed response body: ", body);
             var id = body.id;
+            //TODO fix hardcoded url
             body.url= 'https://www.facebook.com/yug357/posts/'+id.split('_')[1];
             deferred.resolve(body);  
         }

@@ -17,6 +17,8 @@ const DAILYMOTION_API_KEY = process.env.DAILYMOTION_API_KEY;
 const DAILYMOTION_API_SECRET = process.env.DAILYMOTION_API_SECRET;
 const DAILYMOTION_REDIRECT_URL = process.env.APP_URL + '/dailymotion2callback';
 
+const DESCRIPTION_MAX_LENGTH = 800;
+
 function getOAuthURL() {
     
     return "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists";
@@ -164,9 +166,10 @@ exports.listMedia = function(tokens) {
 };
 
 exports.searchVideo = function(videoName, limit, order, page) {
-    
-    //sort : recent(old), visited, relevance, ranking
-    var fields = 'id,thumbnail_120_url,title,description,status,created_time,views_total,comments_total,owner.username';
+   
+    //TODO add token if user is connected 
+    var tokens;
+    var fields = 'id,thumbnail_120_url,title,description,status,created_time,views_total,comments_total,owner.username,duration';
     
     //process Order
     var sort = processOrder(order);    
@@ -177,15 +180,15 @@ exports.searchVideo = function(videoName, limit, order, page) {
         url += '&page='+page;
     
     //console.log("dailymotion searchVideo URL: ", url);
-
-    return processGetRequest(undefined, url, function(results) {
+    return processGetRequest(tokens, url, function(results) {
         
         //console.log("dailymotion results: ", results);
         return {
             videos : results.list.map(function(video) {
-                //tronque la description
-                if(video.description && video.description.search('<br ?/>')!==-1)
-                    video.description = video.description.substr(0, video.description.search('<br ?/>'));
+                //truncate description
+                //FIXME html issue ?
+                if(video.description && video.description.length> DESCRIPTION_MAX_LENGTH)
+                    video.description = video.description.substr(0, DESCRIPTION_MAX_LENGTH)+" ...";
                 
                 //console.log("dailymotion video", video);
                 video.thumbnailURL = video.thumbnail_120_url;

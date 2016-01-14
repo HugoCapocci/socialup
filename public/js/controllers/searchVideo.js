@@ -3,8 +3,8 @@ define(['./module', 'moment'], function(appModule, moment) {
     'use strict';
     
     appModule.controller('SearchVideoController',
-    ['$scope', '$location', 'videosService', 'alertsService', 
-    function($scope,  $location, videosService, alertsService) {
+    ['$scope', '$location', '$sce', 'videosService', 'alertsService', 
+    function($scope,  $location, $sce, videosService, alertsService) {
         
         $scope.searchVideoForm =  {
             orders : [
@@ -105,12 +105,59 @@ define(['./module', 'moment'], function(appModule, moment) {
                 return;
             }
             $scope.searchVideoForm.playlist.push(selected);
-            if($scope.searchVideoForm.selected===undefined)
+            if($scope.searchVideoForm.selected===undefined) {
                 $scope.searchVideoForm.selected = $scope.searchVideoForm.playlist[$scope.searchVideoForm.playlist.length-1];
+            }
             console.log('$scope.searchVideoForm.selected: ',$scope.searchVideoForm.selected);
             console.log("Selected Video: ", $scope.searchVideoForm.selected.video);
+            
+            //playlist lengthInSeconds ?
         };
         
+        $scope.removeFromPlaylist = function(element) {
+    
+            var index = getPlaylistIndex(element);
+            console.log("removeFromPlaylist: ", element);
+            $scope.searchVideoForm.playlist.splice(index, 1);
+            
+            if(element.provider===$scope.searchVideoForm.selected.provider && element.video.id===$scope.searchVideoForm.selected.video.id) {
+                console.log("removing current played element ");
+                //TODO stop properly the video ?
+                delete $scope.searchVideoForm.selected;
+            }
+        };
+        
+        $scope.formatDuration  = function(durationInSeconds) {
+            //format("HH'h'mm:ss")
+            var format = durationInSeconds>=3600 ? "HH[h]mm:ss" : "mm:ss";
+            return moment(durationInSeconds*1000).format(format);
+        };
+        
+        $scope.formatDate = function(date) {            
+            var time = Date.now() - new Date(date).getTime();
+            return moment.duration(time).humanize();
+        };
+        
+        $scope.formatNumber = function(number) {
+            
+            number = parseFloat(number);
+            if(number<1000) {
+                return parseInt(number);
+            } else {
+                var numberInKilos = number/1000;
+                if(numberInKilos<1000) {
+                    return parseInt(numberInKilos)+'k';
+                } else {
+                    var numberInMillions = numberInKilos/1000;
+                    return parseInt(numberInMillions)+'M';
+                }
+            }
+        };
+        
+        $scope.sanitize = function(varWithHtml) {
+            return $sce.trustAsHtml("<h5>"+varWithHtml+"</h5>");
+        };
+
         function isAlreadySelected(videoId, provider) {
             var isSelected=false;
             $scope.searchVideoForm.playlist.forEach(function(element) {

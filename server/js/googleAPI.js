@@ -13,6 +13,7 @@ var googleAPI = require('googleapis');
 var Q = require('q');
 var fs = require("fs");
 var userDAO = require('./userDAO.js');
+var moment = require('moment');
 
 const GOOGLE_API_ID = process.env.GOOGLE_API_ID;
 const GOOGLE_API_SECRET = process.env.GOOGLE_API_SECRET;
@@ -232,7 +233,8 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                     thumbnailURL : item.snippet.thumbnails['default'].url
                 });
             });
-            youtubeAPI.videos.list({auth: API_KEY, part:'statistics', id : videoIDs.toString()}, function(err, res) {
+            //TOTO use tokens if user is connected
+            youtubeAPI.videos.list({auth: API_KEY, part:'statistics,contentDetails', id : videoIDs.toString()}, function(err, res) {
 
                 if(err) {
                     console.error(err);
@@ -242,8 +244,16 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                     var i=0;
                     if(res)
                         res.items.forEach(function(item) {
-                            //console.log("videos.list item ",item);
-                            //console.log("videos[i].id === item.id ? ", videos[i].id === item.id);
+                            
+                            /*contentDetails { duration: 'PT3M11S',
+                                 dimension: '2d',
+                                 definition: 'hd',
+                                 caption: 'false',
+                                 licensedContent: true }*/
+                            
+                            //console.log("youtube statistics+contentDetails item ",item);
+                            //youtube duration format -> https://en.wikipedia.org/wiki/ISO_8601#Durations
+                            videos[i].duration = moment.duration(item.contentDetails.duration).asSeconds();
                             videos[i].counts = {
                                 view : parseInt(item.statistics.viewCount),
                                 like : parseInt(item.statistics.likeCount),
