@@ -2,21 +2,13 @@ define(['angular'], function(angular) {
 
     'use strict';
     
-    function launchIntoFullscreen(element) {
-      if(element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if(element.mozRequestFullScreen) {
-        element.mozRequestFullScreen();
-      } else if(element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if(element.msRequestFullscreen) {
-        element.msRequestFullscreen();
-      }
-    }
+    var YOUTUBE_API = 'https://www.youtube.com/iframe_api';
+    var DAILYMOTION_API = 'https://api.dmcdn.net/all.js';
   
     angular.module('SocialUp.directives', [])  
-    .directive('tsVideoPlayer', ['$window', '$timeout','$compile', function ($window, $timeout, $compile) {
+    .directive('tsVideoPlayer', ['$document', '$window', '$timeout','$compile', '$q', function ($document, $window, $timeout, $compile, $q) {
        
+        var document = $document[0];
         var player = {};
         var width = "830", height = "530";
         
@@ -27,10 +19,30 @@ define(['angular'], function(angular) {
                 videoProvider : '@videoProvider'
             },
             link: function(scope, element) {
-                
-                var el = angular.element('<div id="videoPlayer"/>');
-                $compile(el)(scope);
-                element.append(el);
+             
+                loadExternalAPIs().then(function() {
+                    
+                    console.log("external script added and loaded");
+                    
+                    var el = angular.element('<div id="videoPlayer"/>');
+                    $compile(el)(scope);
+                    element.append(el);
+                    
+                    switch(scope.videoProvider) {
+                        case 'google' :
+                        case 'youtube' :
+                            createYoutubePlayer();
+                            break;
+                        case 'dailymotion' :                       
+                            createDailymotionPlayer();
+                            break;                        
+                        case 'vimeo' :
+                            createVimeoPlayer();
+                            break;
+                    }
+                }, function(err) {
+                    console.error("fail to load external APIs: ",err);
+                });
 
                 scope.$watch('videoProvider', function (newValue, oldValue) {
                     if (newValue == oldValue) {
@@ -39,15 +51,15 @@ define(['angular'], function(angular) {
                     //console.log("videoProvider changed from: ", oldValue+" to "+newValue);
                     switch(newValue) {
                         case 'google' :
+                            case 'youtube' :
                             createYoutubePlayer();
                             break;
-
                         case 'dailymotion' :                       
                             createDailymotionPlayer();
                             break;                        
                     }
                 });
-               
+        
                 scope.$watch('videoId', function (newValue, oldValue) {
     
                     if (newValue == oldValue) {
@@ -75,18 +87,11 @@ define(['angular'], function(angular) {
                         console.error(scope.videoProvider+" player not set ");
                     }
                 });
-
-                switch(scope.videoProvider) {
-                    case 'google' :
-                        createYoutubePlayer();
-                        break;
-                    case 'dailymotion' :                       
-                        createDailymotionPlayer();
-                        break;                        
-                    case 'vimeo' :
-                        createVimeoPlayer();
-                        break;
-                }
+                
+                scope.$on('$destroy', function() {
+                    player = {};
+                });
+           
                 function createDailymotionPlayer() {
 
                     var el = angular.element('<div id="videoPlayer"/>');
@@ -110,7 +115,7 @@ define(['angular'], function(angular) {
                         });
                        
                         player.dailymotion.addEventListener("fullscreenchange", function() {
-                            fullScreen = player.dailymotion.fullscreen;
+                            //fullScreen = player.dailymotion.fullscreen;
                         });
                         player.dailymotion.addEventListener("ended", function() {
                             scope.$emit('videoFinished');
@@ -124,7 +129,7 @@ define(['angular'], function(angular) {
                         });
                     }
                 }
-                
+
                 function createYoutubePlayer() {
 
                     //workaround
@@ -171,8 +176,7 @@ define(['angular'], function(angular) {
                     $compile(el)(scope);
                     element.children().remove();
                     element.append(el);
-                    
-                    
+                                        
                     /*<iframe id="player1" 
                     src="https://player.vimeo.com/video/76979871?api=1&player_id=player1" 
                     width="630" 
@@ -182,8 +186,60 @@ define(['angular'], function(angular) {
                     mozallowfullscreen 
                     allowfullscreen
                         ></iframe>*/
-                    
                 }
+                            
+                function createElement(src) {
+
+                    var script = document.createElement('script');
+                    script.src = src;
+                    document.body.appendChild(script);
+                    console.log("script added: ", script);
+                    return script;
+                }
+                
+                function loadExternalAPIs() {                  
+                    
+                    var promise;
+                    if(typeof YT === 'undefined') {
+                        promise = loadExternalAPI(YOUTUBE_API);
+                    }
+                    if(typeof DM === 'undefined') {
+                        if(!promise)
+                            promise = loadExternalAPI(DAILYMOTION_API);
+                        else
+                            promise = promise.then(function() {
+                                return loadExternalAPI(DAILYMOTION_API);
+                            });
+                    }
+                    //workaround
+                    if(!promise) {
+                        var deferred = $q.defer();
+                        deferred.resolve();
+                        promise= deferred.promise;
+                    }
+                    return promise;
+                }
+
+                function loadExternalAPI(src) {                  
+                    
+                    var deferred = $q.defer();
+                    var element = createElement(src);
+                    element.onload = element.onreadystatechange = function (e) {
+ 
+                        if (element.readyState && element.readyState !== 'complete' && element.readyState !== 'loaded') {
+                            return; //deferred.resolve(e);
+                        }
+                        $timeout(function () {
+                            deferred.resolve(e);
+                        });
+                    };
+                    element.onerror = function (e) {
+                        deferred.reject(e);                       
+                    };
+                    return deferred.promise;
+                }
+                
+                
             }
         };
     }]);
