@@ -1,4 +1,4 @@
-![Build Status](https://codeship.com/projects/b4d5b6b0-9e87-0133-c2d5-36bf3814fed7/status?branch=master)
+[![Build Status](https://codeship.com/projects/b4d5b6b0-9e87-0133-c2d5-36bf3814fed7/status?branch=master)](https://codeship.com/projects/127748) [![dependencies](https://david-dm.org/DrHelmut/socialup.svg)](https://david-dm.org/DrHelmut/socialup) [![dev-dependencies](https://david-dm.org/DrHelmut/socialup/dev-status.svg)](https://david-dm.org/DrHelmut/socialup#info=devDependencies)
 
 Live: https://socialup.herokuapp.com
 
