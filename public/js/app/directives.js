@@ -11,6 +11,7 @@ define(['angular'], function(angular) {
         var document = $document[0];
         var player = {};
         var width = "830", height = "530";
+        var isVimeoListener=false;
         
         return {
             restrict : 'AE',
@@ -89,8 +90,8 @@ define(['angular'], function(angular) {
                             player.dailymotion.load(scope.videoId);
                         }
                         
-                    } else if(scope.videoProvider==='vimeo') {
-                        createVimeoPlayer();                    
+                    } else if(scope.videoProvider==='vimeo') {        
+                        createVimeoPlayer();
                     } else {
                         console.error(scope.videoProvider+" player not set ");
                     }
@@ -188,12 +189,15 @@ define(['angular'], function(angular) {
                     player.vimeo = document.getElementById('videoPlayer');
               
                     // Listen for messages from the player
-                    if (window.addEventListener) {
-                        window.addEventListener('message', onMessageReceived, false);
+                    if(!isVimeoListener) {
+                        if (window.addEventListener ) {
+                            window.addEventListener('message', onMessageReceived, false);
+                            isVimeoListener=true;
+                        } else {
+                            window.attachEvent('onmessage', onMessageReceived, false);
+                        }
                     }
-                    else {
-                        window.attachEvent('onmessage', onMessageReceived, false);
-                    }
+            
                     function onMessageReceived(event) {
                         // Handle messages from the vimeo player only
                         if (!(/^https?:\/\/player.vimeo.com/).test(event.origin)) {
@@ -235,16 +239,16 @@ define(['angular'], function(angular) {
                         var message = JSON.stringify(data);                   
                         player.vimeo.contentWindow.postMessage(message, playerOrigin);
                     }
+                    
 
-                    function onReady() {
+                    function onReady() {                        
                         console.log('ready');
-
                         post('addEventListener', 'pause');
                         post('addEventListener', 'finish');
                         //post('addEventListener', 'playProgress');
                         //autoplay
                         post('play');
-                        scope.$emit('videoStarted');
+                        scope.$emit('videoStarted');                        
                     }
 
                     function onPause() {

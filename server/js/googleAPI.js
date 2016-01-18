@@ -269,7 +269,7 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                         } else {                            
                             var channels = {};
                             channelsResult.items.forEach(function(channel) {
-                                console.log("Channel  ", channel);
+                                //console.log("Channel  ", channel);
                                 channels[channel.id]=channel.snippet.title;
                             });                            
                             videos.forEach(function(video) {
@@ -295,8 +295,8 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
 //todo  categoryId ?
 function sendVideo(tokens, file, user, videoParams, providerOptions) {
 
-    console.log('youtube UploadFile, file? ',file);
-    console.log('youtube UploadFile, providerOptions? ',providerOptions);
+    //console.log('youtube UploadFile, file? ',file);
+    //console.log('youtube UploadFile, providerOptions? ',providerOptions);
     var deferred = Q.defer();
     oauth2Client.setCredentials(tokens);
     
