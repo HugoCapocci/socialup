@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">19.33% </span>
+        <span class="strong">18.25% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>46/238</span>
+        <span class='fraction'>46/252</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">1.79% </span>
+        <span class="strong">1.67% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/56</span>
+        <span class='fraction'>1/60</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">7.14% </span>
+        <span class="strong">6.67% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>3/42</span>
+        <span class='fraction'>3/45</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">19.33% </span>
+        <span class="strong">18.25% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>46/238</span>
+        <span class='fraction'>46/252</span>
       </div>
     </div>
   </div>
@@ -615,7 +615,23 @@
 570
 571
 572
-573</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -814,6 +830,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -852,6 +869,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -861,14 +882,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -880,7 +893,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1385,6 +1417,7 @@ exports.searchVideo = <span class="fstat-no" title="function not covered" >funct
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    var deferred = Q.defer();</span>
 <span class="cstat-no" title="statement not covered" >    var videoIDs = [];</span>
+<span class="cstat-no" title="statement not covered" >    var channelIDs = [];</span>
 <span class="cstat-no" title="statement not covered" >    var query = {</span>
         auth : API_KEY, 
         part :'snippet', 
@@ -1415,12 +1448,16 @@ exports.searchVideo = <span class="fstat-no" title="function not covered" >funct
 <span class="cstat-no" title="statement not covered" >                videoIDs.push(item.id.videoId);</span>
 <span class="cstat-no" title="statement not covered" >                videos.push({</span>
                     id : item.id.videoId,
-                    channel : item.snippet.channelTitle,
+                    // retrieve channel data, not user
+                    channelId : item.snippet.channelId,
+                    channelURL : 'https://www.youtube.com/channel/'+item.snippet.channelId,
                     creationDate : item.snippet.publishedAt,
                     title : item.snippet.title,
                     description : item.snippet.description,
                     thumbnailURL : item.snippet.thumbnails['default'].url
                 });
+<span class="cstat-no" title="statement not covered" >                if(channelIDs.indexOf(item.snippet.channelId)===-1)</span>
+<span class="cstat-no" title="statement not covered" >                    channelIDs.push(item.snippet.channelId);</span>
             });
             //TOTO use tokens if user is connected
 <span class="cstat-no" title="statement not covered" >            youtubeAPI.videos.list({auth: API_KEY, part:'statistics,contentDetails', id : videoIDs.toString()}, <span class="fstat-no" title="function not covered" >function(err, res) {</span></span>
@@ -1433,14 +1470,6 @@ exports.searchVideo = <span class="fstat-no" title="function not covered" >funct
 <span class="cstat-no" title="statement not covered" >                    var i=0;</span>
 <span class="cstat-no" title="statement not covered" >                    if(res)</span>
 <span class="cstat-no" title="statement not covered" >                        res.items.forEach(<span class="fstat-no" title="function not covered" >function(item) {</span></span>
-                            
-                            /*contentDetails { duration: 'PT3M11S',
-                                 dimension: '2d',
-                                 definition: 'hd',
-                                 caption: 'false',
-                                 licensedContent: true }*/
-                            
-                            //console.log("youtube statistics+contentDetails item ",item);
                             //youtube duration format -&gt; https://en.wikipedia.org/wiki/ISO_8601#Durations
 <span class="cstat-no" title="statement not covered" >                            videos[i].duration = moment.duration(item.contentDetails.duration).asSeconds();</span>
 <span class="cstat-no" title="statement not covered" >                            videos[i].counts = {</span>
@@ -1449,14 +1478,33 @@ exports.searchVideo = <span class="fstat-no" title="function not covered" >funct
                                 dislike : parseInt(item.statistics.dislikeCount),
                                 favorite : parseInt(item.statistics.favoriteCount),
                                 comment : parseInt(item.statistics.commentCount)
-                            };
+                            };                            
 <span class="cstat-no" title="statement not covered" >                            i++;</span>
                         });
-<span class="cstat-no" title="statement not covered" >                    deferred.resolve({</span>
-                        videos : videos,
-                        totalResults :  totalResults,
-                        nextPageToken : nextPageToken,
-                        prevPageToken : prevPageToken
+                    
+<span class="cstat-no" title="statement not covered" >                    youtubeAPI.channels.list({auth: API_KEY, part:'snippet', id : channelIDs.toString()} , <span class="fstat-no" title="function not covered" >function(err, channelsResult) { </span></span>
+                        
+<span class="cstat-no" title="statement not covered" >                        if(err) {</span>
+<span class="cstat-no" title="statement not covered" >                            console.error(err);</span>
+<span class="cstat-no" title="statement not covered" >                            deferred.reject(err);</span>
+                        } else {                            
+<span class="cstat-no" title="statement not covered" >                            var channels = {};</span>
+<span class="cstat-no" title="statement not covered" >                            channelsResult.items.forEach(<span class="fstat-no" title="function not covered" >function(channel) {</span></span>
+<span class="cstat-no" title="statement not covered" >                                console.log("Channel  ", channel);</span>
+<span class="cstat-no" title="statement not covered" >                                channels[channel.id]=channel.snippet.title;</span>
+                            });                            
+<span class="cstat-no" title="statement not covered" >                            videos.forEach(<span class="fstat-no" title="function not covered" >function(video) {</span></span>
+<span class="cstat-no" title="statement not covered" >                                video.channel = channels[video.channelId];</span>
+<span class="cstat-no" title="statement not covered" >                                delete video.channelId;</span>
+                            });    
+<span class="cstat-no" title="statement not covered" >                            deferred.resolve({</span>
+                                videos : videos,
+                                totalResults :  totalResults,
+                                nextPageToken : nextPageToken,
+                                prevPageToken : prevPageToken
+                            });
+                        }
+                    
                     });
                 }
             });
@@ -1765,7 +1813,7 @@ exports.refreshTokens=refreshTokens;</pre></td></tr>
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jan 15 2016 17:52:35 GMT+0100 (Romance Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Jan 18 2016 15:39:39 GMT+0100 (Romance Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

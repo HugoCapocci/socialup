@@ -56,7 +56,10 @@ define(['angular'], function(angular) {
                             break;
                         case 'dailymotion' :                       
                             createDailymotionPlayer();
-                            break;                        
+                            break;
+                        case 'vimeo' :
+                            createVimeoPlayer();
+                            break;
                     }
                 });
         
@@ -67,6 +70,7 @@ define(['angular'], function(angular) {
                     }
                     //console.log("videoId changed from: ", oldValue+" to "+newValue);
                     //console.log("scope.videoProvider: ",scope.videoProvider);
+                   
                     if(scope.videoProvider === 'google') {
                         //console.log("load new google video");
                         if(!player.google || !player.google.loadVideoById) {
@@ -77,12 +81,16 @@ define(['angular'], function(angular) {
                             //console.log("player.google: ",player.google);
                             player.google.loadVideoById(scope.videoId);
                         }
+                        
                     } else if(scope.videoProvider==='dailymotion') {
                         if(!player.dailymotion)
                             createDailymotionPlayer();
                         else {
                             player.dailymotion.load(scope.videoId);
                         }
+                        
+                    } else if(scope.videoProvider==='vimeo') {
+                        createVimeoPlayer();                    
                     } else {
                         console.error(scope.videoProvider+" player not set ");
                     }
@@ -156,9 +164,9 @@ define(['angular'], function(angular) {
                         width : width,
                         videoId : scope.videoId,
                         events : {
-                            'onReady': function(event) {
-                                scope.$emit('videoStarted');
+                            'onReady': function(event) {                                
                                 event.target.playVideo();
+                                scope.$emit('videoStarted');
                             },
                             'onStateChange': function(event) {
                                 if (event.data === 0) {
@@ -172,21 +180,82 @@ define(['angular'], function(angular) {
                 // see https://developer.vimeo.com/player/js-api#universal-with-postmessage
                 function createVimeoPlayer() {
                     
-                    var el = angular.element('<iframe id="videoPlayer"/>');
+                    var playerOrigin = '*';
+                    var el = angular.element('<iframe id="videoPlayer" src="https://player.vimeo.com/video/'+scope.videoId+'?api=1&player_id=videoPlayer" width="'+width+'" height="'+height+'"   frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen/>');
                     $compile(el)(scope);
                     element.children().remove();
                     element.append(el);
-                                        
-                    /*<iframe id="player1" 
-                    src="https://player.vimeo.com/video/76979871?api=1&player_id=player1" 
-                    width="630" 
-                    height="354" 
-                    frameborder="0" 
-                    webkitallowfullscreen 
-                    mozallowfullscreen 
-                    allowfullscreen
-                        ></iframe>*/
-                }
+                    player.vimeo = document.getElementById('videoPlayer');
+              
+                    // Listen for messages from the player
+                    if (window.addEventListener) {
+                        window.addEventListener('message', onMessageReceived, false);
+                    }
+                    else {
+                        window.attachEvent('onmessage', onMessageReceived, false);
+                    }
+                    function onMessageReceived(event) {
+                        // Handle messages from the vimeo player only
+                        if (!(/^https?:\/\/player.vimeo.com/).test(event.origin)) {
+                            return false;
+                        }
+                        if (playerOrigin === '*') {
+                            playerOrigin = event.origin;
+                        }
+
+                        var data = JSON.parse(event.data);
+
+                        switch (data.event) {
+                            case 'ready':
+                                onReady();
+                                break;
+
+                            case 'playProgress':
+                                onPlayProgress(data.data);
+                                break;
+
+                            case 'pause':
+                                onPause();
+                                break;
+
+                            case 'finish':
+                                scope.$emit('videoFinished');
+                                break;
+                        }
+                    }
+                    // Helper function for sending a message to the player
+                    function post(action, value) {
+                        var data = {
+                          method: action
+                        };
+
+                        if (value) {
+                            data.value = value;
+                        }
+                        var message = JSON.stringify(data);                   
+                        player.vimeo.contentWindow.postMessage(message, playerOrigin);
+                    }
+
+                    function onReady() {
+                        console.log('ready');
+
+                        post('addEventListener', 'pause');
+                        post('addEventListener', 'finish');
+                        //post('addEventListener', 'playProgress');
+                        //autoplay
+                        post('play');
+                        scope.$emit('videoStarted');
+                    }
+
+                    function onPause() {
+                        console.log('paused');
+                    }
+
+                    function onPlayProgress(data) {
+                        console.log(data.seconds + 's played');
+                    }
+    
+                }              
                             
                 function createElement(src) {
 

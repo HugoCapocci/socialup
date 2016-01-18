@@ -3,8 +3,8 @@ define(['./module', 'moment'], function(appModule, moment) {
     'use strict';
     
     appModule.controller('SearchVideoController',
-    ['$scope', '$location', '$sce', 'videosService', 'alertsService', 
-    function($scope,  $location, $sce, videosService, alertsService) {
+    ['$scope', '$window', '$location', '$sce', 'videosService', 'alertsService', 
+    function($scope, $window, $location, $sce, videosService, alertsService) {
         
         $scope.searchVideoForm =  {
             orders : [
@@ -77,7 +77,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.searchVideoForm.order = $scope.searchVideoForm.orders[0];
         $scope.itemsByPage = 5;
         
-        $scope.providers = ['google', 'dailymotion'];
+        $scope.providers = ['google', 'dailymotion', 'vimeo'];
         $scope.searchVideo = function() {
             $scope.searchVideoForm.currentPage =1;
             if($scope.searchVideoForm.videoName && $scope.searchVideoForm.videoName.length>1)
@@ -156,6 +156,13 @@ define(['./module', 'moment'], function(appModule, moment) {
         
         $scope.sanitize = function(varWithHtml) {
             return $sce.trustAsHtml("<h5>"+varWithHtml+"</h5>");
+        };
+        
+        $scope.openChannel = function(channelURL) {
+            if(!channelURL || channelURL.length === 0)
+                return;
+            console.log("open Channel URL");
+            $window.open(channelURL, '_blank');
         };
 
         function isAlreadySelected(videoId, provider) {

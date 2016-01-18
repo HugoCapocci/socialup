@@ -196,6 +196,7 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
 
     var deferred = Q.defer();
     var videoIDs = [];
+    var channelIDs = [];
     var query = {
         auth : API_KEY, 
         part :'snippet', 
@@ -226,12 +227,16 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                 videoIDs.push(item.id.videoId);
                 videos.push({
                     id : item.id.videoId,
-                    channel : item.snippet.channelTitle,
+                    // retrieve channel data, not user
+                    channelId : item.snippet.channelId,
+                    channelURL : 'https://www.youtube.com/channel/'+item.snippet.channelId,
                     creationDate : item.snippet.publishedAt,
                     title : item.snippet.title,
                     description : item.snippet.description,
                     thumbnailURL : item.snippet.thumbnails['default'].url
                 });
+                if(channelIDs.indexOf(item.snippet.channelId)===-1)
+                    channelIDs.push(item.snippet.channelId);
             });
             //TOTO use tokens if user is connected
             youtubeAPI.videos.list({auth: API_KEY, part:'statistics,contentDetails', id : videoIDs.toString()}, function(err, res) {
@@ -244,14 +249,6 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                     var i=0;
                     if(res)
                         res.items.forEach(function(item) {
-                            
-                            /*contentDetails { duration: 'PT3M11S',
-                                 dimension: '2d',
-                                 definition: 'hd',
-                                 caption: 'false',
-                                 licensedContent: true }*/
-                            
-                            //console.log("youtube statistics+contentDetails item ",item);
                             //youtube duration format -> https://en.wikipedia.org/wiki/ISO_8601#Durations
                             videos[i].duration = moment.duration(item.contentDetails.duration).asSeconds();
                             videos[i].counts = {
@@ -260,14 +257,33 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                                 dislike : parseInt(item.statistics.dislikeCount),
                                 favorite : parseInt(item.statistics.favoriteCount),
                                 comment : parseInt(item.statistics.commentCount)
-                            };
+                            };                            
                             i++;
                         });
-                    deferred.resolve({
-                        videos : videos,
-                        totalResults :  totalResults,
-                        nextPageToken : nextPageToken,
-                        prevPageToken : prevPageToken
+                    
+                    youtubeAPI.channels.list({auth: API_KEY, part:'snippet', id : channelIDs.toString()} , function(err, channelsResult) { 
+                        
+                        if(err) {
+                            console.error(err);
+                            deferred.reject(err);
+                        } else {                            
+                            var channels = {};
+                            channelsResult.items.forEach(function(channel) {
+                                console.log("Channel  ", channel);
+                                channels[channel.id]=channel.snippet.title;
+                            });                            
+                            videos.forEach(function(video) {
+                                video.channel = channels[video.channelId];
+                                delete video.channelId;
+                            });    
+                            deferred.resolve({
+                                videos : videos,
+                                totalResults :  totalResults,
+                                nextPageToken : nextPageToken,
+                                prevPageToken : prevPageToken
+                            });
+                        }
+                    
                     });
                 }
             });

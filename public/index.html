@@ -6,9 +6,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Social Up</title>
-        <!-- player dailymotion API
-        <script src="https://api.dmcdn.net/all.js"></script> -->
-         <script>document.write('<base href="' + document.location + '" />');</script>
+        <!--  
+        <script>document.write('<base href="' + document.location + '" />');</script>
+        -->
         <!-- build:js -->
         <script data-main="js/app/main.js" src="./require.js"></script>
         <!-- endbuild -->
@@ -189,10 +189,53 @@
                 height: 30px;
                 background-color: #f5f5f5;
             }
+            
+            //
+           
         </style>
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap-theme.css" />
+        <style>
+   /*      @media (max-width: 1000px) {
+            .navbar-nav {
+                display:  none !important;
+            }
+            .navbar-header {
+                display: block !important;
+            }
+             .navbar-toggle {
+                display: inline-block !important;
+            }
+        }
+            
+        @media (min-width: 1000px) {
+            .navbar-toggle {
+                display: none;
+            }
+  
+            .navbar > .container .navbar-brand,
+            .navbar > .container-fluid .navbar-brand {
+                margin-left: -15px;
+            }
+            
+            .navbar-fixed-top,
+            .navbar-fixed-bottom {
+                border-radius: 0;
+            }
         
+            .navbar-nav {
+                float: left;
+                margin: 0;
+            }
+            .navbar-nav > li {
+                float: left;
+            }
+            .navbar-nav > li > a {
+                padding-top: 15px;
+                padding-bottom: 15px;
+            }
+        }*/
+        </style>
     </head>
     <body ng-controller="MainController">
         
@@ -216,8 +259,8 @@
                         <li><a href="#/uploadMusic" ng-click="navCollapsed=true">Publier un son <i class="glyphicon glyphicon-music"></i></a></li>
                       </ul>
                     </li>
-                    <li ng-if="$root.user"><a href="#/cloudExplorer" ng-click="navCollapsed=true">Explorer clouds <i class="glyphicon glyphicon-cloud"></i></a></li>
-                    <li ng-if="$root.user"><a href="#/postMessage" ng-click="navCollapsed=true">Poster un message <i class="glyphicon glyphicon-comment"></i></a></li>
+                    <li ng-if="$root.user"><a href="#/cloudExplorer" ng-click="navCollapsed=true">Clouds <i class="glyphicon glyphicon-cloud"></i></a></li>
+                    <li ng-if="$root.user"><a href="#/postMessage" ng-click="navCollapsed=true">Message <i class="glyphicon glyphicon-comment"></i></a></li>
                     <li ng-if="$root.user" class="dropdown" uib-dropdown>
                       <a href uib-dropdown-toggle class="dropdown-toggle">Evènements <span class="caret"></span></a>
                       <ul class="dropdown-menu">
@@ -232,7 +275,7 @@
                             <li ng-if="$root.user"><a href="#/videos" ng-click="navCollapsed=true">Vos media publiés <i class="glyphicon"></i></a></li>                           
                         </ul>
                     </li>                    
-                    <li ng-if="$root.user"><a href="#/manageSocialNetworks" ng-click="navCollapsed=true">Gestion des authentifications <i class="glyphicon glyphicon-cog"></i></a></li>
+                    <li ng-if="$root.user"><a href="#/manageSocialNetworks" ng-click="navCollapsed=true">Authentifications <i class="glyphicon glyphicon-cog"></i></a></li>
                     <li ng-if="$root.user"><a href="#/facebookStats" ng-click="navCollapsed=true">Stats <i class="glyphicon glyphicon-stats"></i></a></li>                    
                     <li ng-if="$root.user"><a href="#/login" ng-click="navCollapsed=true;signout()">Sign Out <i class="glyphicon glyphicon-off"></i></a></li>  
                     <li ng-if="!$root.user"><a href="#/login">Login / Registration</a></li>

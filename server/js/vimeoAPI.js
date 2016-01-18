@@ -13,6 +13,8 @@ const CLIENT_ID = process.env.VIMEO_CLIENT_ID;
 const CLIENT_SECRET = process.env.VIMEO_CLIENT_SECRET;
 const REDIRECT_URL = process.env.APP_URL + '/vimeo2callback';
 
+var unauthenticatedToken;
+
 exports.getOAuthURL = function() {
     
     return "https://api.vimeo.com/oauth/authorize?response_type=code&client_id="+CLIENT_ID+"&redirect_uri="+REDIRECT_URL+"&scope="+encodeURI('public private purchased create edit delete upload interact');
@@ -53,6 +55,40 @@ exports.pushCode = function(code, userId) {
     return deferred.promise;
 };
 
+function getUnauthenticatedToken() {
+    
+     var deferred = Q.defer();    
+    request({
+        method : 'POST',
+        uri :  'https://api.vimeo.com/oauth/authorize/client',
+        auth : {
+            user : CLIENT_ID,
+            pass : CLIENT_SECRET
+        },
+        form : {
+            grant_type : 'client_credentials',
+            redirect_uri : REDIRECT_URL
+        }
+    }, function(err, response, body) {
+
+        if(err) {
+            console.log("Err: ",err);
+            deferred.reject(err);
+        } else {            
+            var results = JSON.parse(body);
+            console.log('UnauthenticatedToken ?', results);
+            if(results.error) {
+                deferred.reject(results);
+            } else {
+                unauthenticatedToken=results;
+                deferred.resolve(results);
+            }
+        }
+    });
+    
+    return deferred.promise;
+}
+
 exports.getUserInfo = function(tokens) {
     
     var deferred = Q.defer();
@@ -81,7 +117,7 @@ exports.listMedia = function(tokens) {
         //video.metadata.connections comments.total likes.total 
         return {
             list : response.data.map(function(video) {
-                video.id=video.uri.substr(video.uri.lastIndexOf('/'));
+                video.id=video.uri.substr(video.uri.lastIndexOf('/')+1);
                 video.title=video.name;
                 video.thumbnailURL = video.pictures.sizes[0].link;
                 video.creationDate = video.created_time;            
@@ -106,6 +142,74 @@ exports.listMedia = function(tokens) {
         };
     });
 };
+
+exports.searchVideo = function(videoName, limit, order, page) {
+    
+    var url = '/videos?query='+encodeURI(videoName)+'&per_page='+limit;
+    
+    if(page)
+        url+='&page='+page;
+    
+    var sort = processOrder(order);
+    url+='&sort='+sort;
+        
+    return processGetRequest(unauthenticatedToken.access_token, url, function(response) {
+    
+        return {
+            videos : response.data.map(function(result) {
+                
+                var video = {};
+                video.id=result.uri.substr(result.uri.lastIndexOf('/')+1);
+                video.title=result.name;
+                video.thumbnailURL = result.pictures.sizes[0].link;
+                video.creationDate = result.created_time;
+                video.description=result.description;
+                video.duration=result.duration;
+                video.channel = result.user.name;
+                video.channelURL = result.user.link;
+               // console.log("vimeo video returned: ", video);               
+                video.counts = {
+                    view : result.stats.plays,
+                    comment : result.metadata.connections.comments.total,
+                    like : result.metadata.connections.likes.total
+                };
+               
+                return video;
+            }),
+            totalResults :  response.total,
+            next : response.next,
+            previous : response.previous,
+            first: response.first,
+            last : response.last,
+            page : response.page
+        };
+    });
+    
+};
+
+/*relevant
+date
+alphabetical
+plays
+likes
+comments
+duration*/
+function processOrder(order) {
+ 
+    switch(order) {
+        case 'date' :
+            return 'date';
+        case 'rating' :
+            return 'likes';
+        case 'relevance' :
+            return 'relevant';
+        case 'viewCount' :
+            return 'plays';
+        default :
+            return undefined;
+    }
+
+}
 
 //see https://developer.vimeo.com/api/upload/videos
 exports.sendVideo = function(tokens, file, userId, params, providerOptions) {
@@ -312,10 +416,11 @@ function processGetRequest(access_token, path, callback) {
         port: 443,
         path: path,
         method: 'GET',
-        headers: {
+        headers : {
             'Authorization': 'Bearer '+access_token
         }
     };
+    
 
     var req = https.request(req_options, function(res) {
         var data="";
@@ -332,3 +437,6 @@ function processGetRequest(access_token, path, callback) {
     req.end();
     return deferred.promise;
 }
+
+//onload
+getUnauthenticatedToken();

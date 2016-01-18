@@ -198,6 +198,7 @@ exports.searchVideo = function(videoName, limit, order, page) {
                     comment : video.comments_total
                 };
                 video.channel = video['owner.username'];
+                video.channelURL = 'http://www.dailymotion.com/'+video['owner.username'];
                 delete video['owner.username'];
                 delete video.views_total;
                 delete video.comments_total;
