@@ -118,7 +118,7 @@ function sendVideo(token, file, user, params, providerOptions) {
     //current user by default
     var targetId = 'me';
     //post on group 
-    if(providerOptions.group !== undefined)
+    if(providerOptions.group)
         targetId = providerOptions.group.id;
     
     var formData = {
@@ -128,6 +128,7 @@ function sendVideo(token, file, user, params, providerOptions) {
         description : params.description + tagsAsHashtags(params.tags)
     };
 
+    console.log("providerOptions? ",providerOptions);
     if(providerOptions===undefined)
         formData["privacy.value"] = 'SELF';
     else
