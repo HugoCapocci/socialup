@@ -8,7 +8,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.facebookPages = [];
         $scope.displayedCollection = [].concat($scope.facebookPages);
         $scope.itemsByPage = 5;
-        $scope.searchFacebookPage = function() {
+        $scope.searchFacebookPage = function() {           
             eventService.getPages($scope.pageName).then(function(pages){
                 $scope.facebookPages=pages.data;
                 $scope.displayedCollection = [].concat($scope.facebookPages);
@@ -30,7 +30,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         ];
         
         $scope.getPageStats = function() {
-            
+                    
             var dateSince = $scope.stats.dates.since;
             var dateUntil = $scope.stats.dates.until;
             
@@ -45,7 +45,6 @@ define(['./module', 'moment'], function(appModule, moment) {
             
             //adapt tootip label on the graph according to selected stat type
             if($scope.stats.metricType.value === 'page_fans_country') {
-                
                 if($scope.stats.metricType.isVariation)
                     $scope.chartOptions.tooltipTemplate = "<%if (label){%><%=label%> : <%}%><%if(value>0){%>+<%}%><%=value%> likes";
                 else
@@ -70,7 +69,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                 valuesByDay.forEach(function(dayValue) {
                     //console.log("dayValue: ", dayValue);
                     if(!$scope.stats.metricType.isVariation || ($scope.stats.metricType.isVariation && previousValue) )                   
-                        $scope.labels.push(moment(dayValue.end_time).format('D MMM YYYY'));
+                        $scope.labels.push(moment(dayValue.end_time).format('D MMM YY'));
                     //$scope.data[0].push(dayValue.value.FR);
                     var likes = 0;
                     for(var country in dayValue.value){

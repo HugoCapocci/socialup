@@ -1,15 +1,17 @@
 <div class="row">
     
     <div class="col-md-8 colg-lg-8">
-        <div ts-video-player video-provider="{{searchVideoForm.selected.provider}}" video-id="{{searchVideoForm.selected.video.id}}" ng-if="searchVideoForm.selected"></div>
+        <div ts-video-player auto-play="{{searchVideoForm.autoplay}}" height="530" width="830" pause="{{searchVideoForm.isPaused}}"
+             video-provider="{{searchVideoForm.selected.provider}}" 
+             video-id="{{searchVideoForm.selected.video.id}}"
+             ng-if="searchVideoForm.selected"></div>
         
         <div ng-if="!isEmpty(searchVideoForm.results) && !searchVideoForm.selected" class="text-center">
             <h6>Aucune vidéo sélectionnée</h6>
         </div>
     </div>
     
-    <div class="col-xs-7 col-md-4 colg-lg-4" style="max-height:530px; overflow-y: auto;">
-    
+    <div class="col-xs-7 col-md-4 colg-lg-4" style="max-height:500px; overflow-y: auto;">
         <ul dnd-list="searchVideoForm.playlist">
             <li ng-repeat="element in searchVideoForm.playlist"
                 dnd-draggable="element"
@@ -34,15 +36,37 @@
             </li>
         </ul>
     </div>
+    
+    <div class="col-xs-7 col-md-4 colg-lg-4" ng-if="searchVideoForm.playlist.length>0">
+         &nbsp; 
+        <label class="checkbox-inline">
+            <input type="checkbox" ng-model="searchVideoForm.autoplay">Lecture auto
+        </label>
+         <label class="checkbox-inline">
+            <input type="checkbox" ng-model="searchVideoForm.loop">Boucle
+        </label>
+         &nbsp; 
+        <button type="button" class="btn btn-default btn-md" ng-click="changeCurrentPlaying('backward')">
+            <i class="glyphicon glyphicon-step-backward"></i>
+        </button>
+        <button type="button" class="btn btn-default btn-md" ng-click="changePlayingState()">
+            <i class="glyphicon glyphicon-pause" ng-if="searchVideoForm.isReading"></i>
+            <i class="glyphicon glyphicon-play" ng-if="!searchVideoForm.isReading"></i>
+        </button>
+        <button type="button" class="btn btn-default btn-md" ng-click="changeCurrentPlaying('forward')">
+            <i class="glyphicon glyphicon-step-forward"></i>
+        </button>        
+    </div>
+    
 </div>
     
 <div class="input-group" style="margin-top:20px;">
     <span class="input-group-addon">Trier par :</span>
-    <select class="form-control" ng-model="searchVideoForm.order" ng-options="option.label for option in searchVideoForm.orders"></select>
+    <select class="form-control" ng-model="searchVideoForm.order" ng-options="option.label for option in searchVideoForm.orders" ng-keyup="$event.keyCode === 13? searchVideo():''"></select>
     <span class="input-group-addon">Titre :</span>
-    <input type="text" class="form-control" ng-model="searchVideoForm.videoName" placeholder="Vidéo à rechercher" value="Title"/>
+    <input type="text" class="form-control" ng-model="searchVideoForm.videoName" placeholder="Vidéo à rechercher" value="Title" ng-keyup="$event.keyCode === 13? searchVideo():''"/>
     <span class="input-group-addon">Résultats / page</span>
-    <input type="number" class="form-control" ng-model="searchVideoForm.limit" min="10" max="50" step="5" placeholder="Limite" value="Limit"/>
+    <input type="number" class="form-control" ng-model="searchVideoForm.limit" min="10" max="50" step="5" placeholder="Limite" ng-keyup="$event.keyCode === 13? searchVideo():''" value="Limit"/>
     <span class="input-group-btn">
         <button id="signInButt" class="btn btn-primary" ng-click="searchVideo()">Rechercher</button>
     </span>
@@ -57,7 +81,12 @@
             </uib-tab-heading>
             
             <div class="panel-body" style="max-height:600px; overflow-y: auto;">
-                 <table st-table="searchVideoForm.results[provider].videos" class="table table-striped">
+                
+                <div ng-if="searchVideoForm.provider[provider].isLoading" class="row" style="text-align:center;">
+                    <img src="images/loading.gif" width="64" height="64"/> Chargement en cours...
+                </div>
+                
+                 <table ng-if="!searchVideoForm.provider[provider].isLoading" st-table="searchVideoForm.results[provider].videos" class="table table-striped">
                     <tbody>
                         <tr ng-repeat="video in searchVideoForm.results[provider].videos" ng-click="addToPlaylist(provider, $index)">
                             <td><img ng-src="{{video.thumbnailURL}}" style="max-height:90px; max-width:120px"></td>
@@ -117,7 +146,7 @@
                         total-items="searchVideoForm.results[provider].totalPages" 
                         items-per-page="10" 
                         max-size="10" 
-                        ng-model="searchVideoForm.currentPage" 
+                        ng-model="searchVideoForm.provider[provider].currentPage" 
                         ng-change="searchVideoForm.changePage(provider)" 
                         boundary-links="true" 
                         previous-text="&lsaquo;" 

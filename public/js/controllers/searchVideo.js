@@ -16,30 +16,14 @@ define(['./module', 'moment'], function(appModule, moment) {
             playlist : [],
             results : {},
             limit : 10,
-            currentPage : 1,
+            autoplay : true,
+            loop : true,
+            isReading : false,
+            isPaused : false,
+            provider : {},
             changePage : function(provider) {
-                console.log("change page to ", $scope.searchVideoForm.currentPage);                
-                videosService.searchVideo(
-                    provider, 
-                    $scope.searchVideoForm.videoName, 
-                    $scope.searchVideoForm.limit,
-                    $scope.searchVideoForm.order.value, 
-                    $scope.searchVideoForm.currentPage
-                ).then(function(data) {
-                
-                    $scope.searchVideoForm.results[provider]=data;
-                    if(provider === 'dailymotion') {
-                        if($scope.searchVideoForm.results[provider].totalResults /10 > 100)
-                            $scope.searchVideoForm.results[provider].totalPages = 100 * 10;
-                        else
-                            $scope.searchVideoForm.results[provider].totalPages = $scope.searchVideoForm.results[provider].totalResults;
-                    }
-
-                    alertsService.success(data.totalResults + " vidéos trouvées pour le fournisseur "+provider);     
-                }, function(err) {
-                    alertsService.error("Impossible de récupérer des vidéo pour le fournisseur "+provider+". "+err);    
-                });
-                
+                console.log("change page to ", $scope.searchVideoForm.provider[provider].currentPage);                
+                searchVideo(provider, $scope.searchVideoForm.provider[provider].currentPage);         
             },
             changeStep : function(provider, step) {
                 
@@ -49,41 +33,52 @@ define(['./module', 'moment'], function(appModule, moment) {
                     pageToken = $scope.searchVideoForm.results[provider].nextPageToken;
                 else
                     pageToken = $scope.searchVideoForm.results[provider].prevPageToken;
-                
-                videosService.searchVideo(
-                    provider,
-                    $scope.searchVideoForm.videoName,
-                    $scope.searchVideoForm.limit,
-                    $scope.searchVideoForm.order.value,
-                    pageToken
-                ).then(function(data) {
-    
-                    console.log("changeStep data: ", data);
-                    $scope.searchVideoForm.results[provider]=data;                
-                    if(provider === 'dailymotion') {
-                        if($scope.searchVideoForm.results[provider].totalResults /10 > 100)
-                            $scope.searchVideoForm.results[provider].totalPages = 100 * 10;
-                        else
-                            $scope.searchVideoForm.results[provider].totalPages = $scope.searchVideoForm.results[provider].totalResults;
-                    }
-
-                    alertsService.success(data.totalResults + " vidéos trouvées pour le fournisseur "+provider);     
-                }, function(err) {
-                    alertsService.error("Impossible de récupérer des vidéo pour le fournisseur "+provider+". "+err);    
-                });
-                
+                searchVideo(provider, pageToken);
             }
         };
-        $scope.searchVideoForm.order = $scope.searchVideoForm.orders[0];
-        $scope.itemsByPage = 5;
-        
         $scope.providers = ['google', 'dailymotion', 'vimeo'];
+        $scope.providers.forEach(function(provider) {
+            $scope.searchVideoForm.provider[provider] = {
+                 currentPage : 1,
+                 isLoading : false
+            };
+        });
+                
+        function searchVideo(provider, next) {
+            
+            $scope.searchVideoForm.provider[provider].isLoading=true;
+            
+            videosService.searchVideo(
+                provider, 
+                $scope.searchVideoForm.videoName, 
+                $scope.searchVideoForm.limit,
+                $scope.searchVideoForm.order.value, 
+                next
+            ).then(function(data) {
+                $scope.searchVideoForm.provider[provider].isLoading=false;
+                $scope.searchVideoForm.results[provider]=data;
+                if(provider !== 'google') {
+                    if($scope.searchVideoForm.results[provider].totalResults /$scope.searchVideoForm.limit > 100)
+                        $scope.searchVideoForm.results[provider].totalPages = 100 * $scope.searchVideoForm.limit;
+                    else
+                        $scope.searchVideoForm.results[provider].totalPages = $scope.searchVideoForm.results[provider].totalResults;
+                }
+                alertsService.success(data.totalResults + " vidéos trouvées pour le fournisseur "+provider);
+            
+            }, function(err) {
+                $scope.searchVideoForm.provider[provider].isLoading=false;
+                alertsService.error("Impossible de récupérer des vidéo pour le fournisseur "+provider+". "+err);    
+            });
+        }
+        //deault order
+        $scope.searchVideoForm.order = $scope.searchVideoForm.orders[0];
+        //$scope.itemsByPage = 5;
+                
         $scope.searchVideo = function() {
-            $scope.searchVideoForm.currentPage =1;
             if($scope.searchVideoForm.videoName && $scope.searchVideoForm.videoName.length>1)
                 //search for all video providers at the same time
                 $scope.providers.forEach(function(provider)  {
-                    searchVideo(provider, $scope.searchVideoForm.videoName, $scope.searchVideoForm.order.value);
+                     searchVideo(provider);
                 });
             else
                 alertsService.warn("Veuillez taper un titre à rechercher ");
@@ -110,7 +105,6 @@ define(['./module', 'moment'], function(appModule, moment) {
             }
             console.log('$scope.searchVideoForm.selected: ',$scope.searchVideoForm.selected);
             console.log("Selected Video: ", $scope.searchVideoForm.selected.video);
-            
             //playlist lengthInSeconds ?
         };
         
@@ -128,16 +122,15 @@ define(['./module', 'moment'], function(appModule, moment) {
         };
         
         $scope.formatDuration  = function(durationInSeconds) {
-            //format("HH'h'mm:ss")
             var format = durationInSeconds>=3600 ? "HH[h]mm:ss" : "mm:ss";
             return moment(durationInSeconds*1000).format(format);
         };
-        
+
         $scope.formatDate = function(date) {            
             var time = Date.now() - new Date(date).getTime();
             return moment.duration(time).humanize();
         };
-        
+
         $scope.formatNumber = function(number) {
             
             number = parseFloat(number);
@@ -149,15 +142,19 @@ define(['./module', 'moment'], function(appModule, moment) {
                     return parseInt(numberInKilos)+'k';
                 } else {
                     var numberInMillions = numberInKilos/1000;
-                    return parseInt(numberInMillions)+'M';
+                    if(numberInMillions<1000) {
+                        return parseInt(numberInMillions)+'M';
+                    } else {
+                        return parseInt(numberInMillions/1000)+' Md';
+                    }
                 }
             }
         };
-        
+
         $scope.sanitize = function(varWithHtml) {
             return $sce.trustAsHtml("<h5>"+varWithHtml+"</h5>");
         };
-        
+    
         $scope.openChannel = function(channelURL) {
             if(!channelURL || channelURL.length === 0)
                 return;
@@ -177,8 +174,7 @@ define(['./module', 'moment'], function(appModule, moment) {
             return isSelected;
         }
         
-        function getPlaylistIndex(element) {
-            
+        function getPlaylistIndex(element) {            
             for(var i=0; i<$scope.searchVideoForm.playlist.length;i++) {
                 var row = $scope.searchVideoForm.playlist[i];
                 if(element.provider===row.provider && element.video.id===row.video.id) {
@@ -188,35 +184,27 @@ define(['./module', 'moment'], function(appModule, moment) {
             return -1;
         }
         $scope.getPlaylistIndex=getPlaylistIndex;
-    
-        function searchVideo(provider, videoName, order) {
-            videosService.searchVideo(provider, videoName, $scope.searchVideoForm.limit, order).then(function(data) {
-                
-                $scope.searchVideoForm.results[provider]=data;
-                //calculate number of pages
-                //$scope.searchVideoForm.pagination.numberOfPages = Math.round(data.totalResults/$scope.itemsByPage);
-                
-                if(provider === 'dailymotion') {
-                    if($scope.searchVideoForm.results[provider].totalResults /10 > 100)
-                        $scope.searchVideoForm.results[provider].totalPages = 100 * 10;
-                    else
-                        $scope.searchVideoForm.results[provider].totalPages = $scope.searchVideoForm.results[provider].totalResults;
-                }
-                alertsService.success(data.totalResults + " vidéos trouvées pour le fournisseur "+provider);     
-            }, function(err) {
-                alertsService.error("Impossile de récupérer des vidéo pour le fournisseur "+provider+". "+err);    
-            });
-        }
-        
+
         $scope.isEmpty = function(object) {
             return Object.keys(object).length===0;
         };
         
         //videoStarted
         $scope.$on('videoStarted', function(/*args*/) {
-            //alert('bye bye');
+            $scope.$apply(function () {
+                $scope.searchVideoForm.isReading=true;
+                $scope.searchVideoForm.isPaused=false;
+            });
             console.log('videoStarted');
         });
+        //TODO videoOnPause
+         $scope.$on('videoPaused', function(/*args*/) {
+            $scope.$apply(function () {
+                $scope.searchVideoForm.isReading=false;
+                $scope.searchVideoForm.isPaused=true;
+            });
+            console.log('videoPaused');
+        });        
         //videoFinished
         $scope.$on('videoFinished', function(/*args*/) {
            //lit la video suivante !
@@ -226,15 +214,36 @@ define(['./module', 'moment'], function(appModule, moment) {
                 $scope.$apply(function () {
                    $scope.searchVideoForm.selected=$scope.searchVideoForm.playlist[selectedIndex+1];
                 });
-                
-            } else {
+
+            } else if($scope.searchVideoForm.loop) {
                 console.log("reset video");
                 $scope.$apply(function () {
                     $scope.searchVideoForm.selected=$scope.searchVideoForm.playlist[0];
                 });
-            }
+            } else
+                $scope.searchVideoForm.isReading=false;
+            //otherwise stop
         });
-    
-    }]);    
-    
+
+        $scope.changeCurrentPlaying = function(order) {
+            var selectedIndex = getPlaylistIndex($scope.searchVideoForm.selected);            
+            if(order==='backward') {
+                if(selectedIndex!==0) {
+                   $scope.searchVideoForm.selected=$scope.searchVideoForm.playlist[selectedIndex-1];
+                }
+            } else {
+                if($scope.searchVideoForm.playlist.length-1 > selectedIndex)  {
+                   $scope.searchVideoForm.selected=$scope.searchVideoForm.playlist[selectedIndex+1];
+                }
+            }
+        };
+        
+        $scope.changePlayingState = function() {
+            //console.log("changePlayingState to ",!$scope.searchVideoForm.isPaused);
+            $scope.searchVideoForm.isPaused = !$scope.searchVideoForm.isPaused;
+            $scope.searchVideoForm.isReading = !$scope.searchVideoForm.isReading;
+        };
+
+    }]);
+
 });

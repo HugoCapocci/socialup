@@ -1,20 +1,20 @@
 <div class="row">
     <div class="input-group">
         <span class="input-group-addon">Rechercher page facebook : </span>
-        <input type="text" class="form-control" ng-model="pageName" value="Nom de la page"/>
+        <input type="text" class="form-control" ng-model="pageName" value="Nom de la page" ng-keyup="$event.keyCode === 13? searchFacebookPage():''"/>
         <span class="input-group-btn">
             <button type="button" class="btn btn-default btn-primary" ng-click="searchFacebookPage()">Chercher</button>
         </span>
     </div>
 </div>
 
-<div class="row">
+<div class="row" style="margin-top: 5px;">
     <table st-table="displayedCollection" st-safe-src="facebookPages" class="table table-striped">
         <thead>
 			<tr>
-				<th colspan="2" st-sort="name">Nom de la page</th>
-                <th>Description</th>
-                <th st-sort="category">Catégorie</th>
+                <th colspan="2" st-sort="name"><label>Nom de la page</label></th>
+                <th><label>Description</label></th>
+                <th st-sort="category"><label>Catégorie</label></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -27,7 +27,7 @@
         </tbody>
          <tfoot>
 			<tr>
-				<td colspan="4" class="text-center">
+				<td colspan="4" class="text-center" style="padding-top: 0px;padding-bottom: 0px;">
 					<div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
 				</td>
 			</tr>
@@ -41,16 +41,16 @@
         
         <div class="input-group">
             <span class="input-group-addon">Stat : </span>
-            <select class="form-control" ng-model="stats.metricType" ng-options="option.label for option in metricTypes"></select>
+            <select class="form-control" ng-model="stats.metricType" ng-options="option.label for option in metricTypes" ng-keyup="$event.keyCode === 13? getPageStats():''"></select>
 
             <span class="input-group-addon">Période du </span>
-            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.since" is-open="status.since" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('since')"/>
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.since" is-open="status.since" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('since')" ng-keyup="getPageStats($event.keyCode)"/>
             <span class="input-group-btn">
                 <button type="button" class="form-control btn btn-default" ng-click="open('since', $event)"><i class="glyphicon glyphicon-calendar"></i></button>
             </span>
 
             <span class="input-group-addon">Au </span>
-            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.until" is-open="status.until" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('until')"/>
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.until" is-open="status.until" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('until')" ng-keyup="getPageStats($event.keyCode)"/>
             <span class="input-group-btn">
                 <button type="button" class="form-control btn btn-default" ng-click="open('until', $event)"><i class="glyphicon glyphicon-calendar"></i></button>
             </span>
@@ -63,7 +63,7 @@
 </div>
 
 <!-- display stats-->
-<div class="row" ng-if="labels">
+<div class="row" ng-if="labels" style="margin-bottom:30px;">
     <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-legend="false" chart-series="series" chart-options="chartOptions">
     </canvas>
 </div>
