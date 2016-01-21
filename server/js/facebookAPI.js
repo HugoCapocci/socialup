@@ -246,6 +246,11 @@ function processGetRequest(access_token, path, callback, isOldPath) {
         req_options.headers = {
             'Authorization': 'Bearer '+access_token
         };
+    else
+        req_options.headers = {
+            'Authorization': 'Bearer '+appToken.access_token
+        };
+        
     var req = https.request(req_options, function(res) {
         var data="";
         res.on('data', function(chunk) {
@@ -265,8 +270,7 @@ function processGetRequest(access_token, path, callback, isOldPath) {
 
 // see https://developers.facebook.com/docs/graph-api/using-graph-api & https://developers.facebook.com/docs/graph-api/reference/page
 exports.searchPage = function(tokens, pageName) {
-
-    return search(tokens.access_token, pageName, 'page', 'id,name,category,picture,about,likes');
+    return search(tokens !== undefined ? tokens.access_token : undefined, pageName, 'page', 'id,name,category,picture,about,likes');
 };
 
 /*exports.searchVideo = function(videoName, limit, order, page) {
@@ -293,7 +297,7 @@ exports.getPageMetrics = function(tokens, metricType, pageId, since, until) {
    //var metric = 'page_fans_country';
    // var metric = 'page_storytellers_by_country';
    // var metric = 'post_stories'; -> admin
-    return processGetRequest(tokens.access_token, '/'+pageId+'/insights?metric='+metricType+'&since='+since+'&until='+until, function(metrics) {
+    return processGetRequest(tokens !== undefined ? tokens.access_token : undefined, '/'+pageId+'/insights?metric='+metricType+'&since='+since+'&until='+until, function(metrics) {
         //console.log("Facebook searched metrics: ", metrics);
         return metrics;
     });
@@ -301,8 +305,7 @@ exports.getPageMetrics = function(tokens, metricType, pageId, since, until) {
 
 function getAppToken() {
     
-     var deferred = Q.defer();
-
+    var deferred = Q.defer();
     var req_options = {
         host: 'graph.facebook.com',
         port: 443,

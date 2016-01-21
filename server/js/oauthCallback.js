@@ -479,39 +479,53 @@ app.get('/spaceUsage/:provider/:userId', function(req, res) {
     
 });
 
-app.get('/searchPage/:provider/:pageName/:userId', function(req, res) {
+app.get('/searchPage/:provider/:pageName', function(req, res) {
     
     var provider = req.params.provider;
-    var userId = req.params.userId;
     var pageName = req.params.pageName;
+    var userId = req.query.userId;
     
-    getRefreshedToken(provider, userId).then(function(tokens) {
-        //pipe the bytes returned from request to the response 'res', in order to directly download the file
-       return providersAPI[provider].searchPage(tokens, pageName);
-    }).then(function(pagesFound) {
-         res.send(pagesFound);
-    }).fail(function(err) {
-         res.send(err);
-    });
-    
+    if(!userId)
+        providersAPI[provider].searchPage(undefined, pageName).then(function(pagesFound) {
+            res.send(pagesFound);
+        }).fail(function(err) {
+            res.send(err);
+        });
+    else
+        getRefreshedToken(provider, userId).then(function(tokens) {
+            //pipe the bytes returned from request to the response 'res', in order to directly download the file
+           return providersAPI[provider].searchPage(tokens, pageName);
+        }).then(function(pagesFound) {
+             res.send(pagesFound);
+        }).fail(function(err) {
+             res.send(err);
+        });
 });
 
-app.get('/pageMetrics/:provider/:metricType/:pageId/:userId', function(req, res) {
+app.get('/pageMetrics/:provider/:metricType/:pageId', function(req, res) {
     
     var provider = req.params.provider;
     var metricType = req.params.metricType;
-    var userId = req.params.userId;
     var pageId = req.params.pageId;
     var since = req.query.since;
     var until = req.query.until;
+    var userId = req.query.userId;
     
-    getRefreshedToken(provider, userId).then(function(tokens) {
-       return providersAPI[provider].getPageMetrics(tokens, metricType, pageId, since, until);
-    }).then(function(pagesFound) {
-         res.send(pagesFound);
-    }).fail(function(err) {
-         res.send(err);
-    });
+    if(!userId)
+        providersAPI[provider].getPageMetrics(undefined, metricType, pageId, since, until).then(function(pagesFound) {
+             res.send(pagesFound);
+        }).fail(function(err) {
+             res.send(err);
+        });
+        
+    else
+        getRefreshedToken(provider, userId).then(function(tokens) {
+           return providersAPI[provider].getPageMetrics(tokens, metricType, pageId, since, until);
+        }).then(function(pagesFound) {
+             res.send(pagesFound);
+        }).fail(function(err) {
+             res.send(err);
+        });
 });
 
 app.post('/message/:userId', function(req, res) {

@@ -8,17 +8,26 @@ define(['./module', 'moment'], function(appModule, moment) {
         $scope.facebookPages = [];
         $scope.displayedCollection = [].concat($scope.facebookPages);
         $scope.itemsByPage = 5;
-        $scope.searchFacebookPage = function() {           
+        $scope.searchFacebookPage = function() {
+            $scope.isPagesLoading=true;
             eventService.getPages($scope.pageName).then(function(pages){
+                $scope.isPagesLoading=false;
                 $scope.facebookPages=pages.data;
                 $scope.displayedCollection = [].concat($scope.facebookPages);
+            }, function(err) {
+                console.error(err);
+                $scope.isPagesLoading=false;
+                alertsService.error("Impossible de chercher des pages Facebook: "+err);
             });
         };
         
         //select a page
-        $scope.setSelected = function($index) {
-            $scope.selectedPage = $scope.displayedCollection[$index];
+        $scope.setSelected = function(page) {
+            $scope.selectedPage = page;
         };
+        
+        $scope.isPagesLoading = false;
+        $scope.isStatsLoading = false;
     
         $scope.stats = {
             dates : {}
@@ -42,6 +51,8 @@ define(['./module', 'moment'], function(appModule, moment) {
                  alertsService.warn("Veuillez choisir un type de stats à afficher svp");
                 return;
             }
+            
+            $scope.isStatsLoading=true;
             
             //adapt tootip label on the graph according to selected stat type
             if($scope.stats.metricType.value === 'page_fans_country') {
@@ -87,9 +98,13 @@ define(['./module', 'moment'], function(appModule, moment) {
                     } else {
                         $scope.data[0].push(likes);
                     }
-                    
                 });
+                $scope.isStatsLoading=false;
                 console.log("$scope.data: ", $scope.data);
+            }, function(err) {
+                console.error(err);
+                $scope.isStatsLoading=false;
+                alertsService.error("Impossible de récupérer les stats Facebook: "+err);
             });
 
         };

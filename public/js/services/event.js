@@ -130,7 +130,11 @@ define(['./module'], function (appModule) {
                 var deferred = $q.defer();
                 console.log("search page name: ", pageName);
                 pageName = encodeURI(pageName);
-                $http.get('/searchPage/facebook/'+pageName+'/'+localData.user.id).then(function(response) {
+                
+                var url = '/searchPage/facebook/'+pageName;
+                if(localData && localData.user)
+                    url+='?userId='+localData.user.id;
+                $http.get(url).then(function(response) {
                     console.log('response for facebook searchPage: ', response);
                     deferred.resolve(response.data);
                 }, function (err) {
@@ -141,10 +145,14 @@ define(['./module'], function (appModule) {
             };
             
             this.getPageMetrics = function(metricType, pageId, dateSince, dateUntil) {
+               
                 var deferred = $q.defer();
-                var url = '/pageMetrics/facebook/'+metricType+'/'+pageId+'/'+localData.user.id;
+                var url = '/pageMetrics/facebook/'+metricType+'/'+pageId;
                 if(dateSince && dateUntil)
                     url+='?since='+dateSince+"&until="+dateUntil;
+                if(localData && localData.user)
+                    url+='&userId='+localData.user.id;
+                
                 $http.get(url).then(function(response) {
                     console.log('response for facebook getPageMetrics: ', response);
                     deferred.resolve(response.data);

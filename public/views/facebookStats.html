@@ -9,7 +9,11 @@
 </div>
 
 <div class="row" style="margin-top: 5px;">
-    <table st-table="displayedCollection" st-safe-src="facebookPages" class="table table-striped">
+    
+    <div ng-if="isPagesLoading" class="col-md-12" style="text-align:center;margin-top:10px;margin-bottom:10px">
+        <img src="images/loading.gif" width="64" height="64"/> Chargement en cours...
+    </div>
+    <table ng-if="!isPagesLoading" st-table="displayedCollection" st-safe-src="facebookPages" class="table table-striped">
         <thead>
 			<tr>
                 <th colspan="2" st-sort="name"><label>Nom de la page</label></th>
@@ -19,7 +23,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr ng-repeat="page in displayedCollection"  ng-click="setSelected($index)" ng-class="{selected: page === selectedPage}">
+			<tr ng-repeat="page in displayedCollection"  ng-click="setSelected(page)" ng-class="{selected: page === selectedPage}">
                 <td><img ng-src="{{page.picture.data.url}}" ></td>
 				<td><a ng-href="{{'https://www.facebook.com/'+page.id}}" target="_blank">{{page.name}}</a></td>            
                 <td>{{page.about}}</td>
@@ -58,14 +62,18 @@
             </span>
         </div>
     </div>
-    <div class="col-md-1 col-md-offset-11">
-        <br/>
+    <div class="col-md-11" style="text-align:center;margin-top:8px; margin-bottom:5px;">
+        <span ng-if="isStatsLoading">
+            <img src="images/loading.gif" width="32" height="32"/> Chargement en cours...
+        </span>
+    </div>
+    <div class="col-md-1" style="margin-top:5px; margin-bottom:5px;">
         <button class=" btn btn-default btn-primary" ng-click="getPageStats()">Valider</button>
     </div>
 </div>
 
 <!-- display stats-->
-<div class="row" ng-if="labels" style="margin-bottom:30px;">
+<div class="row" ng-if="labels" style="margin-bottom:30px;">    
     <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-legend="false" chart-series="series" chart-options="chartOptions">
     </canvas>
 </div>

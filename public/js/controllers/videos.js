@@ -25,31 +25,7 @@ define(['./module'], function(appModule) {
                     //stats:
                     $scope.stats = media.stats;
                     console.log("stats: ", $scope.stats);
-                   // var playbackCount=0, downloadCount=0, likes=0, commentsCount=0, repostCount=0;
-                   /* if($scope.media.provider === 'soundcloud' || $scope.media.provider === 'mixcloud') {
-                        media.forEach(function(datum) {
-                            playbackCount+=datum.playbackCount;
-                            if(datum.downloadCount)
-                                downloadCount+=datum.downloadCount;
-                            else if(datum.repostCount)
-                                repostCount+=datum.repostCount;
-                            likes+=datum.likes;
-                            commentsCount+=datum.commentsCount;
-                        });
-                        $scope.data = [[playbackCount, commentsCount, likes]];
-                        $scope.labels = ['lectures', 'commentaires', 'likes'];
-                        if($scope.media.provider === 'soundcloud') {
-                            $scope.data[0].push(downloadCount);
-                            $scope.labels.push('téléchargements');
-                        } else {
-                            $scope.data[0].push(repostCount);
-                            $scope.labels.push('reposts');
-                        }
-                        
-                    } else {
-                        $scope.data = [];
-                        $scope.labels = [];
-                    }*/
+                  
                 }, function(err) {
                     $scope.isLoading=false;
                     alertsService.error("Impossible de récupérer les vidéos. Err: "+err);
@@ -113,7 +89,7 @@ define(['./module'], function(appModule) {
         };
         
         $scope.modifyVideo = function(media) {
-            
+            //TODO
             console.log("modify media id? ", media.id);
         };
         
