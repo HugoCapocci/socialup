@@ -36,7 +36,7 @@
                     <span class="label label-danger" ng-if="event.error">{{event.error}}</span>
                 </td>             
                 <td>
-                    <img src="images/attachment.png" height="24" width="24" uib-tooltip="{{event.attachment.originalFileName}} - {{displayFileSize(event.attachment.size)}}" ng-if="event.attachment">
+                    <img src="images/attachment.png" height="24" width="24" uib-tooltip="{{event.attachment.originalFileName}} - {{event.attachment.size | formatFileSize}}" ng-if="event.attachment">
                 </td>
                  <td>
                     <div class="btn-group" uib-dropdown>

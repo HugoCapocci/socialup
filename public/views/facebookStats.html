@@ -15,6 +15,7 @@
                 <th colspan="2" st-sort="name"><label>Nom de la page</label></th>
                 <th><label>Description</label></th>
                 <th st-sort="category"><label>Catégorie</label></th>
+                <th st-sort="likes" style="min-width:90px;"><label><i class="glyphicon glyphicon-thumbs-up" style="color:blue;"></i> Likes</label></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -23,11 +24,12 @@
 				<td><a ng-href="{{'https://www.facebook.com/'+page.id}}" target="_blank">{{page.name}}</a></td>            
                 <td>{{page.about}}</td>
                 <td>{{page.category}}</td>
+                <td>{{page.likes | formatNumber:1}}</td>
 			</tr>
         </tbody>
          <tfoot>
 			<tr>
-				<td colspan="4" class="text-center" style="padding-top: 0px;padding-bottom: 0px;">
+				<td colspan="5" class="text-center" style="padding-top: 0px;padding-bottom: 0px;">
 					<div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
 				</td>
 			</tr>

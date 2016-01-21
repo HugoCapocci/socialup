@@ -25,22 +25,21 @@
         <table ng-if="!isLoading && displayedCollection.length>0" st-table="displayedCollection" st-safe-src="media.list" class="table table-striped">
             <thead>
                 <tr>
-                    <th st-sort="title">video title</th>
-                    <th st-sort="creationDate">creation date</th>               
-                    <th>description</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>                
+                    <th colspan="2" st-sort="title" style="max-width:400px;width:300px"><label>Titre</label></th>
+                    <th st-sort="creationDate" style="max-width:150px;width:150px"><label>Date de création</label></th>               
+                    <th><label>Description</label></th>
+                    <th style="max-width:50px;width:50px"></th>
+                    <th style="max-width:50px;width:50px"></th>               
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="video in displayedCollection">
-                    <td>{{video.title}}</td>
-                    <td>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</td>
-                    <td>{{video.description}}</td>
-                    <td>
-                       <a ng-href="{{media.getURL(video.id, $index)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>
+                    <td style="max-width:150px;width:100px;">
+                       <a ng-href="{{media.getURL(video.id, $index)}}" target="_blank"><img ng-src="{{video.thumbnailURL}}" height="60"/></a>               
                     </td>
+                    <td style="max-width:250px;width:200px;"><label>{{video.title}}</label></td>
+                    <td>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm" }}</td>
+                    <td>{{video.description}}</td>                    
                     <td>
                         <div class="btn-group" uib-dropdown>
                             <button type="button" class="btn btn-info" uib-dropdown-toggle>

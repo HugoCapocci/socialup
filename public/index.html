@@ -288,7 +288,7 @@
         <div class="container" style="width:100%">
             <div class="row">
                 <div class="col-lg-2 col-md-2 col-sm-0">
-                    <uib-alert ng-if="$root.alert" type="{{$root.alert.type}}" style="opacity:{{$root.alert.opacity}};" close="closeAlert()">{{$root.alert.msg}}</uib-alert>
+                    <uib-alert ng-repeat="alert in $root.alerts" type="{{alert.type}}" style="opacity:{{alert.opacity}};" close="closeAlert($index)">{{alert.msg}}</uib-alert>
                 </div>
                 <div class="col-lg-9 col-md-9 col-sm-12">
                     <div ng-view></div>

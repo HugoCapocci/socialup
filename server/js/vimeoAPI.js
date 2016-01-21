@@ -13,6 +13,8 @@ const CLIENT_ID = process.env.VIMEO_CLIENT_ID;
 const CLIENT_SECRET = process.env.VIMEO_CLIENT_SECRET;
 const REDIRECT_URL = process.env.APP_URL + '/vimeo2callback';
 
+const DESCRIPTION_MAX_LENGTH = 1250;
+
 var unauthenticatedToken;
 
 exports.getOAuthURL = function() {
@@ -163,7 +165,10 @@ exports.searchVideo = function(videoName, limit, order, page) {
                 video.title=result.name;
                 video.thumbnailURL = result.pictures.sizes[0].link;
                 video.creationDate = result.created_time;
-                video.description=result.description;
+                if(result.description && result.description.length> DESCRIPTION_MAX_LENGTH)
+                     video.description=result.description.substr(0, DESCRIPTION_MAX_LENGTH);
+                else
+                    video.description=result.description;
                 video.duration=result.duration;
                 video.channel = result.user.name;
                 video.channelURL = result.user.link;

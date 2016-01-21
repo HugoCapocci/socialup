@@ -76,8 +76,12 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
             console.log("localData found: ",localData);
             if(!localData)
                 $location.path('/login');
-            $scope.closeAlert=function() {
-                delete $rootScope.alert;
+            
+            $scope.closeAlert=function($index) {
+                console.log("close alert index: ", $index);
+                //delete $rootScope.alerts[$index];
+                $rootScope.alerts.splice($index, 1);
+                //$rootScope.alerts.slice($index, 1);
             };
             //MENU
             
@@ -89,6 +93,7 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
         }]
     );
     
+    // progressing bar, in a modal
     appModule.controller('WaitingModalController', ['$scope', '$rootScope', '$location', '$uibModalInstance', 
     function($scope, $rootScope, $location, $uibModalInstance) {
        

@@ -5,9 +5,9 @@
 * see https://developers.facebook.com/docs/graph-api/using-graph-api/v2.5
 */
 
-const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
-const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
-const FACEBOOK_REDIRECT_URI = process.env.APP_URL + '/facebook2callback';
+const APP_ID = process.env.FACEBOOK_APP_ID;
+const APP_SECRET = process.env.FACEBOOK_APP_SECRET;
+const REDIRECT_URI = process.env.APP_URL + '/facebook2callback';
 
 var querystring = require('querystring');
 var https = require('https');
@@ -16,6 +16,8 @@ var request = require('request');
 var fs = require("fs");
 var userDAO = require('./userDAO.js');
 
+var appToken;
+
 function pushCode(code) {
 
     var deferred = Q.defer();
@@ -23,7 +25,7 @@ function pushCode(code) {
     var req_options = {
         host: 'graph.facebook.com',
         port: 443,
-        path: '/v2.3/oauth/access_token?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&client_secret='+FACEBOOK_APP_SECRET+'&code='+code,
+        path: '/v2.3/oauth/access_token?client_id='+APP_ID+'&redirect_uri='+REDIRECT_URI+'&client_secret='+APP_SECRET+'&code='+code,
         method: 'GET'
     };
 
@@ -55,7 +57,7 @@ function refreshTokens(tokens, userId) {
     var req_options = {
         host: 'graph.facebook.com',
         port: 443,
-        path: '/v2.3/oauth/access_token?grant_type=fb_exchange_token&client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&client_secret='+FACEBOOK_APP_SECRET+'&fb_exchange_token='+tokens.access_token,
+        path: '/v2.3/oauth/access_token?grant_type=fb_exchange_token&client_id='+APP_ID+'&redirect_uri='+REDIRECT_URI+'&client_secret='+APP_SECRET+'&fb_exchange_token='+tokens.access_token,
         method: 'GET'
     };
 
@@ -174,7 +176,7 @@ function getVideoData(videoId, tokens) {
 
 //https://developers.facebook.com/docs/facebook-login/permissions
 function getOAuthURL() {
-    return 'https://graph.facebook.com/oauth/authorize?client_id='+FACEBOOK_APP_ID+'&redirect_uri='+FACEBOOK_REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages+read_insights';//+'&response_type=token'
+    return 'https://graph.facebook.com/oauth/authorize?client_id='+APP_ID+'&redirect_uri='+REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages+read_insights';//+'&response_type=token'
 }
 
 function postMessage(tokens, message, providerOptions) {
@@ -216,7 +218,7 @@ function publishOnFeed(tokens, data, providerOptions) {
 
 exports.getPages = function(tokens) {
     
-    return processGetRequest(tokens.access_token, '/me/accounts', function(pages) {
+    return processGetRequest(tokens.access_token, '/me/accounts?locale=fr_FR', function(pages) {
         console.log("Facebook users pages: ", pages.data);
         return pages.data;
     });
@@ -238,11 +240,12 @@ function processGetRequest(access_token, path, callback, isOldPath) {
         host: 'graph.facebook.com',
         port: 443,
         path: isOldPath ? path : '/v2.5'+path,
-        method: 'GET',
-        headers: {
-            'Authorization': 'Bearer '+access_token
-        }
+        method: 'GET'
     };
+    if(access_token)
+        req_options.headers = {
+            'Authorization': 'Bearer '+access_token
+        };
     var req = https.request(req_options, function(res) {
         var data="";
         res.on('data', function(chunk) {
@@ -256,23 +259,34 @@ function processGetRequest(access_token, path, callback, isOldPath) {
         console.log('processRequest error: ', e);
         deferred.reject(e);
     });
-    req.end();
-    
+    req.end();    
     return deferred.promise;
 }
 
 // see https://developers.facebook.com/docs/graph-api/using-graph-api & https://developers.facebook.com/docs/graph-api/reference/page
 exports.searchPage = function(tokens, pageName) {
-    
-    var searchType = 'page';
-    return processGetRequest(tokens.access_token, '/search?q='+encodeURI(pageName)+'&type='+searchType+'&fields=id,name,category,picture,about', function(pages) {
+
+    return search(tokens.access_token, pageName, 'page', 'id,name,category,picture,about,likes');
+};
+
+/*exports.searchVideo = function(videoName, limit, order, page) {
+    return search(undefined, videoName, 'page', 'id,name');
+};*/
+
+function search(access_token, query, searchType, fields) {
+    var url = '/search?q='+encodeURI(query)+'&type='+searchType+'&fields='+fields+'&locale=fr_FR';
+    if(!access_token)
+        url+= '&access_token='+appToken.access_token;    
+    return processGetRequest(access_token, url, function(pages) {
         //console.log("Facebook searched pages: ", pages);
         return pages;
     }, true);
-};
+}
 
 //see https://developers.facebook.com/docs/graph-api/reference/v2.5/insights
 exports.getPageMetrics = function(tokens, metricType, pageId, since, until) {
+    
+     //TODO : cut by periods of 93 days if request duration is too long
 
     //var metric = 'page_fans'; -> admin
     //var metric = 'page_fans_gender_age'; -> admin
@@ -284,6 +298,42 @@ exports.getPageMetrics = function(tokens, metricType, pageId, since, until) {
         return metrics;
     });
 };
+
+function getAppToken() {
+    
+     var deferred = Q.defer();
+
+    var req_options = {
+        host: 'graph.facebook.com',
+        port: 443,
+        path: '/v2.3/oauth/access_token?client_id='+APP_ID+'&grant_type=client_credentials&client_secret='+APP_SECRET,
+        method: 'GET'
+    };
+
+    var req = https.request(req_options, function(res) {
+
+        var data="";
+        res.on('data', function(chunk) {
+            data+=chunk;
+        });
+        res.on('end', function() {            
+            var results = JSON.parse(data);
+            appToken=results;
+            console.log("appToken? ",appToken);
+            deferred.resolve(results);
+        });
+    });
+    
+    req.on('error', function(e) {         
+        console.log('FB getAppToken error: ', e);
+        deferred.reject(e);
+    });
+
+    req.end();    
+    return deferred.promise;
+}
+
+getAppToken();
 
 exports.pushCode=pushCode;
 exports.sendVideo=sendVideo;

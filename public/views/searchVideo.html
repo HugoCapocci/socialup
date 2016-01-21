@@ -101,17 +101,17 @@
                                         </h6>
                                         <h5>
                                             <a href="" uib-tooltip="Publié le {{video.creationDate | date : 'dd MMMM yyyy à&nbsp;HH\'h\'mm'}}">
-                                                Il y a {{formatDate(video.creationDate)}}
+                                                Il y a {{video.creationDate | formatDate}}
                                             </a>
                                         </h5>                                    
                                       <!--  <h6>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm"}}</h6>  -->                         
-                                        <h6 ng-if="video.duration">Durée {{formatDuration(video.duration)}}</h6>
+                                        <h6 ng-if="video.duration">Durée {{video.duration | formatDurationInSeconds}}</h6>
                                         <h6>
-                                            {{formatNumber(video.counts.view)}} vues&nbsp;
+                                            {{video.counts.view | formatNumber}} vues&nbsp;
                                             <span ng-if="video.counts.like">
-                                                {{formatNumber(video.counts.like)}} <i class="glyphicon glyphicon-thumbs-up" style="color:green;"></i>&nbsp;
+                                                {{video.counts.like | formatNumber}} <i class="glyphicon glyphicon-thumbs-up" style="color:green;"></i>&nbsp;
                                                 <span ng-if="video.counts.dislike">
-                                                    {{formatNumber(video.counts.dislike)}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i>
+                                                    {{video.counts.dislike | formatNumber}} <i class="glyphicon glyphicon-thumbs-down" style="color:red;"></i>
                                                 </span>
                                             </span>
                                         </h6>

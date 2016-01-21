@@ -32,14 +32,14 @@ define(['./module', 'moment'], function(appModule, moment) {
                        
             modalInstance.result.then(function(selectedItem) {
                 $scope.selected = selectedItem;
-                console.log("Modal executed");
+               // console.log("Modal executed");
             }, function () {
-                console.log('Modal dismissed at: ' + new Date());
+               // console.log('Modal dismissed at: ' + new Date());
             });
         }
 
         eventService.retrieveAll().then(function(events) {
-            console.log("events retrieved: ", events);
+            //console.log("events retrieved: ", events);
             events.forEach(function(event) {
                 var row = { 
                     type : event.eventType, 
@@ -60,29 +60,12 @@ define(['./module', 'moment'], function(appModule, moment) {
                 $scope.events.push(row);
                     
             });
-           // $scope.events=events;
             $scope.displayedCollection = [].concat($scope.events);
-            console.log("$scope.displayedCollection: ",$scope.displayedCollection );
+            //console.log("$scope.displayedCollection: ",$scope.displayedCollection );
         }, function(err) {
             alertsService.error("Impossible de récupérer les évènements enregistrés. Err: "+err);
         });
-        
-        $scope.displayFileSize = function(sizeInBytes) {
-            
-            var sizeInKiloBytes = sizeInBytes/1024;
-            if(sizeInKiloBytes<1) {
-                return sizeInBytes+" o";           
-            } else {                
-                var sizeInMegaBytes = sizeInKiloBytes/1024;                
-                if(sizeInMegaBytes<1) {
-                     return Number(sizeInKiloBytes).toFixed(2)+" ko";
-                } else {
-                    var sizeInGigaBytes = sizeInMegaBytes/1024;                    
-                    return Number(sizeInMegaBytes).toFixed(2) + (sizeInGigaBytes<1 ? " Mo": " Go");
-                }
-            }
-        };
-        
+         
         $scope.executeAction = function(type, event) {
             console.log("executeAction with type: ",type);
             if(type==='message')
@@ -97,7 +80,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         ];
         
         $scope.deleteEvent = function(event) {
-            console.log("delete event: ", event);
+            //console.log("delete event: ", event);
             //TODO open modal window with loading gif, and close it after
             eventService.deleteScheduledEvent(event.id).then(function() {
                 var index = $scope.events.indexOf(event);
@@ -117,11 +100,6 @@ define(['./module', 'moment'], function(appModule, moment) {
             }else if(event.type ==='uploadVideo') {
                 $location.url('/uploadFile?eventId='+event.id);
             }
-        };
-        
-        $scope.parseDate = function(dateString) {
-            var date = new Date(dateString);
-            return date.getTime();
         };
         
     }]);

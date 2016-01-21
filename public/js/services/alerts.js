@@ -5,6 +5,9 @@ define(['./module'], function (appModule) {
     appModule.service('alertsService', 
         ['$rootScope', '$timeout', 
         function ($rootScope, $timeout) {
+            
+            if(!$rootScope.alerts)
+                $rootScope.alerts = [];
 
             //authentication is made by provider callbacks
             this.success = function(message, delay) {
@@ -26,22 +29,53 @@ define(['./module'], function (appModule) {
             function createAlert(message, type, delay) {
                 if(delay===undefined)
                     delay=2000;
-                $rootScope.alert = {
+                
+                var alert = {
                     msg : message,
                     type : type,
                     opacity : 1
                 };
-                $timeout(deleteAlert, delay);
+                var index = getIndex(alert);
+                if(index===-1)
+                    $rootScope.alerts.push(alert);
+                else {
+                    $rootScope.alerts[index].opacity=1;                    
+                }
+                $timeout(function() {
+                    deleteAlert(alert);
+                }, delay);
             }
             
-            function deleteAlert() {
-                if($rootScope.alert!==undefined) {                    
-                    if($rootScope.alert.opacity < 0.1)
-                        delete $rootScope.alert;
-                    else {
-                        $rootScope.alert.opacity=0.9*$rootScope.alert.opacity;
-                        $timeout(deleteAlert, 100);
+            function deleteAlert(alert) {
+                
+                var index = getIndex(alert);
+                if(index===-1)
+                    return;
+
+                if($rootScope.alerts!==undefined && $rootScope.alerts[index] !== undefined) {                    
+                    if($rootScope.alerts[index].opacity < 0.1) {                       
+                        $rootScope.alerts.splice(index, 1);                      
+                    } else {
+                        $rootScope.alerts[index].opacity=0.9*$rootScope.alerts[index].opacity;
+                        $timeout(function() {
+                            deleteAlert(alert);
+                        }, 100);
                     }                    
+                }
+            }
+            
+            function getIndex(alert) {
+                if(!$rootScope.alerts || $rootScope.alerts.length===0)
+                    return -1;
+                else {
+                    var index = -1;
+                    for(var i =0; i<$rootScope.alerts.length; i++) {
+                        if($rootScope.alerts[i].msg === alert.msg && $rootScope.alerts[i].type === alert.type) {
+                            index = i;
+                            continue;
+                        }
+                    }
+                    return index;
                 }
             }
         }]

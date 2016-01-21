@@ -17,7 +17,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         
         //select a page
         $scope.setSelected = function($index) {
-            $scope.selectedPage = $scope.facebookPages[$index];
+            $scope.selectedPage = $scope.displayedCollection[$index];
         };
     
         $scope.stats = {
@@ -54,7 +54,7 @@ define(['./module', 'moment'], function(appModule, moment) {
             
             //add 1 day to "dateUntil parameter" because facebook exclude it
             dateUntil = moment(dateUntil).add(1,'days');
-            
+
             eventService.getPageMetrics($scope.stats.metricType.value, $scope.selectedPage.id, dateSince.getTime()/1000, dateUntil.unix()).then(function(metrics){
                 console.log("metrics: ", metrics.data);
                 var valuesByDay = metrics.data[0].values; //end_time, value{}
@@ -65,7 +65,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                 // if($scope.stats.metricType.isVariation)
                 var previousValue;
                 
-                //aggegate all countries values
+                //aggregate all countries values
                 valuesByDay.forEach(function(dayValue) {
                     //console.log("dayValue: ", dayValue);
                     if(!$scope.stats.metricType.isVariation || ($scope.stats.metricType.isVariation && previousValue) )                   
@@ -74,10 +74,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                     var likes = 0;
                     for(var country in dayValue.value){
                         likes+=dayValue.value[country];
-                    }
-                    
-                   // $scope.data[1].push(dayValue.value.BE);
-                    
+                    }                    
                     if($scope.stats.metricType.isVariation) {
                         if(!previousValue) {
                             previousValue = likes;
@@ -112,6 +109,7 @@ define(['./module', 'moment'], function(appModule, moment) {
             $scope.status[type] = true;
         };
         
+        //TODO : cut by periods of 93 days if request duration is too long
         $scope.changeDate = function(type) {
             // There cannot be more than 93 days (8035200 s) between since and from => 92 days (8035200-86400=7948800) because we add one
             var since = $scope.stats.dates.since;

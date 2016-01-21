@@ -16,7 +16,8 @@ define([
     'angular-drag-and-drop-lists',
     '../services/index',
     '../controllers/index',
-    './directives'
+    './directives',
+    './filters'
     ], function (angular) {
     
         'use strict';
@@ -36,7 +37,8 @@ define([
             'dndLists',
             'SocialUp.services',
             'SocialUp.controllers',
-            'SocialUp.directives'
+            'SocialUp.directives',
+            'SocialUp.filters'
         ]);
 });
 

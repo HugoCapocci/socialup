@@ -120,36 +120,6 @@ define(['./module', 'moment'], function(appModule, moment) {
                 delete $scope.searchVideoForm.selected;
             }
         };
-        
-        $scope.formatDuration  = function(durationInSeconds) {
-            var format = durationInSeconds>=3600 ? "HH[h]mm:ss" : "mm:ss";
-            return moment(durationInSeconds*1000).format(format);
-        };
-
-        $scope.formatDate = function(date) {            
-            var time = Date.now() - new Date(date).getTime();
-            return moment.duration(time).humanize();
-        };
-
-        $scope.formatNumber = function(number) {
-            
-            number = parseFloat(number);
-            if(number<1000) {
-                return parseInt(number);
-            } else {
-                var numberInKilos = number/1000;
-                if(numberInKilos<1000) {
-                    return parseInt(numberInKilos)+'k';
-                } else {
-                    var numberInMillions = numberInKilos/1000;
-                    if(numberInMillions<1000) {
-                        return parseInt(numberInMillions)+'M';
-                    } else {
-                        return parseInt(numberInMillions/1000)+' Md';
-                    }
-                }
-            }
-        };
 
         $scope.sanitize = function(varWithHtml) {
             return $sce.trustAsHtml("<h5>"+varWithHtml+"</h5>");
