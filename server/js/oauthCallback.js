@@ -13,18 +13,7 @@ try {
 }
 console.log("ENV ?", process.env.NODE_ENV);
 
-//TODO automatically read folder 'providerAPI' , avoid exports
-var providersAPI = {
-    google : require('./googleAPI.js'),
-    dailymotion : require('./dailymotionAPI.js'),
-    facebook : require('./facebookAPI.js'),
-    dropbox : require('./dropboxAPI.js'),
-    twitter : require('./twitterAPI.js'),
-    linkedin : require('./linkedInAPI.js'),
-    vimeo : require('./vimeoAPI.js'),
-    mixcloud : require('./mixcloudAPI.js'),
-    soundcloud : require('./soundcloudAPI.js')
-};
+var providersAPI = require('./providersAPI');
 
 var userDAO = require('./userDAO.js');
 var eventsDAO = require('./eventsDAO.js');

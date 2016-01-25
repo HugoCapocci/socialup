@@ -6,5 +6,6 @@ define([
     './alerts',
     './publishFile',
     './videos',
-    './user'
+    './user',
+    './stats'
 ], function () {});

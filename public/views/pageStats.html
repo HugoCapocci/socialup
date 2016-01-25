@@ -1,0 +1,113 @@
+<div class="row">
+    <div class="input-group">
+        
+        <span class="input-group-addon">Résau social : </span>
+        <select class="form-control" ng-model="pageStats.provider" ng-options="option.title for option in pageStats.providers" style="min-width:150px;"></select>
+        <span class="input-group-addon">Rechercher {{pageStats.provider.pageType}} : </span>
+        <input type="text" class="form-control" ng-model="pageName" value="Nom de la page" ng-keyup="$event.keyCode === 13? searchPage():''"/>
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default btn-primary" ng-click="searchPage()">Chercher</button>
+        </span>
+    </div>
+</div>
+
+<div class="row" style="margin-top: 5px;max-height:500px; overflow-y: auto;">
+    
+    <div ng-if="isPagesLoading" class="col-md-12" style="text-align:center;margin-top:10px;margin-bottom:10px">
+        <img src="images/loading.gif" width="64" height="64"/> Chargement en cours...
+    </div>
+    <table ng-if="!isPagesLoading" st-table="displayedCollection" st-safe-src="pages" class="table table-striped">
+        <thead>
+			<tr>
+                <th colspan="2" st-sort="name"><label ng-if="pageStats.provider">Nom de {{pageStats.provider.pageType}}</label></th>
+                <th><label>Description</label></th>
+                <th ng-if="pageStats.provider.value === 'facebook'" st-sort="category"><label>Catégorie</label></th>
+                
+                <th ng-if="pageStats.provider.value === 'facebook'" st-sort="likes" style="min-width:90px;">
+                    <label><i class="glyphicon glyphicon-thumbs-up" style="color:blue;"></i> Likes</label>
+                </th>
+                <th ng-if="pageStats.provider.value === 'google'" st-sort="counts.subscriber" style="min-width:90px;">
+                    <label>Abonnés</label>                    
+                </th>
+                <th ng-if="pageStats.provider.value === 'google'" st-sort="counts.video" style="min-width:90px;">
+                    <label>Vidéos <i class="glyphicon glyphicon-film"></i></label>                    
+                </th>
+                <th ng-if="pageStats.provider.value === 'google'" st-sort="counts.view" style="min-width:90px;">
+                    <label>Vues</label>                    
+                </th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="page in displayedCollection"  ng-click="setSelected(page)" ng-class="{selected: page === selectedPage}">
+                <td style="width:100px;"><img ng-src="{{page.thumbnailURL}}" style="max-height:100px; max-width:100px;"></td>
+				<td>
+                    <span ng-if="pageStats.provider.value === 'facebook'">
+                        <a ng-href="{{'https://www.facebook.com/'+page.id}}" target="_blank">{{page.name}}</a>
+                    </span>                    
+                    <span ng-if="pageStats.provider.value === 'google'">
+                        <a ng-href="{{'https://www.youtube.com/channel/'+page.id}}" target="_blank">{{page.displayName}}</a>
+                        <h6>{{page.name}}</h6>
+                    </span>
+                </td>            
+                <td>{{page.description}}</td>
+                <td ng-if="pageStats.provider.value === 'facebook'">
+                    <span>{{page.category}}</span>
+                </td>
+                <td>
+                    <span ng-if="pageStats.provider.value === 'facebook'">{{page.likes | formatNumber:1}}</span>
+                    <span ng-if="pageStats.provider.value === 'google'">{{page.counts.subscriber | formatNumber:1}}</span>
+                </td>
+                <td ng-if="pageStats.provider.value === 'google'">
+                     <span>{{page.counts.video | formatNumber:1 }}</span>
+                </td>
+                <td ng-if="pageStats.provider.value === 'google'">
+                     <span>{{page.counts.view | formatNumber:1}}</span>
+                </td>
+			</tr>
+        </tbody>
+         <tfoot>
+			<tr>
+				<td colspan="5" class="text-center" style="padding-top: 0px;padding-bottom: 0px;">
+					<div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="10"></div>
+				</td>
+			</tr>
+		</tfoot>
+    </table>
+</div>
+
+<!-- select stats-->
+<div class="row" ng-if="selectedPage">
+    <div class="col-md-12">
+        
+        <div class="input-group">
+            <span class="input-group-addon">Stat : </span>
+            <select class="form-control" ng-model="stats.metricType" ng-options="option.label for option in metricTypes" ng-keyup="$event.keyCode === 13? getPageStats():''"></select>
+
+            <span class="input-group-addon">Période du </span>
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.since" is-open="status.since" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('since')" ng-keyup="getPageStats($event.keyCode)"/>
+            <span class="input-group-btn">
+                <button type="button" class="form-control btn btn-default" ng-click="open('since', $event)"><i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+
+            <span class="input-group-addon">Au </span>
+            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="stats.dates.until" is-open="status.until" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date)" ng-required="true" close-text="Fermer" ng-change="changeDate('until')" ng-keyup="getPageStats($event.keyCode)"/>
+            <span class="input-group-btn">
+                <button type="button" class="form-control btn btn-default" ng-click="open('until', $event)"><i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+        </div>
+    </div>
+    <div class="col-md-11" style="text-align:center;margin-top:8px; margin-bottom:5px;">
+        <span ng-if="isStatsLoading">
+            <img src="images/loading.gif" width="32" height="32"/> Chargement en cours...
+        </span>
+    </div>
+    <div class="col-md-1" style="margin-top:5px; margin-bottom:5px;">
+        <button class=" btn btn-default btn-primary" ng-click="getPageStats()">Valider</button>
+    </div>
+</div>
+
+<!-- display stats-->
+<div class="row" ng-if="labels" style="margin-bottom:30px;">    
+    <canvas id="line" class="chart chart-line" chart-data="data" chart-labels="labels" chart-legend="false" chart-series="series" chart-options="chartOptions">
+    </canvas>
+</div>

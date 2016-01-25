@@ -64,7 +64,7 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
     appModule.controller(
         'MainController',
         ['$scope', '$rootScope', '$location', '$window', 'alertsService', 'userService',
-        function mainController($scope, $rootScope, $location, $window, alertsService, userService) {
+        function($scope, $rootScope, $location, $window, alertsService, userService) {
             
             var parameters= $location.search();
             if(parameters.close) {
@@ -74,8 +74,8 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
             
             var localData = userService.getUserData();
             console.log("localData found: ",localData);
-            if(!localData)
-                $location.path('/login');
+           /* if(!localData)
+                $location.path('/login');*/
             
             $scope.closeAlert=function($index) {
                 console.log("close alert index: ", $index);

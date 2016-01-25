@@ -4,10 +4,9 @@ define(['./module'], function (appModule) {
     
     appModule.service('eventService', 
         ['$http', '$q', '$window',
-        function eventService($http, $q, $window) {
+        function ($http, $q, $window) {
             
             var localData =  JSON.parse($window.localStorage.getItem('SocialUp'));
-            console.log('localData: ', localData);
             
             this.retrieveAll = function() {
                 return retrieveAllEvents('events', localData.user.id);
@@ -124,44 +123,7 @@ define(['./module'], function (appModule) {
                 });
                 return deferred.promise;
             }
-            
-            //TODO
-            this.getPages = function(pageName) {
-                var deferred = $q.defer();
-                console.log("search page name: ", pageName);
-                pageName = encodeURI(pageName);
-                
-                var url = '/searchPage/facebook/'+pageName;
-                if(localData && localData.user)
-                    url+='?userId='+localData.user.id;
-                $http.get(url).then(function(response) {
-                    console.log('response for facebook searchPage: ', response);
-                    deferred.resolve(response.data);
-                }, function (err) {
-                    //console.log("err: ", err);
-                    deferred.reject(err);
-                });
-                return deferred.promise;
-            };
-            
-            this.getPageMetrics = function(metricType, pageId, dateSince, dateUntil) {
-               
-                var deferred = $q.defer();
-                var url = '/pageMetrics/facebook/'+metricType+'/'+pageId;
-                if(dateSince && dateUntil)
-                    url+='?since='+dateSince+"&until="+dateUntil;
-                if(localData && localData.user)
-                    url+='&userId='+localData.user.id;
-                
-                $http.get(url).then(function(response) {
-                    console.log('response for facebook getPageMetrics: ', response);
-                    deferred.resolve(response.data);
-                }, function (err) {
-                    //console.log("err: ", err);
-                    deferred.reject(err);
-                });
-                return deferred.promise;
-            };
+           
         }]
     );
 });

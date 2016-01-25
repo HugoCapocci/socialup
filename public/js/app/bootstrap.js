@@ -11,7 +11,9 @@ define([
 
     require(['domReady!'], function (document) {
         console.log("domReady");
-        angular.bootstrap(document, ['SocialUp']);
+        angular.bootstrap(document, ['SocialUp'], {
+            strictDi: true
+        });
     });
 
 });

@@ -87,7 +87,7 @@ describe("schedule events service", function() {
     
     it("schedule complex function", function(done) {
 
-        var facebookAPI = require('../js/facebookAPI.js');
+        var facebookAPI = require('../js/api/facebookAPI.js');
         var event = function() {
             var oauthURL = facebookAPI.getOAuthURL();
             (oauthURL.length).should.be.above(1);
@@ -125,7 +125,7 @@ describe("schedule events service", function() {
     
     it("save complex scheduled event in database (then execute it)", function(done) {
 
-        var facebookAPI = require('../js/facebookAPI.js');
+        var facebookAPI = require('../js/api/facebookAPI.js');
         var event = facebookAPI.getOAuthURL;
         this.timeout(10000);
      

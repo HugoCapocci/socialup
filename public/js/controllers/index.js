@@ -12,7 +12,7 @@ define([
     './tracedEvents',
     './videos',
     './searchVideo',
-    './facebookStats',
+    './pageStats',
     './manageSocialNetworks',
     './providers/facebookOptions',
     './providers/dailymotionOptions',

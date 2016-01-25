@@ -22,7 +22,7 @@ define(['angular', 'app'], function(angular, app) {
             'tracedEvents', 
             'videos',
             'searchVideo', 
-            'facebookStats', 
+            'pageStats', 
             'manageSocialNetworks'];
         routes.forEach(function(route) {
             generateRouteProviders($routeProvider, route);
