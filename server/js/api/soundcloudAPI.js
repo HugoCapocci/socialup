@@ -205,5 +205,4 @@ exports.listMedia = function(tokens) {
     });    
     req.end();    
     return deferred.promise;
-
 };

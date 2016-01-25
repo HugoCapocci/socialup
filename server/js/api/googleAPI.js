@@ -209,11 +209,10 @@ exports.searchPage = function(tokens, channelName) {
         if(err)
             deferred.reject(err);
         else {
-            //var channelIds = [];
+            //TODO confirmed channels have a matching google+ account?
             var channels = {};
             response.items.forEach(function(item) {
                 //console.log("youtube channel: ", item);
-                //channelIds.push(item.id.channelId);
                 channels[item.id.channelId] = {
                     id : item.id.channelId,
                     creationDate : item.snippet.publishedAt,
@@ -277,7 +276,6 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
             var videos = [];
             response.items.forEach(function(item) {
                 //console.log('youtube item: ', item);
-               // videoIDs.push(item.id.videoId);
                 videos[item.id.videoId] = {
                     id : item.id.videoId,
                     // retrieve channel data, not user
@@ -298,8 +296,7 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                     console.error(err);
                     deferred.reject(err);
                 } else {
-                    //console.log("videos.list ",res);
-                  
+                    //console.log("videos.list ",res);                  
                     if(res)
                         res.items.forEach(function(item) {
                             //youtube duration format -> https://en.wikipedia.org/wiki/ISO_8601#Durations
@@ -323,8 +320,7 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
                             channelsResult.items.forEach(function(channel) {
                                 //console.log("Channel  ", channel);
                                 channels[channel.id]=channel.snippet.title;
-                            });
-                            
+                            });                            
                             var videoArray = Object.keys(videos).map(function(id) {
                                 videos[id].channel = channels[videos[id].channelId];
                                 delete videos[id].channelId;
@@ -346,7 +342,6 @@ exports.searchVideo = function(videoName, maxResults, order, pageToken) {
     return deferred.promise;
 };
 
-//todo  categoryId ?
 function sendVideo(tokens, file, user, videoParams, providerOptions) {
 
     //console.log('youtube UploadFile, file? ',file);
@@ -399,12 +394,12 @@ function sendVideo(tokens, file, user, videoParams, providerOptions) {
         //console.log("video upload request failed: ", err);
         deferred.reject(new Error(err));
     });
-    //on data -> TODO
+    //do 'on data'?
     return deferred.promise;
 }
 
 function uploadDrive(tokens, file, parent) {
-    
+
     var deferred = Q.defer();
     //console.log("upload to parent? ",parent);
     oauth2Client.setCredentials(tokens);
@@ -460,28 +455,20 @@ function listFiles(tokens, folderId, typeFilter) {
     var deferred = Q.defer();
     var filter = 'trashed=false';
     
-    //console.log("folderId? ", folderId);
-    
+    //console.log("folderId? ", folderId);    
     if(folderId===undefined) 
         folderId='root';
     
-    filter+=' and "'+folderId+'" in parents';
-    
+    filter+=' and "'+folderId+'" in parents';    
     //image or video
     if(typeFilter !== undefined) {
         if(typeFilter==='folder')
             filter+=' and mimeType="application/vnd.google-apps.folder" ';
         else
             filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") ';
-    }
-    
+    }    
     //console.log("filter ? ", filter);
-
     oauth2Client.setCredentials(tokens);
-    // drive.files.list({maxResults: 100}, function(err, response) {
-   //'mimeType="application/vnd.google-apps.folder"'
-    //list only folders
-    //drive.children.list({ folderId : folderId, q: filter }, function(err, response) {
     drive.files.list({ folderId : folderId, q: filter}, function(err, response) {
         if (err) {
           console.log('The API returned an error: ' + err);
@@ -513,7 +500,7 @@ function listFiles(tokens, folderId, typeFilter) {
 }
 
 function getUserInfo(tokens) {
-    //id=103809399192041774467
+
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
     googlePlus.people.get({userId:'me'}, function(err, response) {
@@ -531,18 +518,14 @@ function getUserInfo(tokens) {
 }
 
 exports.downloadFile = function(tokens,fileId) {
-    
-    //var deferred = Q.defer();
+
     oauth2Client.setCredentials(tokens);
+    //bytes are to be handled with a pipe()
     return drive.files.get({fileId:fileId+'?alt=media'}, function(err/*, bytes*/) {
         if(err) {
-            console.log("cannot get data for fileId: "+fileId+" error: ", err);
-          //  deferred.reject(err);
-        } /*else {
-            deferred.resolve(bytes);
-        }*/
+            console.log("cannot get data for fileId: "+fileId+" error: ", err);         
+        }
     });
-   // return deferred.promise;
 };
 
 exports.checkFileData = function(tokens, fileId) {

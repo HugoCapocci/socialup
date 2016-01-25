@@ -6,9 +6,9 @@
 */
 
 var fs = require('fs');
-
 var APIs = {};
 var filenames = fs.readdirSync('server/js/api');
+
 filenames .forEach(function(fileName) {
     var index = fileName.lastIndexOf('API');
       //only add file with sufix 'API'
@@ -17,5 +17,4 @@ filenames .forEach(function(fileName) {
         APIs[key] = require('./api/'+fileName);
     }
 });
-console.log("exports APIs: ",APIs);
 module.exports = APIs;

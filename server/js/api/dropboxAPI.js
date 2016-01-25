@@ -166,18 +166,21 @@ exports.deleteFile = function(tokens,filePath) {
  
     var deferred = Q.defer();
     request({
-        uri: 'api.dropboxapi.com/1/fileops/delete',
+        uri: 'https://api.dropboxapi.com/2/files/delete',
         auth: {
             bearer: tokens.access_token
         },
+        headers : {
+            'Content-Type' : 'application/json'
+        },
         json: true,
-        form : {
-            root : 'dropbox',
-            path : encodeURIComponent('/'+filePath)
+        body : {           
+            path : '/'+filePath
         },
         method: "POST"
     }, function (error, response, body){
-        console.log("deleteFile response: ", response);
+        /*console.log("deleteFile response: ", response);
+        console.log("deleteFile error: ", error);*/
         if(error)
             deferred.reject(error);
         else {
