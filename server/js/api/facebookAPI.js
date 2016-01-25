@@ -309,7 +309,7 @@ exports.getPageMetrics = function(tokens, metricType, pageId, since, until) {
    // var metric = 'post_stories'; -> admin
     return processGetRequest(tokens !== undefined ? tokens.access_token : undefined, '/'+pageId+'/insights?metric='+metricType+'&since='+since+'&until='+until, function(metrics) {
         //console.log("Facebook searched metrics: ", metrics);
-        return metrics;
+        return metrics.data;
     });
 };
 
