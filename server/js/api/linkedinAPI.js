@@ -11,7 +11,6 @@ var Q = require('q');
 var fs = require('fs');
 var querystring = require('querystring');
 
-//TODO externaliser dans variables denvironnement, git-ignored
 const CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
 const CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
 const REDIRECT_URI = process.env.APP_URL + '/linkedin2callback';

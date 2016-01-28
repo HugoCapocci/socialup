@@ -1,0 +1,78 @@
+<div class="row" ng-init="loadDefaultCalendars()">
+
+    <div class="text-center">
+        <button
+          class="btn btn-primary"
+          mwl-date-modifier
+          date="viewDate"
+          decrement="calendarView" ng-click="loadEvents()">
+          Précédent
+        </button>
+   
+       <!-- <button
+          class="btn btn-default"
+          mwl-date-modifier
+          date="viewDate"
+          set-to-today>
+          Courant
+        </button>-->
+  
+        &nbsp;<label>{{ calendarTitle }}</label>&nbsp;
+  
+        <button
+          class="btn btn-primary"
+          mwl-date-modifier
+          date="viewDate"
+          increment="calendarView" ng-click="loadEvents()">
+          Suivant
+        </button>
+    </div>
+    
+    <br class="visible-xs visible-sm">
+
+    <div class="col-md-6 col-md-offset-6 text-center">
+        
+      <div class="btn-group">
+        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'year'">Année</label>
+        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'month'">Mois</label>
+        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'week'">Semaine</label>
+        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'day'">Jour</label>
+      </div>
+        
+    </div>
+    
+    <br/>
+     <br/>
+</div>
+
+<mwl-calendar
+    events="events"
+    view="calendarView"
+    view-title="calendarTitle"
+    view-date="viewDate"
+    on-event-click="displayEvent(calendarEvent)"
+    on-event-times-changed="eventTimesChanged(calendarEvent); calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
+    edit-event-html="'<i class=\'glyphicon glyphicon-pencil\'></i>'"
+    delete-event-html="'<i class=\'glyphicon glyphicon-remove\'></i>'"
+    on-edit-event-click="eventEdited(calendarEvent)"
+    on-delete-event-click="eventDeleted(calendarEvent)"
+    cell-is-open="isCellOpen"
+    day-view-start="06:00"
+    day-view-end="22:00"
+    day-view-split="30"
+    cell-modifier="modifyCell(calendarCell)">
+</mwl-calendar>
+
+<!-- modal window -->   
+<script type="text/ng-template" id="modalEvent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">{{modal.event.title}}</h3>            
+    </div>
+    <div class="modal-body">         
+        {{modal.event.description}}
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="modal.ok()">OK</button><!--
+        <button class="btn btn-warning" type="button" ng-click="modal.cancel()">Cancel</button>-->
+    </div>
+</script>

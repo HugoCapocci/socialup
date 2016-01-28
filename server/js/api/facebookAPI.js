@@ -111,6 +111,14 @@ exports.getUserGroups = function(tokens) {
 
 };
 
+exports.getUserEvents = function(tokens, since, until) {
+    
+    //TODO add parameter 'type' (attending, created, declined, maybe, not_replied) in order to filter events
+    return processGetRequest(tokens.access_token, '/me/events?limit=100&since='+since+'&until='+until, function(events) {
+        return events.data;
+    });
+};
+
 function sendVideo(token, file, user, params, providerOptions) {
 
     //TODO use providerOptions to choose between profil and group
@@ -176,7 +184,7 @@ function getVideoData(videoId, tokens) {
 
 //https://developers.facebook.com/docs/facebook-login/permissions
 function getOAuthURL() {
-    return 'https://graph.facebook.com/oauth/authorize?client_id='+APP_ID+'&redirect_uri='+REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages+read_insights';//+'&response_type=token'
+    return 'https://graph.facebook.com/oauth/authorize?client_id='+APP_ID+'&redirect_uri='+REDIRECT_URI+'&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages+read_insights+user_events';//+'&response_type=token'
 }
 
 function postMessage(tokens, message, providerOptions) {

@@ -1,5 +1,5 @@
 require.config({
-    paths : { 
+    paths : {
         'domReady' : '../../bower_components/requirejs-domready/domReady',
         'angular' : '../../bower_components/angular/angular.min',
         'angular-resource' : '../../bower_components/angular-resource/angular-resource.min',
@@ -17,7 +17,9 @@ require.config({
         'ng-videosharing-embed' : '../../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min',
         'angular-chart' : '../../bower_components/angular-chart.js/dist/angular-chart.min',
         'chart' :  '../../bower_components/Chart.js/Chart.min',
-        'angular-drag-and-drop-lists' : '../../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min'
+        'angular-drag-and-drop-lists' : '../../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min',
+        'angular-bootstrap-calendar' : '../../bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.min',
+        'interact' : '../../bower_components/interact/dist/interact.min'
     },
     shim : {
         'angular' : {
@@ -56,6 +58,9 @@ require.config({
         },
         'angular-drag-and-drop-lists' : {
              deps : ['angular']
+        },
+        'angular-bootstrap-calendar' : {
+            deps : ['angular', 'moment', /*'interact', */'angular-bootstrap']
         }
     },
     // kick start application

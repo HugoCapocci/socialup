@@ -205,7 +205,14 @@ function getRefreshedToken(provider, userId) {
         if(providersAPI[provider].refreshTokens instanceof Function) {
             if(provider ==='google')
                 myToken = users[userId].providers[provider].originalTokens;
-            return providersAPI[provider].refreshTokens(myToken, userId);
+            return providersAPI[provider].refreshTokens(myToken, userId).then(function(tokens) {
+                users[userId].providers[provider].tokens=tokens;
+                userDAO.updateUserTokens(userId, provider, tokens);
+                return Q.fcall(function () {
+                    return tokens;
+                });
+            }
+            );
         } else
             return Q.fcall(function () {
                 throw new Error('no "refreshTokens" function for provider '+provider);
@@ -528,8 +535,6 @@ app.post('/message/:userId', function(req, res) {
     var eventParentId = req.body.eventParentId;
     // provider options (visibility for FB, ect...)
     var providersOptions = req.body.providersOptions;
-    //TODO use providersOptions for messages
-   // console.log("providersOptions? ",providersOptions);
 
     if(eventParentId) {
         //Save chained event eventParentId, userId, eventType, providers, eventParams
@@ -578,7 +583,6 @@ function postMessageToProvider(userId, provider, providerOptions, message) {
     deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
     
     getRefreshedToken(provider, userId).then(function(tokens) {
-        //TODO add providerOptions
         return providersAPI[provider].postMessage(tokens, message, providerOptions);
     }).then(function(result) {
         result.provider=provider;
@@ -810,6 +814,38 @@ function publishFileToProvider(userId, provider, providerOptions, file, params) 
     });
     return deffered.promise;
 }
+
+app.get('/calendars/:provider/:userId', function(req, res) {
+    
+    var userId = req.params.userId;
+    var provider = req.params.provider;
+    
+     getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].getUserCalendars(tokens);
+    }).then(function(calendars) {
+        res.send(calendars);
+    }).fail(function(err) {
+        res.status(404).send(err);
+    });
+});
+
+app.get('/socialEvents/:provider/:userId', function(req, res) {
+   
+    var userId = req.params.userId;
+    var provider = req.params.provider;
+    var since = req.query.since;
+    var until = req.query.until;
+    var calendarId = req.query.calendarId;
+    
+    getRefreshedToken(provider, userId).then(function(tokens) {
+        return providersAPI[provider].getUserEvents(tokens, since, until, calendarId);
+    }).then(function(events) {
+        res.send(events);
+    }).fail(function(err) {
+        res.status(404).send(err);
+    });
+    
+});
 
 app.get('/facebookGroups/:userId', function(req, res) {
     

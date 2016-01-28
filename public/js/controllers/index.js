@@ -10,6 +10,7 @@ define([
     './scheduledEvents',
     './chainedEvents',
     './tracedEvents',
+    './calendarEvents',
     './videos',
     './searchVideo',
     './pageStats',

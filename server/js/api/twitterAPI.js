@@ -14,8 +14,7 @@ var querystring = require('querystring');
 var oAuthNonce = require('./oauth_nonce.js');
 var crypto = require('crypto');
 
-//TODO externaliser dans variables denvironnement, git-ignored
-const APP_KEY = process.env.TWITTER_APP_KEY; //PxmS6sGcO9ovTH7PqPTA
+const APP_KEY = process.env.TWITTER_APP_KEY;
 const APP_SECRET = process.env.TWITTER_APP_SECRET;
 //const REDIRECT_URL = 'oob';
 const REDIRECT_URL = process.env.APP_URL + '/twitter2callback?state=';

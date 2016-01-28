@@ -26,6 +26,7 @@ var oauth2Client = new OAuth2(GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_
 var youtubeAPI = googleAPI.youtube({version: 'v3', auth: oauth2Client});
 var drive = googleAPI.drive({version: 'v2', auth: oauth2Client});
 var googlePlus = googleAPI.plus({version : 'v1', auth: oauth2Client});
+var calendar = googleAPI.calendar({version : 'v3', auth: oauth2Client});
 
 //generate url for OAuth authentication URI
 function getOAuthURL() {
@@ -38,7 +39,8 @@ function getOAuthURL() {
         'https://www.googleapis.com/auth/youtube.force-ssl',
         'https://www.googleapis.com/auth/drive',
         'https://www.googleapis.com/auth/plus.me',
-        'https://www.googleapis.com/auth/plus.stream.write'
+        'https://www.googleapis.com/auth/plus.stream.write',
+        'https://www.googleapis.com/auth/calendar'
     ];
     var url = oauth2Client.generateAuthUrl({
         access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
@@ -85,11 +87,8 @@ function refreshTokens(tokens, userId) {
     oauth2Client.setCredentials(credentials);
 
     oauth2Client.refreshAccessToken(function(err, tokens) {
-
         if(!err) {
             oauth2Client.setCredentials(tokens);
-            //TODO update in database
-            userDAO.updateUserTokens(userId, 'google', tokens);
             deferred.resolve(tokens);
         } else {
             console.log("unable to set credentials, err: ", err);
@@ -130,8 +129,7 @@ exports.listMedia = function(tokens, userId) {
     oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
 
-    var videoIDs = [];   
-    //youtubeAPI.videos.list({part:'snippet', regionCode:'fr', hl:'fr_FR', chart : 'mostPopular'}
+    var videoIDs = [];
     youtubeAPI.search.list({part:'snippet', forMine : true, type : 'video'}, function(err, response) {
 
         if(err)
@@ -614,7 +612,81 @@ exports.deleteFile = function(tokens, fileId) {
             deferred.resolve(res);
         }
     });
-    return deferred.promise;     
+    return deferred.promise;
+};
+
+exports.getUserCalendars = function(tokens) {
+
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    calendar.calendarList.list({}, function(err, calendars) {
+        if (err) {
+            console.error('err: ', err);
+            deferred.reject(err);
+        } else {
+            deferred.resolve(calendars.items.map(function(item) {
+                return {
+                    accessRole : item.accessRole,
+                    id : item.id,
+                    backgroundColor : item.backgroundColor,
+                    foregroundColor : item.foregroundColor,
+                    name : item.summary,
+                    selected : item.selected,
+                    description : item.description
+                };
+            }));
+        }
+    });
+    return deferred.promise;
+};
+
+exports.getUserEvents = function(tokens, since, until, calendarId) {
+    
+    //console.log("GET GOOGLE CALENDAR EVENTS for calendarId: ",calendarId);
+    
+    oauth2Client.setCredentials(tokens);
+    var deferred = Q.defer();
+    //FIXME hardcoded for test only, do not commit
+    var dateMin = '2016-01-01T00:00:00.000Z';
+    var dateMax = '2016-12-31T23:59:59.000Z';
+    calendar.events.list(
+        {
+            calendarId: encodeURIComponent(calendarId),
+            showHiddenInvitations: true,
+            timeMin: dateMin,
+            timeMax: dateMax,
+            singleEvents: true,
+            orderBy: 'startTime'
+        },
+        function(err, events) {
+
+            if (err) {
+                console.error('calendarId: '+calendarId +', err: ', err);
+                deferred.reject(err);
+            } else {
+                         
+                var results = [];
+                var items = events.items;
+                for (var i = 0; i < items.length; i++) {
+                    //console.log('event: ', items[i]);   
+                    results.push({
+                        id: items[i].id,
+                        name: items[i].summary,
+                        start_time: items[i].start.dateTime,
+                        end_time: items[i].end.dateTime,
+                        description : items[i].description,
+                        rsvp_status : items[i].status,
+                        start : items[i].start.date,
+                        creator : items[i].creator,
+                        htmlLink : items[i].htmlLink,
+                        location : items[i].location
+                    });
+                }
+                deferred.resolve(results);
+            }
+        }
+    );    
+    return deferred.promise;
 };
 
 exports.sendVideo=sendVideo;

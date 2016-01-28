@@ -111,6 +111,18 @@ define(['./module'], function (appModule) {
                 return getData('/facebookPages/'+localData.user.id);
             };
             
+            this.getSocialEvents = function(provider, since, until, calendarId) {
+                var url = '/socialEvents/'+provider+'/'+localData.user.id+'?since='+since+'&until='+until;
+                if(calendarId)
+                    url+='&calendarId='+encodeURIComponent(calendarId);                    
+                
+                return getData(url);
+            };
+            
+            this.getCalendars = function(provider) {
+                return getData('/calendars/'+provider+'/'+localData.user.id);
+            };
+            
             function getData(path) {
                 var deferred = $q.defer();
                 $http.get(path)
@@ -122,7 +134,7 @@ define(['./module'], function (appModule) {
                     deferred.reject(err);
                 });
                 return deferred.promise;
-            }
+            } 
            
         }]
     );

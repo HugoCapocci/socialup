@@ -19,6 +19,7 @@
         <link rel="stylesheet" type="text/css" href="bower_components/angular-tree-control/css/tree-control-attribute.css">
         <link rel="stylesheet" type="text/css" href="bower_components/ng-tags-input/ng-tags-input.min.css">  
         <link rel="stylesheet" type="text/css" href="bower_components/angular-chart.js/dist/angular-chart.min.css">
+        <link rel="stylesheet" type="text/css" href="bower_components/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.min.css">
         <style>
             .stripped div:nth-child(even){
                 background-color: #dcdcdc;
@@ -191,6 +192,18 @@
             }
             
             //
+            .googleEvent {
+                color: #f5c72b !important;
+                background-color: #ff0606 !important;
+            }
+            
+            .facebookEvent a {
+                color: #2132fc !important;
+                background-color: #7cefb5 !important;
+            }
+            /* .event 
+            background-color: #c3c3c3
+            */
            
         </style>
         <link rel="stylesheet" type="text/css" href="bower_components/bootstrap-css-only/css/bootstrap.css" />
@@ -264,7 +277,8 @@
                     <li ng-if="$root.user" class="dropdown" uib-dropdown>
                       <a href uib-dropdown-toggle class="dropdown-toggle">Evènements <span class="caret"></span></a>
                       <ul class="dropdown-menu">
-                        <li><a href="#/scheduledEvents" ng-click="navCollapsed=true">Voir actions programmées <i class="glyphicon glyphicon-calendar"></i></a></li>
+                        <li><a href="#/calendarEvents" ng-click="navCollapsed=true">Agenda <i class="glyphicon glyphicon-calendar"></i></a></li>
+                        <li><a href="#/scheduledEvents" ng-click="navCollapsed=true">Voir actions programmées</a></li>
                         <li><a href="#/tracedEvents" ng-click="navCollapsed=true">Historique des actions</a></li>
                       </ul>
                     </li>

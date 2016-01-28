@@ -37,7 +37,7 @@ define(['./module', 'moment'], function(appModule, moment) {
                // console.log('Modal dismissed at: ' + new Date());
             });
         }
-
+    
         eventService.retrieveAll().then(function(events) {
             //console.log("events retrieved: ", events);
             events.forEach(function(event) {

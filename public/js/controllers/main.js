@@ -124,6 +124,6 @@ define(['./module', 'moment', 'angular-i18n-fr'], function (appModule, moment) {
                 $scope.modal.type='info';
             $scope.modal.progress = progress;
         };
-        
     }]);
+
 });
