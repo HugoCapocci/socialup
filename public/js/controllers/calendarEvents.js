@@ -6,31 +6,6 @@ define(['./module', 'moment'], function(appModule, moment) {
     ['$scope', '$location', '$uibModal', 'eventService', 'alertsService', 
     function($scope,  $location, $uibModal, eventService, alertsService) {
 
-  /*      $scope.events = [
-          {
-            title: 'An event',
-            type: 'warning',
-            startsAt: moment().startOf('week').subtract(2, 'days').add(8, 'hours').toDate(),
-            endsAt: moment().startOf('week').add(1, 'week').add(9, 'hours').toDate(),
-            draggable: true,
-            resizable: true
-          }, {
-            title: '<i class="glyphicon glyphicon-asterisk"></i> <span class="text-primary">Another event</span>, with a <i>html</i> title',
-            type: 'info',
-            startsAt: moment().subtract(1, 'day').toDate(),
-            endsAt: moment().add(5, 'days').toDate(),
-            draggable: true,
-            resizable: true
-          }, {
-            title: 'This is a really long event title that occurs on every year',
-            type: 'important',
-            startsAt: moment().startOf('day').add(7, 'hours').toDate(),
-            endsAt: moment().startOf('day').add(19, 'hours').toDate(),
-            recursOn: 'year',
-            draggable: true,
-            resizable: true
-          }
-        ];*/
         $scope.animationsEnabled = true;
         $scope.isCellOpen = true;
         $scope.calendarView = 'month';
@@ -39,7 +14,7 @@ define(['./module', 'moment'], function(appModule, moment) {
         
         $scope.displayEvent = function(event) {
             
-            console.log("open event ",event);            
+            console.log("open event ",event);
          
             $uibModal.open({
                 animation: $scope.animationsEnabled,
@@ -69,22 +44,56 @@ define(['./module', 'moment'], function(appModule, moment) {
         //load events, for a whle month
         $scope.loadEvents = function() {
             
-            getSocialEvents('facebook');
+            var limits=getLimits();
+            $scope.events = [];
+            
+            getSocialEvents('facebook', limits);
             $scope.calendars.forEach(function(calendar) {
                 //console.log("events for calendar: ", calendar.id);
-                getSocialEvents('google', calendar.id);
+                if(calendar.selected)
+                    getSocialEvents('google', limits, calendar.id);
             });
-                   
         };
-        function getSocialEvents(provider, calendarId) {    
+        
+        function getLimits() {
+            
+            var limits = {
+                since : null,
+                until : null
+            };
+            switch($scope.calendarView) {
+                case 'month':
+                    limits.since = moment($scope.viewDate).set('date', 1).set('hour', 0).set('minute',0).set('second', 0);
+                    limits.until = moment($scope.viewDate).add(1, 'months').set('date', 1).set('hour', 0).set('minute',0).set('second', 0);
+                    break;
+                case 'year':
+                    console.log('view YEAR: viewDate', $scope.viewDate);
+                    limits.since = moment($scope.viewDate).set('month', 0).set('date', 1).set('hour', 0).set('minute',0).set('second', 0);
+                    limits.until = moment($scope.viewDate).set('month', 11).set('date', 31).set('hour', 23).set('minute',59).set('second', 59);
+                    break;
+                case 'week':
+                    console.log('view WEEK: viewDate', $scope.viewDate);
+                    limits.since = moment($scope.viewDate).weekday(0).set('hour', 0).set('minute',0).set('second', 0);
+                    limits.until = moment($scope.viewDate).weekday(6).set('hour', 23).set('minute',59).set('second', 59);
+                    break;
+                case 'day':
+                    console.log('view DAY: viewDate', $scope.viewDate);
+                    limits.since = moment($scope.viewDate).set('hour', 0).set('minute',0).set('second', 0);
+                    limits.until = moment($scope.viewDate).set('hour', 23).set('minute',59).set('second', 59);
+                    break;
+            }            
+            console.log('limits: ', limits);
+            return limits;
+        }
+                
+        function getSocialEvents(provider, limits, calendarId) {    
             //console.log("view date? ", $scope.viewDate);
             
-            var since =  moment($scope.viewDate).set('date', 1).set('hour', 0).set('minute',0).set('second', 0);
+          /*  var since =  moment($scope.viewDate).set('date', 1).set('hour', 0).set('minute',0).set('second', 0);
             var timeSince = since.unix();
-            var until = since.add(1, 'months').add(1, 'days');            
-            //console.log("load events to "+until.toDate());
-            
-            eventService.getSocialEvents(provider, timeSince, until.unix(), calendarId).then(function(events) {
+            var until = since.add(1, 'months').add(1, 'days'); */           
+                       
+            eventService.getSocialEvents(provider, limits.since.valueOf(), limits.until.valueOf(), calendarId).then(function(events) {
                 console.log(provider+" events for current user: ", events);
                 events.forEach(function(event) {
                     var eventSource = {
@@ -95,7 +104,8 @@ define(['./module', 'moment'], function(appModule, moment) {
                         resizable: false,
                         editable : false,
                         deletable : false,
-                        id : event.id                        
+                        id : event.id,
+                        provider : provider
                     };
                     if(event.start_time)
                         eventSource.startsAt = moment(event.start_time).toDate();

@@ -642,19 +642,18 @@ exports.getUserCalendars = function(tokens) {
 
 exports.getUserEvents = function(tokens, since, until, calendarId) {
     
-    //console.log("GET GOOGLE CALENDAR EVENTS for calendarId: ",calendarId);
-    
-    oauth2Client.setCredentials(tokens);
     var deferred = Q.defer();
-    //FIXME hardcoded for test only, do not commit
-    var dateMin = '2016-01-01T00:00:00.000Z';
-    var dateMax = '2016-12-31T23:59:59.000Z';
+    //console.log("GET GOOGLE CALENDAR EVENTS for calendarId: ",calendarId);
+    since = moment(parseInt(since)).toISOString();
+    until = moment(parseInt(until)).toISOString();    
+    oauth2Client.setCredentials(tokens);
+    
     calendar.events.list(
         {
             calendarId: encodeURIComponent(calendarId),
             showHiddenInvitations: true,
-            timeMin: dateMin,
-            timeMax: dateMax,
+            timeMin: since,
+            timeMax: until,
             singleEvents: true,
             orderBy: 'startTime'
         },

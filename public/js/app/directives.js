@@ -10,7 +10,6 @@ define(['angular'], function(angular) {
        
         var document = $document[0];
         var player = {};
-       // var width = "830", height = "530";
         var isVimeoListener=false;
         
         return {
@@ -366,7 +365,7 @@ define(['angular'], function(angular) {
                         deferred.reject(e);                       
                     };
                     return deferred.promise;                
-                }                         
+                }
             }
         };
     }]);

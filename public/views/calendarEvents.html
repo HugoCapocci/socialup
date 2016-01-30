@@ -1,6 +1,6 @@
 <div class="row" ng-init="loadDefaultCalendars()">
 
-    <div class="text-center">
+    <div class="col-lg-6 col-lg-offset-1 col-md-6 text-center">
         <button
           class="btn btn-primary"
           mwl-date-modifier
@@ -8,16 +8,8 @@
           decrement="calendarView" ng-click="loadEvents()">
           Précédent
         </button>
-   
-       <!-- <button
-          class="btn btn-default"
-          mwl-date-modifier
-          date="viewDate"
-          set-to-today>
-          Courant
-        </button>-->
-  
-        &nbsp;<label>{{ calendarTitle }}</label>&nbsp;
+     
+        &nbsp;&nbsp;<label>{{ calendarTitle }}</label>&nbsp;&nbsp;
   
         <button
           class="btn btn-primary"
@@ -30,20 +22,26 @@
     
     <br class="visible-xs visible-sm">
 
-    <div class="col-md-6 col-md-offset-6 text-center">
-        
-      <div class="btn-group">
-        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'year'">Année</label>
-        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'month'">Mois</label>
-        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'week'">Semaine</label>
-        <label class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'day'">Jour</label>
-      </div>
-        
+    <div class="col-lg-5 cold-md-6 text-right">        
+        <div class="btn-group" role="group">             
+            <button class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'year'" ng-click="loadEvents()">Année</button>           
+            <button class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'month'" ng-click="loadEvents()">Mois</button>          
+            <button class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'week'" ng-click="loadEvents()">Semaine</button>
+            <button class="btn btn-primary" ng-model="calendarView" uib-btn-radio="'day'">Jour</button>
+            <button class="btn btn-default" ng-click="isCollapsed = !isCollapsed">&nbsp;<i class="glyphicon glyphicon-cog"></i>&nbsp;</button>
+        </div>        
     </div>
     
-    <br/>
-     <br/>
+    <div ng-init="isCollapsed=true" uib-collapse="isCollapsed" class="col-lg-12">
+        <div class="well">
+            <div ng-repeat="calendar in calendars"> 
+                <label><input type="checkbox" ng-model="calendars[$index].selected" ng-change="loadEvents();"> {{calendar.name}}</label>
+            </div>
+        </div> 
+    </div>    
 </div>
+
+<br>
 
 <mwl-calendar
     events="events"

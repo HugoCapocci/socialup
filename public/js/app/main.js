@@ -19,7 +19,8 @@ require.config({
         'chart' :  '../../bower_components/Chart.js/Chart.min',
         'angular-drag-and-drop-lists' : '../../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min',
         'angular-bootstrap-calendar' : '../../bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.min',
-        'interact' : '../../bower_components/interact/dist/interact.min'
+        'interact' : '../../bower_components/interact/dist/interact.min',
+        'player' : '../../bower_components/angular-social-video-player/dist/player.min'
     },
     shim : {
         'angular' : {
@@ -61,6 +62,9 @@ require.config({
         },
         'angular-bootstrap-calendar' : {
             deps : ['angular', 'moment', /*'interact', */'angular-bootstrap']
+        },
+        'player' : {
+            deps : ['angular']
         }
     },
     // kick start application

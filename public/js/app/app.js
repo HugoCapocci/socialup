@@ -17,7 +17,8 @@ define([
     'angular-bootstrap-calendar',
     '../services/index',
     '../controllers/index',
-    './directives',
+    /*'./directives',*/
+    'player',
     './filters'
     ], function (angular) {
     
@@ -39,7 +40,8 @@ define([
             'mwl.calendar',
             'SocialUp.services',
             'SocialUp.controllers',
-            'SocialUp.directives',
+            /*'SocialUp.directives',*/
+            'socialVideoPlayer',
             'SocialUp.filters'
         ]);
 });

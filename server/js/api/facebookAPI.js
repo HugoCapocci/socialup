@@ -13,8 +13,9 @@ var querystring = require('querystring');
 var https = require('https');
 var Q = require('q');
 var request = require('request');
-var fs = require("fs");
+var fs = require('fs');
 var userDAO = require('../userDAO.js');
+var moment = require('moment');
 
 var appToken;
 
@@ -108,12 +109,13 @@ exports.getUserGroups = function(tokens) {
     return processGetRequest(tokens.access_token, '/me/groups', function(groupsData) {
         return groupsData.data;
     });
-
 };
 
 exports.getUserEvents = function(tokens, since, until) {
     
     //TODO add parameter 'type' (attending, created, declined, maybe, not_replied) in order to filter events
+    since = moment(parseInt(since)).unix();
+    until = moment(parseInt(until)).unix();
     return processGetRequest(tokens.access_token, '/me/events?limit=100&since='+since+'&until='+until, function(events) {
         return events.data;
     });

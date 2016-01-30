@@ -37,6 +37,8 @@
           ng-bind-html="vm.$sce.trustAsHtml(vm.deleteEventHtml)"
           ng-click="vm.onDeleteEventClick({calendarEvent: event})">
         </a>
+         <!-- TODO adapt size for screen / media queries -->
+         &nbsp;<img ng-src="{{'images/icons/'+event.provider+'.png'}}" style="background-color:#FFF;border-radius:12px;border: 1px solid #ccc;max-height:20px; max-width:20px" align="middle"/>
       </li>
 
     </ul>

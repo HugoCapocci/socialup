@@ -837,6 +837,8 @@ app.get('/socialEvents/:provider/:userId', function(req, res) {
     var until = req.query.until;
     var calendarId = req.query.calendarId;
     
+    //console.log("search events for "+provider + " from "+since+" to "+until);
+    
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].getUserEvents(tokens, since, until, calendarId);
     }).then(function(events) {
