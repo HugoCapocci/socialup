@@ -6,14 +6,17 @@
   "scripts": {
     "test": "node node_modules/gulp/bin/gulp",
     "oldstart": "node index.js",
-    "start": "node server/js/oauthCallback.js",
+    "start": "node server/js/oauthCallback.min.js",
     "postinstall": "node node_modules/bower/bin/bower install",
     "gulp": "node node_modules/gulp/bin/gulp",
-    "build-prod": "node node_modules/gulp/bin/gulp prod"
+    "build-prod": "node node_modules/gulp/bin/gulp prod",
+    "compileCoffee": "node node_modules/gulp/bin/gulp compileCoffee",
+    "testCoffee": "node node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register server/test/**/*.coffee -R spec -u bdd -w"
   },
   "dependencies": {
     "body-parser": "^1.14.1",
     "bower": "^1.7.2",
+    "coffee-script": "^1.10.0",
     "cookie-parser": "^1.4.0",
     "express": "~4.13.3",
     "googleapis": "^2.0.2",
@@ -42,11 +45,14 @@
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-bower": "0.0.11",
+    "gulp-coffee": "^2.3.1",
+    "gulp-coffeelint": "^0.6.0",
     "gulp-html-replace": "^1.5.5",
     "gulp-istanbul": "^0.10.2",
     "gulp-jasmine": "^2.2.1",
     "gulp-jshint": "^1.12.0",
     "gulp-mocha": "^2.1.3",
+    "gulp-rename": "^1.2.2",
     "gulp-strip-debug": "^1.1.0",
     "gulp-uglify": "^1.4.2",
     "jasmine": "^2.3.2",
