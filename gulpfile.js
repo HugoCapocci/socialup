@@ -25,41 +25,41 @@ gulp.task('pre-test', function () {
 });
 
 gulp.task('unitTests', function () {
-    return gulp.src('server/test/**/*.coffee', {read: false})
-        // gulp-mocha needs filepaths so you can't have any plugins before it {reporter: 'nyan'}
-        .pipe(mocha({
-            compilers: {
-                coffee:'coffee-script/register'
-            },
-            reporter: 'spec',
-            ui : 'bdd'
-        }))
-        .pipe(istanbul.writeReports());
+  return gulp.src('server/test/**/*.coffee', {read: false})
+    // gulp-mocha needs filepaths so you can't have any plugins before it {reporter: 'nyan'}
+    .pipe(mocha({
+      compilers: {
+        coffee:'coffee-script/register'
+      },
+      reporter: 'spec',
+      ui : 'bdd'
+    }))
+    .pipe(istanbul.writeReports());
 });
 
 gulp.task('frontEndTests'/*, ['unitTests']*/, function () {
-    return gulp.src(['./public/test/*.js'])//,
-        // gulp-mocha needs filepaths so you can't have any plugins before it {reporter: 'nyan'}
-        .pipe(mocha());
+  return gulp.src(['./public/test/*.js'])//,
+    // gulp-mocha needs filepaths so you can't have any plugins before it {reporter: 'nyan'}
+    .pipe(mocha());
 });
 
 gulp.task("compileCoffee", function() {
-    return gulp.src(["./server/js/**/*.coffee"]) // Read the files
-        .pipe(
-            coffee({bare:true}) // Compile coffeescript
-                .on("error",  function(err) {
-                    console.error(err);
-                })
-        )
-        .pipe(gulp.dest("./temp"));// Write complied to disk
+  return gulp.src(["./server/js/**/*.coffee"]) // Read the files
+    .pipe(
+      coffee({bare:true}) // Compile coffeescript
+        .on("error",  function(err) {
+            console.error(err);
+        })
+    )
+    .pipe(gulp.dest("./temp/js"));// Write complied to disk
 });
 
 gulp.task("minifyServer", ['compileCoffee'], function() {
-    return gulp.src(["./temp/**/*.js"])// Read the files
-        //.pipe(stripDebug()) // remove logs
-        .pipe(uglify())                     // Minify
-        .pipe(rename({extname: ".min.js"})) // Rename to ng-quick-date.min.js
-        .pipe(gulp.dest("./dist")); // Write minified to disk
+  return gulp.src(["./temp/**/*.js"])// Read the files
+      //.pipe(stripDebug()) // remove logs
+      .pipe(uglify())                     // Minify
+      //.pipe(rename({extname: ".min.js"})) // Rename to ng-quick-date.min.js
+      .pipe(gulp.dest("./dist")); // Write minified to disk
 });
 
 //for js in HTML files, not use with angular...
@@ -91,14 +91,14 @@ gulp.task('jshintAngular', ['unitTests'], function() {
 
 gulp.task('jshintNode', ['jshintAngular'], function() {
 
-    var opt = {
-        max_line_length : {
-            value: 120
-        }
-    };
-    return gulp.src(['server/js/**/*.coffee'])
-        .pipe(coffeelint(opt))
-        .pipe(coffeelint.reporter());
+  var opt = {
+    max_line_length : {
+      value: 120
+    }
+  };
+  return gulp.src(['server/js/**/*.coffee'])
+    .pipe(coffeelint(opt))
+    .pipe(coffeelint.reporter());
 });
 
 gulp.task('minify', function() {
@@ -124,4 +124,4 @@ gulp.task('prod', ['minify'],function() {
 
 });
 
-gulp.task('default', ['jshintNode']);
+gulp.task('default', ['jshintNode', 'minifyServer']);

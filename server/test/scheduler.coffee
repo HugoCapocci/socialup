@@ -24,17 +24,18 @@ describe 'scheduler', ->
         done()
 
   it 'schedule event with 1 parameter only', (done) ->
+
     #old date so job will be executed directly
     date = new Date(2012, 10, 29, 10, 30, 0)
-    event = (eventId, userId, param) ->
-      console.log("event avec param: ", param)
+    scheduler.addEventListerner "event1", (eventId, userId, param) ->
+      console.log "event avec param: ", param
       should(param).be.exactly("test")
       done()
-    scheduler.addEventListerner("event1", event)
-    eventId = scheduler.scheduleEvent(USER, date, "event1", "test")
-    console.log("eventId: ",eventId)
+    eventId = scheduler.scheduleEvent USER, date, "event1", "test"
+    console.log "eventId: ",eventId
 
   it 'schedule event with 3 parameters', (done) ->
+    this.timeout 3000
     #old date so job will be executed directly
     date = new Date(2012, 10, 29, 10, 30, 0)
     event = (eventId, userId, params) ->
@@ -47,7 +48,7 @@ describe 'scheduler', ->
     console.log("eventId: ",eventId)
 
   it 'schedule late event', (done) ->
-    this.timeout(3000)
+    this.timeout 3000
     #newer date
     date = new Date(Date.now() + 1500)
     eventId
@@ -72,34 +73,35 @@ describe 'scheduler', ->
     scheduler.cancelEvent(USER2+Date.now()).should.equal(false)
 
   it 'schedule complex function', (done) ->
-
+    this.timeout 3000
     facebookAPI = require('../js/api/facebookAPI.coffee')
     event = ->
       oauthURL = facebookAPI.getOAuthURL()
-      (oauthURL.length).should.be.above(1)
+      (oauthURL.length).should.be.above 1
       done()
-    scheduler.addEventListerner("event4", event)
+    scheduler.addEventListerner "event4", event
     date = new Date(Date.now() - 1500)
-    eventId = scheduler.scheduleEvent(USER, date, "event4", [""])
+    eventId = scheduler.scheduleEvent USER, date, "event4", [""]
 
   it 'save scheduled event in database (then execute it)', (done) ->
-    this.timeout(5000)
-    date = new Date(Date.now() + 3000)
+    this.timeout 5000
+    date = new Date Date.now() + 3000
     eventId=null
     event = (eventId, userId, params) ->
-      finish(params)
+      finish params
 
     finish = (params) ->
-      console.log("late event, eventId: ", eventId)
-      should(params[0]).be.exactly("late test")
+      console.log "late event, eventId: ", eventId
+      should(params[0]).be.exactly "late test"
       done()
 
-    scheduler.addEventListerner("event5", event)
-    scheduler.saveScheduledEvent(USER, date, "event5", ["late test"]).then (result) ->
+    scheduler.addEventListerner "event5", event
+    scheduler.saveScheduledEvent USER, date, "event5", ["late test"]
+    .then (result) ->
       eventId=result
     , (err) ->
-      console.log("err dans save Scheduled Event: ", err)
-      done(err)
+      console.log "err dans save Scheduled Event: ", err
+      done err
 
   it 'save complex scheduled event in database (then execute it)', (done) ->
 

@@ -6,7 +6,7 @@
 fs = require('fs')
 APIs = {}
 
-for fileName in fs.readdirSync('server/js/api')
+for fileName in fs.readdirSync(__dirname+'/api')
   index = fileName.lastIndexOf('API')
   #only add file with sufix 'API'
   if index isnt -1

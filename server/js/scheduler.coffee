@@ -1,7 +1,6 @@
 schedule = require('node-schedule')
-Q = require('q')
-eventsDAO = require('./eventsDAO.coffee')
-
+EventsDAO = require('./eventsDAO')
+eventsDAO = new EventsDAO()
 #stocke les évènement programmés, 2 max par user
 MAX_EVENTS = 2
 scheduleEvents = {}

@@ -8,22 +8,22 @@
 # if needed with refreshed tokens (automatically refresh by googleAPI)
 ###
 
-googleAPI = require('googleapis')
-Q = require('q')
-fs = require("fs")
-userDAO = require('../userDAO.coffee')
-moment = require('moment')
+googleAPI = require 'googleapis'
+Q = require 'q'
+fs = require 'fs'
+userDAO = require '../userDAO'
+moment = require 'moment'
 GOOGLE_API_ID = process.env.GOOGLE_API_ID
 GOOGLE_API_SECRET = process.env.GOOGLE_API_SECRET
 GOOGLE_REDIRECT_URL = process.env.APP_URL + '/google2callback'
 API_KEY = process.env.GOOGLE_API_KEY
 FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
 OAuth2 = googleAPI.auth.OAuth2
-oauth2Client = new OAuth2(GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_URL)
-youtubeAPI = googleAPI.youtube({version: 'v3', auth: oauth2Client})
-drive = googleAPI.drive({version: 'v2', auth: oauth2Client})
-googlePlus = googleAPI.plus({version : 'v1', auth: oauth2Client})
-calendar = googleAPI.calendar({version : 'v3', auth: oauth2Client})
+oauth2Client = new OAuth2 GOOGLE_API_ID, GOOGLE_API_SECRET, GOOGLE_REDIRECT_URL
+youtubeAPI = googleAPI.youtube version: 'v3', auth: oauth2Client
+drive = googleAPI.drive version: 'v2', auth: oauth2Client
+googlePlus = googleAPI.plus version : 'v1', auth: oauth2Client
+calendar = googleAPI.calendar version : 'v3', auth: oauth2Client
 
 #generate url for OAuth authentication URI
 exports.getOAuthURL = ->
@@ -50,41 +50,39 @@ exports.pushCode = (code) ->
   oauth2Client.getToken code, (err, tokens) ->
     # Now tokens contains an access_token and an optional refresh_token. Save them.
     if not err
-      oauth2Client.setCredentials(tokens)
-      deferred.resolve(tokens)
+      oauth2Client.setCredentials tokens
+      deferred.resolve tokens
     else
-      console.log("unable to set credentials, err: ", err)
-      deferred.reject(err)
+      console.log 'unable to set credentials, err: ', err
+      deferred.reject err
 
   deferred.promise
 
 exports.refreshTokens = (tokens, userId) ->
 
   deferred = Q.defer()
-  credentials =
-    access_token: tokens.access_token
+  credentials = access_token: tokens.access_token
 
-  if tokens.refresh_token
-    credentials.refresh_token=tokens.refresh_token
-  oauth2Client.setCredentials(credentials)
+  if tokens.refresh_token? then credentials.refresh_token=tokens.refresh_token
+  oauth2Client.setCredentials credentials
 
   oauth2Client.refreshAccessToken (err, tokens) ->
     if not err
-      oauth2Client.setCredentials(tokens)
-      deferred.resolve(tokens)
+      oauth2Client.setCredentials tokens
+      deferred.resolve okens
     else
-    console.log("unable to set credentials, err: ", err)
-    deferred.reject(err)
+    console.log 'unable to refresh credentials, err: ', err
+    deferred.reject err
 
   deferred.promise
 
 exports.listCategories = (tokens) ->
 
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  youtubeAPI.videoCategories.list {part:'snippet', regionCode:'fr', hl:'fr_FR'}, (err, response) ->
-    if err
-      deferred.reject(err)
+  youtubeAPI.videoCategories.list part:'snippet', regionCode:'fr', hl:'fr_FR', (err, response) ->
+    if err?
+      deferred.reject err
     else
       categories = []
       for item in response.items
@@ -92,20 +90,21 @@ exports.listCategories = (tokens) ->
           categories.push
             id : item.id
             name : item.snippet.title
-      deferred.resolve(categories)
+      deferred.resolve categories
 
   deferred.promise
 
 #see https://developers.google.com/youtube/v3/docs/search/list#forMine
 exports.listMedia = (tokens, userId) ->
 
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
   videoIDs = []
-  youtubeAPI.search.list {part:'snippet', forMine : true, type : 'video'}, (err, response) ->
+  youtubeAPI.search.list part:'snippet', forMine : true, type : 'video',
+  (err, response) ->
 
-    if err
-      deferred.reject(err)
+    if err?
+      deferred.reject err
     else
       videos = []
       counts=
@@ -115,10 +114,10 @@ exports.listMedia = (tokens, userId) ->
         favorite:0
         comment:0
       getStat = (name) ->
-        return { name : name, value : counts[name]}
+        return name : name, value : counts[name]
 
       for item in response.items
-        videoIDs.push(item.id.videoId)
+        videoIDs.push item.id.videoId
         videos.push
           id : item.id.videoId
           creationDate : item.snippet.publishedAt
@@ -126,7 +125,8 @@ exports.listMedia = (tokens, userId) ->
           description : item.snippet.description
           thumbnailURL : item.snippet.thumbnails['default'].url
 
-      youtubeAPI.videos.list {part:'statistics', id : videoIDs.toString()}, (e, res) ->
+      youtubeAPI.videos.list part:'statistics', id : videoIDs.toString(),
+      (e, res) ->
 
         i=0
         for item in res.items
@@ -160,13 +160,13 @@ exports.searchPage = (tokens, channelName) ->
     safeSearch : 'none'
 
   youtubeAPI.search.list query, (err, response) ->
-
-    if err
-      deferred.reject(err)
+  
+    if err?
+      deferred.reject err
     else
       #TODO confirmed channels have a matching google+ account?
       channels = {}
-      for item in reponse.items
+      for item in response.items
         channels[item.id.channelId] =
           id : item.id.channelId
           creationDate : item.snippet.publishedAt
@@ -175,15 +175,16 @@ exports.searchPage = (tokens, channelName) ->
           description : item.snippet.description
           thumbnailURL : item.snippet.thumbnails['default'].url
 
-      youtubeAPI.channels.list {auth: API_KEY, part:'statistics', id : Object.keys(channels).toString()}, (err, res) ->
+      youtubeAPI.channels.list auth: API_KEY, part:'statistics', id : Object.keys(channels).toString(),
+      (err, res) ->
 
         if res
           for item in res.items
             channels[item.id].counts =
-              view : parseInt(item.statistics.viewCount)
-              subscriber : parseInt(item.statistics.subscriberCount)
-              video : parseInt(item.statistics.videoCount)
-              comment : parseInt(item.statistics.commentCount)
+              view : parseInt item.statistics.viewCount
+              subscriber : parseInt item.statistics.subscriberCount
+              video : parseInt item.statistics.videoCount
+              comment : parseInt item.statistics.commentCount
 
         deferred.resolve Object.keys(channels).map (id) -> channels[id]
 
@@ -202,18 +203,19 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
     maxResults : maxResults
     safeSearch : 'none'
 
-  if order
+  if order?
     query.order=order
-  if pageToken
+  if pageToken?
     query.pageToken=pageToken
 
   totalResults=null
   nextPageToken=null
   prevPageToken=null
-  youtubeAPI.search.list query, (err, response) ->
+  youtubeAPI.search.list query,
+  (err, response) ->
 
-    if err
-      deferred.reject(err)
+    if err?
+      deferred.reject err
     else
       totalResults = response.pageInfo.totalResults
       nextPageToken = response.nextPageToken
@@ -234,29 +236,30 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
           channelIDs.push(item.snippet.channelId)
 
     #TODO use tokens if user is connected
-    youtubeAPI.videos.list {auth: API_KEY, part:'statistics,contentDetails', id : Object.keys(videos).toString()}
+    youtubeAPI.videos.list auth: API_KEY, part:'statistics,contentDetails', id : Object.keys(videos).toString()
     ,(err, res) ->
 
       if err
-        console.error(err)
-        deferred.reject(err)
+        console.error err
+        deferred.reject err
       else
         if res
           for item in res.items
             #youtube duration format -> https://en.wikipedia.org/wiki/ISO_8601#Durations
             videos[item.id].duration = moment.duration(item.contentDetails.duration).asSeconds()
             videos[item.id].counts =
-              view : parseInt(item.statistics.viewCount)
-              like : parseInt(item.statistics.likeCount)
-              dislike : parseInt(item.statistics.dislikeCount)
-              favorite : parseInt(item.statistics.favoriteCount)
-              comment : parseInt(item.statistics.commentCount)
+              view : parseInt item.statistics.viewCount
+              like : parseInt item.statistics.likeCount
+              dislike : parseInt item.statistics.dislikeCount
+              favorite : parseInt item.statistics.favoriteCount
+              comment : parseInt item.statistics.commentCount
 
-        youtubeAPI.channels.list {auth: API_KEY, part:'snippet', id : channelIDs.toString()} , (err, channelsResult) ->
+        youtubeAPI.channels.list auth: API_KEY, part:'snippet', id : channelIDs.toString(),
+        (err, channelsResult) ->
 
-          if err
-            console.error(err)
-            deferred.reject(err)
+          if err?
+            console.error err
+            deferred.reject err
           else
             channels = {}
             for channel in channelsResult.items
@@ -277,7 +280,7 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
 exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
 
   deferred = Q.defer()
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
 
   metaData =
     snippet:
@@ -288,11 +291,11 @@ exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
     status:
       privacyStatus: providerOptions.privacyStatus
 
-  buf = fs.readFileSync(file.path)
+  buf = fs.readFileSync file.path
   if buf is undefined
-    deferred.reject(new Error('cannot load file from path: '+file.path))
+    deferred.reject new Error('cannot load file from path: '+file.path)
   params =
-    part : Object.keys(metaData).join(',')
+    part : Object.keys(metaData).join ','
     media :
       mimeType : file.mimetype
       body : buf
@@ -302,14 +305,14 @@ exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
   videoUploadRequest.on 'complete', (response) ->
     try
       body = JSON.parse(response.body)
-      if body.error
+      if body.error?
         deferred.reject(body.error)
       else
         deferred.resolve
           url : 'https://www.youtube.com/watch?v='+body.id
           thumbnail : body.snippet.thumbnails.high.url
     catch
-      deferred.reject(error)
+      deferred.reject error
 
   videoUploadRequest.on 'error', (err) ->
     deferred.reject new Error(err)
@@ -320,7 +323,7 @@ exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
 exports.uploadDrive = (tokens, file, parent) ->
 
   deferred = Q.defer()
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   metaData =
     uploadType : 'media'
     visibility: 'PRIVATE'
@@ -331,10 +334,10 @@ exports.uploadDrive = (tokens, file, parent) ->
 
   buf = fs.readFileSync(file.path)
   if buf is undefined
-    deferred.reject new Error('cannot load file from path: '+file.path)
+    deferred.reject new Error 'cannot load file from path: '+file.path
 
   params =
-    part : Object.keys(metaData).join(',')
+    part : Object.keys(metaData).join ','
     media :
       mimeType : file.mimetype
       body : buf
@@ -345,7 +348,7 @@ exports.uploadDrive = (tokens, file, parent) ->
   videoUploadRequest.on 'complete', (response) ->
     result
     try
-      result = JSON.parse(response.body)
+      result = JSON.parse response.body
       deferred.resolve
         url : 'https://drive.google.com/file/d/'+result.id+'/view'
         downloadUrl : result.downloadUrl
@@ -353,7 +356,7 @@ exports.uploadDrive = (tokens, file, parent) ->
       deferred.reject(error)
 
   videoUploadRequest.on 'error', (err) ->
-    console.log("video upload request failed: ", err)
+    console.log "video upload request failed: ", err
     deferred.reject new Error(err)
 
   deferred.promise
@@ -368,15 +371,16 @@ exports.listFiles = (tokens, folderId, typeFilter) ->
 
   filter+=' and "'+folderId+'" in parents'
   #image or video
-  if typeFilter isnt undefined
+  if typeFilter?
     if typeFilter is 'folder'
       filter+=' and mimeType="application/vnd.google-apps.folder" '
     else
       filter+=' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "'+typeFilter+'/") '
 
   oauth2Client.setCredentials(tokens)
-  drive.files.list { folderId : folderId, q: filter}, (err, response) ->
-    if err
+  drive.files.list folderId : folderId, q: filter,
+  (err, response) ->
+    if err?
       console.log('The API returned an error: ' + err)
       deferred.reject new Error(err)
       return
@@ -391,9 +395,9 @@ exports.listFiles = (tokens, folderId, typeFilter) ->
           id: file.id
           mimeType : file.mimeType
           isFolder : file.mimeType is FOLDER_MIME_TYPE
-        if file.downloadUrl
-          fileInfo.downloadUrl = file.downloadUrl.replace('&gd=true','')
-        return fileInfo
+        if file.downloadUrl?
+          fileInfo.downloadUrl = file.downloadUrl.replace '&gd=true',''
+        fileInfo
 
   deferred.promise
 
@@ -401,13 +405,13 @@ exports.getUserInfo = (tokens) ->
 
   oauth2Client.setCredentials(tokens)
   deferred = Q.defer()
-  googlePlus.people.get {userId:'me'}, (err, response) ->
+  googlePlus.people.get userId:'me', (err, response) ->
 
-    if err
-      console.log('getUserInfo error: ', err)
+    if err?
+      console.log 'getUserInfo error: ', err
       deferred.reject new Error(err)
     else
-      deferred.resolve({userName : response.displayName})
+      deferred.resolve userName : response.displayName
 
   deferred.promise
 
@@ -415,17 +419,18 @@ exports.downloadFile = (tokens,fileId) ->
 
   oauth2Client.setCredentials(tokens)
   #bytes are to be handled with a pipe()
-  drive.files.get {fileId:fileId+'?alt=media'}, (err) ->
-    if err
-      console.log("cannot get data for fileId: "+fileId+" error: ", err)
+  drive.files.get fileId:fileId+'?alt=media',
+  (err) ->
+    if err?
+      console.log "cannot get data for fileId: "+fileId+" error: ", err
 
 exports.checkFileData = (tokens, fileId) ->
 
   deferred = Q.defer()
-  drive.files.get {fileId:fileId}, (err, file) ->
+  drive.files.get fileId:fileId, (err, file) ->
     if err
-      console.log("cannot get data for fileId: "+fileId+" error: ", err)
-      deferred.reject(err)
+      console.log "cannot get data for fileId: "+fileId+" error: ", err
+      deferred.reject err
     else
       fileInfo =
         name:file.title
@@ -434,8 +439,8 @@ exports.checkFileData = (tokens, fileId) ->
         isFolder : file.mimeType is FOLDER_MIME_TYPE
 
       if file.downloadUrl
-        fileInfo.downloadUrl = file.downloadUrl.replace('&gd=true','')
-      deferred.resolve(fileInfo)
+        fileInfo.downloadUrl = file.downloadUrl.replace '&gd=true',''
+      deferred.resolve fileInfo
 
   deferred.promise
 
@@ -445,18 +450,18 @@ exports.getSpaceUsage = (tokens) ->
   deferred = Q.defer()
   drive.about.get (err, infos) ->
     if err
-      console.log("cannot get googleDrive SpaceUsage, error: ", err)
-      deferred.reject(err)
+      console.log "cannot get googleDrive SpaceUsage, error: ", err
+      deferred.reject err
     else
       deferred.resolve
-        used : parseInt(infos.quotaBytesUsedAggregate)
-        total : parseInt(infos.quotaBytesTotal)
+        used : parseInt infos.quotaBytesUsedAggregate
+        total : parseInt infos.quotaBytesTotal
 
   deferred.promise
 
 exports.createShareLink = (tokens, fileId) ->
 
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
   permission =
     type : 'anyone'
@@ -466,7 +471,7 @@ exports.createShareLink = (tokens, fileId) ->
     withLink : true
 
   drive.permissions.insert {fileId:fileId, resource : permission}, (err, results) ->
-    if err
+    if err?
       console.log("cannot change file permission ", err)
       deferred.reject(err)
     else
@@ -496,14 +501,13 @@ exports.getUserCalendars = (tokens) ->
       deferred.reject(err)
     else
     deferred.resolve calendars.items.map (item) ->
-      result
-        accessRole: item.accessRole
-        id: item.id
-        backgroundColor: item.backgroundColor
-        foregroundColor: item.foregroundColor
-        name: item.summary
-        selected: item.selected
-        description: item.description
+      accessRole: item.accessRole
+      id: item.id
+      backgroundColor: item.backgroundColor
+      foregroundColor: item.foregroundColor
+      name: item.summary
+      selected: item.selected
+      description: item.description
 
   deferred.promise
 

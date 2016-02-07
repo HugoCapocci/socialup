@@ -6,28 +6,30 @@
   "scripts": {
     "test": "node node_modules/gulp/bin/gulp",
     "oldstart": "node index.js",
-    "start": "node server/js/oauthCallback.min.js",
+    "start": "node dist/js/oauthCallback.js",
+    "coffee:start": "coffee server/js/oauthCallback.coffee",
     "postinstall": "node node_modules/bower/bin/bower install",
     "gulp": "node node_modules/gulp/bin/gulp",
     "build-prod": "node node_modules/gulp/bin/gulp prod",
-    "compileCoffee": "node node_modules/gulp/bin/gulp compileCoffee",
-    "testCoffee": "node node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register server/test/**/*.coffee -R spec -u bdd -w"
+    "minifyServer": "node node_modules/gulp/bin/gulp minifyServer",
+    "coffee:test": "node node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register server/test/**/*.coffee -R spec -u bdd -w"
   },
   "dependencies": {
+    "bluebird": "^3.2.2",
     "body-parser": "^1.14.1",
-    "bower": "^1.7.2",
+    "bower": "^1.7.7",
     "coffee-script": "^1.10.0",
     "cookie-parser": "^1.4.0",
-    "express": "~4.13.3",
-    "googleapis": "^2.0.2",
-    "moment": "^2.10.6",
+    "express": "~4.13.4",
+    "googleapis": "^2.1.7",
+    "moment": "^2.11.2",
     "mongodb": "^2.0.47",
     "multer": "^1.1.0",
-    "node-schedule": "^0.6.0",
-    "nodemailer": "^2.0.0",
+    "node-schedule": "^1.0.0",
+    "nodemailer": "^2.1.0",
     "q": "^1.2.0",
     "querystring": "^0.2.0",
-    "request": "^2.65.0"
+    "request": "^2.69.0"
   },
   "engines": {
     "node": "4.2.4"

@@ -11,7 +11,7 @@ https = require('https')
 Q = require('q')
 request = require('request')
 fs = require('fs')
-userDAO = require('../userDAO.coffee')
+userDAO = require('../userDAO')
 moment = require('moment')
 appToken = null
 
