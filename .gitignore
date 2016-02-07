@@ -6,3 +6,5 @@ coverage
 localeConfig.js
 tasks.json
 build
+dist
+temp

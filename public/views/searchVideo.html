@@ -1,14 +1,16 @@
 <div class="row">
     
     <div class="col-md-8 colg-lg-8">
+                
         <div sv-player auto-play="{{searchVideoForm.autoplay}}" height="530" width="830" pause="{{searchVideoForm.isPaused}}"
              video-provider="{{searchVideoForm.selected.provider}}" 
              video-id="{{searchVideoForm.selected.video.id}}"
              ng-if="searchVideoForm.selected"></div>
-        
+
         <div ng-if="!isEmpty(searchVideoForm.results) && !searchVideoForm.selected" class="text-center">
             <h6>Aucune vidéo sélectionnée</h6>
         </div>
+        
     </div>
     
     <div class="col-xs-7 col-md-4 colg-lg-4" style="max-height:500px; overflow-y: auto;">
