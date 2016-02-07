@@ -7,7 +7,7 @@ if process.env.MONGOLAB_URI is undefined
   catch
     console.warn("No configuration file found")
 
-scheduler = require('../js/scheduler.coffee')
+scheduler = require('../coffee/scheduler.coffee')
 
 describe 'scheduler', ->
 
@@ -74,7 +74,7 @@ describe 'scheduler', ->
 
   it 'schedule complex function', (done) ->
     this.timeout 3000
-    facebookAPI = require('../js/api/facebookAPI.coffee')
+    facebookAPI = require('../coffee/api/facebookAPI.coffee')
     event = ->
       oauthURL = facebookAPI.getOAuthURL()
       (oauthURL.length).should.be.above 1
@@ -105,7 +105,7 @@ describe 'scheduler', ->
 
   it 'save complex scheduled event in database (then execute it)', (done) ->
 
-    facebookAPI = require('../js/api/facebookAPI.coffee')
+    facebookAPI = require('../coffee/api/facebookAPI.coffee')
     event = facebookAPI.getOAuthURL
     this.timeout(10000)
     date = new Date(Date.now() + 3000)

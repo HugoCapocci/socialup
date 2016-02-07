@@ -1,0 +1,1 @@
+var crypto,normalize;crypto=require("crypto"),normalize=function(r){return r.toString("base64").replace(/[^\w]/g,"")},module.exports=function(r){return r&&"function"==typeof r?crypto.randomBytes(32,function(o,t){if(o)throw o;return r(normalize(t))}):normalize(crypto.randomBytes(32))};

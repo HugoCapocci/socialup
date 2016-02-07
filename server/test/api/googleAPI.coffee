@@ -1,5 +1,5 @@
 fs = require('fs')
-googleAPI = require('../../js/api/googleAPI.coffee')
+googleAPI = require('../../coffee/api/googleAPI.coffee')
 should = require('should')
 
 if process.env.GOOGLE_API_KEY is undefined

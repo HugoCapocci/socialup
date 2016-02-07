@@ -1,6 +1,6 @@
 should = require('should')
 fs = require('fs')
-oAuthNonce = require('../../js/api/oauth_nonce')
+oAuthNonce = require('../../coffee/api/oauth_nonce')
 
 describe 'api/oauth_nonce', ->
 

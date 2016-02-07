@@ -44,7 +44,7 @@ gulp.task('frontEndTests'/*, ['unitTests']*/, function () {
 });
 
 gulp.task("compileCoffee", function() {
-  return gulp.src(["./server/js/**/*.coffee"]) // Read the files
+  return gulp.src(["./server/coffee/**/*.coffee"]) // Read the files
     .pipe(
       coffee({bare:true}) // Compile coffeescript
         .on("error",  function(err) {
@@ -59,7 +59,7 @@ gulp.task("minifyServer", ['compileCoffee'], function() {
       //.pipe(stripDebug()) // remove logs
       .pipe(uglify())                     // Minify
       //.pipe(rename({extname: ".min.js"})) // Rename to ng-quick-date.min.js
-      .pipe(gulp.dest("./dist")); // Write minified to disk
+      .pipe(gulp.dest("./server")); // Write minified to disk
 });
 
 //for js in HTML files, not use with angular...

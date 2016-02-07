@@ -6,7 +6,7 @@ if process.env.MONGOLAB_URI is undefined
   catch
     console.log "No configuration file found"
 
-UserDAO = require '../js/userDAO'
+UserDAO = require '../coffee/userDAO'
 userDAO = new UserDAO
 
 describe.only "userDAO tests", ->
