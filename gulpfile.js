@@ -60,6 +60,8 @@ gulp.task("minifyServer", ['compileCoffee'], function() {
       .pipe(uglify())                     // Minify
       //.pipe(rename({extname: ".min.js"})) // Rename to ng-quick-date.min.js
       .pipe(gulp.dest("./server")); // Write minified to disk
+  
+  //TODO remove temp files
 });
 
 //for js in HTML files, not use with angular...
