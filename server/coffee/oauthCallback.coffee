@@ -4,8 +4,9 @@ upload = multer { dest: 'server/uploads/' }
 fs = require 'fs'
 Q = require 'q'
 
-require '../../localeConfig.js'
-  
+try require '../../localeConfig.js'
+catch
+  console.log 'No configuration file found'
 console.log 'ENV ?', process.env.NODE_ENV
 
 providersAPI = require './providersAPI'
