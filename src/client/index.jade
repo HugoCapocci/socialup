@@ -1,0 +1,123 @@
+doctype html
+html(lang="fr")
+    head
+        meta(http-equiv="Content-Type" content="text/html; charset=UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        title= "Social Up"
+        script(type="text/javascript", data-main="app/main.js", src="bower_components/requirejs/require.js")
+        link(
+            rel="stylesheet"
+            type="text/css"
+            href="bundle.css"
+        )
+        link(
+            rel="stylesheet"
+            type="text/css"
+            href='bower_components/bootstrap-css-only/css/bootstrap.css'
+        )
+        link(
+            rel="stylesheet"
+            type="text/css"
+            href='bower_components/bootstrap-css-only/css/bootstrap-theme.css'
+        )
+
+    body(ng-controller="MainController")
+        nav.navbar.navbar-inverse.navbar-static-top
+            .container
+                .navbar-header
+                    button(
+                        type="button"
+                        uib-dropdown-toggle
+                        ng-init="navCollapsed=true"
+                        ng-click="navCollapsed=!navCollapsed"
+                        class="navbar-toggle collapsed"
+                        data-toggle="collapse"
+                        data-target="#navbar"
+                        aria-expanded="false"
+                        aria-controls="navbar")
+                        span.sr-only="Toggle navigation"
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    a.navbar-brand(href="#")="Social Up"
+        .collapse.navbar-collapse(id="navbar" ng-class="{'in':!navCollapsed}")
+            ul.nav.navbar-nav
+                li.dropdown(ng-if="$root.user" uib-dropdown)
+                    a.dropdown-toggle(href uib-dropdown-toggle)
+                    ul.dropdown-menu
+                        li
+                            a(href="#/uploadFile" ng-click="navCollapsed=true")= "Publier une vidéo"
+                                i.glyphicon.glyphicon-film
+                        li
+                            a(href="#/uploadMusic" ng-click="navCollapsed=true")= "Publier un son"
+                                i.glyphicon.glyphicon-music
+                li(ng-if="$root.user")
+                    a(href="#/cloudExplorer" ng-click="navCollapsed=true")= "Clouds"
+                        i.glyphicon.glyphicon-cloud
+                li(ng-if="$root.user")
+                    a(href="#/postMessage" ng-click="navCollapsed=true")= "Message"
+                        i.glyphicon.glyphicon-comment
+                li.dropdown(ng-if="$root.user" uib-dropdown)
+                    a.dropdown-toggle(href uib-dropdown-toggle)= "Evènements "
+                        span.caret
+                        ul.dropdown-menu
+                            li
+                                a(href="#/calendarEvents" ng-click="navCollapsed=true")= "Agenda"
+                                    i.glyphicon.glyphicon-calendar
+                            li
+                                a(href="#/scheduledEvents" ng-click="navCollapsed=true")= "Voir actions programmées"
+                            li
+                                a(href="#/tracedEvents" ng-click="navCollapsed=true")= "Historique des actions"
+                li.dropdown(uib-dropdown)
+                    a.dropdown-toggle(href uib-dropdown-toggle)= "Media"
+                        i.glyphicon.glyphicon-open-film
+                        span.caret
+                    ul.dropdown-menu
+                        li
+                            a(href="#/searchVideo" ng-click="navCollapsed=true")= "Rechercher une vidéo"
+                                i.glyphicon.glyphicon-film
+                        li(ng-if="$root.user")
+                            a(href="#/videos" ng-click="navCollapsed=true")= "Vos media publiés"
+                                i.glyphicon
+                li(ng-if="$root.user")
+                    a(href="#/manageSocialNetworks" ng-click="navCollapsed=true")= "Authentifications"
+                        i.glyphicon.glyphicon-cog
+                li
+                    a(href="#/pageStats" ng-click="navCollapsed=true")= "Stats"
+                        i.glyphicon.glyphicon-stats
+                li(ng-if="$root.user")
+                    a(href="#/login" ng-click="navCollapsed=true;signout()")= "Sign Out"
+                        i.glyphicon.glyphicon-off
+                li(ng-if="!$root.user")
+                    a(href="#/login")= "Login / Registration"
+
+        .container(style="width:100%")
+            .row
+                .col-lg-2.col-md-2.col-sm-0
+                    uib-alert(
+                        ng-repeat="alert in $root.alerts"
+                        type="{{alert.type}}"
+                        style="opacity:{{alert.opacity}};"
+                        close="closeAlert($index)"
+                    )= "{{alert.msg}}"
+
+                .col-lg-9.col-md-9.col-sm-12
+                    .div(ng-view)
+                .col-lg-1.col-md-1.cols-sm-0
+
+        footer.footer
+            .container
+                .row.text-center
+                    p= "Copyright &copy; Social Up 2015-2016. - Version <!-- build:version -->x<!-- endbuild -->"
+
+        script(type="text/ng-template" id="modalContent.html")
+            .modal-header
+                h3.modal-title= "{{modal.title}}"
+            .modal-body
+                ng-include(ng-if="!modal.isLoading" src="modal.url")
+                div(ng-if="modal.isLoading")
+                uib-progressbar.progress-striped.active(value="modal.progress" type="{{modal.type}}")= "{{modal.progress}} %"
+                div= "{{modal.message}}"
+            .modal-footer(ng-if="!modal.isLoading")
+                button.btn.btn-primary(type="button" ng-click="modal.ok()")= "OK"
+                button.btn.btn-warning(type="button" ng-click="modal.cancel()")= "Cancel"

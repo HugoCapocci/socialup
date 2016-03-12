@@ -1,0 +1,1 @@
+define(["./authentication","./alerts"],function(){});

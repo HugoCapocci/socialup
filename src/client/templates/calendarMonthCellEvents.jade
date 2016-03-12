@@ -1,0 +1,33 @@
+.events-list(ng-show="day.events.length > 0")
+
+    div(ng-repeat="event in day.events | orderBy:'startsAt' track by event.$id" style="overflow: hidden;")
+
+        a.pull-left.event.visible-sm.visible-xs.visible-md.hidden-lg(
+            ng-if="!event.allDay"
+            href="javascript:;"
+            ng-click="vm.onEventClick({calendarEvent: event})"
+            ng-class="'event-' + event.type + ' ' + event.cssClass"
+            ng-mouseenter="vm.highlightEvent(event, true)"
+            ng-mouseleave="vm.highlightEvent(event, false)"
+            tooltip-append-to-body="true"
+            uib-tooltip-html="((event.startsAt | calendarDate:'time':true) + (vm.calendarConfig.displayEventEndTimes && event.endsAt ? ' - ' + (event.endsAt | calendarDate:'time':true) : '') + ' : ' + event.title) | calendarTrustAsHtml"
+            mwl-draggable="event.draggable === true"
+            drop-data="{event: event, draggedFromDate: day.date.toDate()}"
+        )
+
+        a.pull-left.event.visible-sm.visible-xs.visible-md.hidden-lg(
+            ng-if="event.allDay"
+            href="javascript:;"
+            ng-click="vm.onEventClick({calendarEvent: event})"
+            ng-class="'event-' + event.type + ' ' + event.cssClass"
+            ng-mouseenter="vm.highlightEvent(event, true)"
+            ng-mouseleave="vm.highlightEvent(event, false)"
+            tooltip-append-to-body="true"
+            uib-tooltip="{{event.title}}"
+            mwl-draggable="event.draggable === true"
+            drop-data="{event: event, draggedFromDate: day.date.toDate()}"
+        )
+        a.hidden-sm.hidden-xs.hidden-md.visible-lg(href="javascript:;" ng-click="vm.onEventClick({calendarEvent: event})")
+            small(ng-if="event.allDay")= "{{ event.title | calendarTruncateEventTitle:25:1 }}"
+            small(ng-if="!event.allDay")= "{{ (event.startsAt | calendarDate:'time':true) +' - '+ (event.title | calendarTruncateEventTitle:17:1) }}"
+  

@@ -1,0 +1,1 @@
+define(["./event"],function(){});

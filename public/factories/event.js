@@ -1,0 +1,1 @@
+define(["./module"],function(e){var n;return n=function(e){return e("/event/:eventType/:eventId",{eventId:"@eventId",eventType:"@eventType"})},e.factory("EventFactory",["$resource",n])});

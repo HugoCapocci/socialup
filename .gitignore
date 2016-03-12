@@ -1,9 +1,8 @@
 node_modules
 public/bower_components
-public/dist
-server/uploads
+server
 coverage
-localeConfig.js
+localeConfig.coffee
 tasks.json
 build
 dist

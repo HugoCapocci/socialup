@@ -1,1 +1,0 @@
-var APIs,fileName,fs,i,index,key,len,ref;for(fs=require("fs"),APIs={},ref=fs.readdirSync(__dirname+"/api"),i=0,len=ref.length;len>i;i++)fileName=ref[i],index=fileName.lastIndexOf("API"),-1!==index&&(key=fileName.substring(0,index),APIs[key]=require("./api/"+fileName));module.exports=APIs;

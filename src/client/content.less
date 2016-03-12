@@ -1,0 +1,188 @@
+@screen-md-min: 500px;
+@screen-md-max: 800px;
+@screen-sm-min: 350px;
+@screen-sm-max: 500px;
+@screen-xs-min: 100px;
+@screen-xs-max: 350px;
+
+@grey1: #f5f5f5;
+@even-color: #dcdcdc;
+@odd-color: #aaaaaa;
+
+.stripped div:nth-child(even){
+  background-color: @even-color;
+}
+.stripped div:nth-child(odd){
+  background-color: @odd-color;
+}
+.stripped-header {
+  background-color: #FFF !important;
+  text-align: center;
+}
+.dateColumn {
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+  width: 13% !important;
+}
+
+.dateColumn {
+  @media (min-width: 800px) and (max-width: 1300px) {
+    width: 13% !important;
+  }
+  @media (min-width: @screen-md-min) and (max-width: @screen-md-max) {
+    width: 13% !important;
+  }
+  @media (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
+    width: 13% !important;
+  }
+  @media (min-width: @screen-xs-min) and (max-width: @screen-xs-max) {
+    width: 13% !important;
+  }
+}
+
+body {
+  /* padding-top: 70px;  Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+}
+
+/* hex: #a1bbc5 */
+.oddResults {
+  background-color: rgba(161, 187, 197, 0.50);
+}
+
+/* tooltip */
+.black-tooltip + .tooltip > .tooltip-inner {background-color: #000 ;}
+.black-tooltip + .tooltip > .tooltip-arrow { border-bottom-color:#000; }
+
+/* datePicker */
+.full button span {
+  background-color: limegreen;
+  border-radius: 32px;
+  color: black;
+}
+.partially button span {
+  background-color: orange;
+  border-radius: 32px;
+  color: black;
+}
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
+}
+.selected {
+  background : #888 !important;
+  color: #EEE !important;
+}
+.selected a {
+  color: #EEE !important;
+}
+
+/* DnD */
+
+ul[dnd-list],
+ul[dnd-list] > li {
+  position: relative;
+}
+
+/**
+ * The dnd-list should always have a min-height,
+ * otherwise you can't drop to it once it's empty
+ */
+ul[dnd-list] {
+  min-height: 42px;
+  padding-left: 0px;
+}
+
+/**
+ * The dndDraggingSource class will be applied to
+ * the source element of a drag operation. It makes
+ * sense to hide it to give the user the feeling
+ * that he's actually moving it.
+ */
+ul[dnd-list] .dndDraggingSource {
+  display: none;
+}
+
+/**
+ * An element with .dndPlaceholder class will be
+ * added to the dnd-list while the user is dragging
+ * over it.
+ */
+ul[dnd-list] .dndPlaceholder {
+  display: block;
+  background-color: #ddd;
+  min-height: 50px; /*42 */
+  min-width: 200px; /*new*/
+}
+
+/**
+ * The dnd-lists's child elements currently MUST have
+ * position: relative. Otherwise we can not determine
+ * whether the mouse pointer is in the upper or lower
+ * half of the element we are dragging over. In other
+ * browsers we can use event.offsetY for this.
+ */
+ul[dnd-list] li {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+  display: block;
+  padding: 7px 8px;
+  margin-bottom: -1px;
+}
+
+/**
+ * Show selected elements in green
+ */
+ul[dnd-list] li.selected {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+/* Sticky footer styles
+ -------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 30px;
+}
+.footer {
+  margin-top: 5px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 30px;
+  background-color: @grey1;
+}
+
+.googleEvent {
+  background-color: unset;
+  list-style-image: url('../../public/images/icons/google.png') !important;
+}
+.facebookEvent {
+  background-color: unset;
+  background-image: url('../../public/images/icons/facebook.png');
+}
+
+.cal-year-box .cal-slide-content a.event-item {
+  top: initial !important;
+}
