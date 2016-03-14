@@ -49,7 +49,7 @@ module.exports = class EmailService
 
     loadTemplate = (message) ->
       template = fs.readFileSync TEMPLATE_EMAIL_CONFIRMATION, 'utf-8'
-      template.replace '%URL%', 'http://localhost:5000/#/confirm?id='+userId
+      template.replace '%URL%', 'http://localhost:5000/#/confirm?id=' + userId
 
     console.log 'sendMail'
     deferred = Promise.pending()

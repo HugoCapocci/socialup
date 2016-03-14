@@ -69,7 +69,8 @@ loadScheduledEvents = ->
   .then (results) ->
     if results isnt undefined
       for result in results
-        addEventToSchedule result.user, new Date(result.dateTime), result.eventType, result.providers, result.providersOptions, result.eventParams, result.eventId
+        addEventToSchedule result.user, new Date(result.dateTime), result.eventType, result.providers,
+          result.providersOptions, result.eventParams, result.eventId
   .catch (error) ->
     console.log 'cannot load events, error occurs: ', error
 

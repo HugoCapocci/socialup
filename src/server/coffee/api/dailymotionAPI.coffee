@@ -18,19 +18,19 @@ DESCRIPTION_MAX_LENGTH = 800
 
 exports.getOAuthURL = ->
 
-  "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id="+DAILYMOTION_API_KEY+"&redirect_uri="+
-  DAILYMOTION_REDIRECT_URL+"&scope=userinfo+email+manage_videos+manage_playlists"
+  "https://www.dailymotion.com/oauth/authorize?response_type=code&client_id=#{DAILYMOTION_API_KEY}&redirect_uri=" +
+  "#{DAILYMOTION_API_KEY}&scope=userinfo+email+manage_videos+manage_playlists"
 
 exports.pushCode = (code, userId) ->
 
   deferred = Promise.pending()
   #ask for token
   post_data = querystring.stringify
-    'grant_type' : 'authorization_code'
+    'grant_type': 'authorization_code'
     'client_id': DAILYMOTION_API_KEY
     'client_secret': DAILYMOTION_API_SECRET
-    'redirect_uri' : DAILYMOTION_REDIRECT_URL
-    'code' : code
+    'redirect_uri': DAILYMOTION_REDIRECT_URL
+    'code': code
 
   post_options =
     host: 'api.dailymotion.com'
@@ -44,28 +44,26 @@ exports.pushCode = (code, userId) ->
   post_req = https.request post_options, (res) ->
     res.setEncoding 'utf8'
     res.on 'data', (chunk) ->
-      tokens =JSON.parse(chunk)
-      deferred.resolve saveTokensForUser(tokens, userId)
-  
+      tokens = JSON.parse chunk
+      deferred.resolve saveTokensForUser tokens, userId
+
   post_req.on 'error', (e) ->
     deferred.reject new Error(e)
-  
+
   post_req.write post_data
   post_req.end()
-  
+
   deferred.promise
 
 saveTokensForUser = (tokens, userId) ->
-
   tokens.expiry_date = Date.now() + tokens.expires_in
   delete tokens.expires_in
   tokens
 
 checkAccessTokenValidity = (tokens, userId) ->
-  
   deferred = Promise.pending()
   if tokens.expiry_date <= Date.now()
-    console.log "refresh dailymotion oauth token "
+    console.log 'refresh dailymotion oauth token '
     return refreshTokens tokens, userId
   else
     deferred.resolve tokens
@@ -73,13 +71,12 @@ checkAccessTokenValidity = (tokens, userId) ->
 
 # see https://developer.dailymotion.com/api#using-refresh-tokens
 refreshTokens = (tokens, userId) ->
-    
   deferred = Promise.pending()
   post_data = querystring.stringify
-    'grant_type' : 'refresh_token'
+    'grant_type': 'refresh_token'
     'client_id': DAILYMOTION_API_KEY
     'client_secret': DAILYMOTION_API_SECRET
-    'refresh_token' : tokens.refresh_token
+    'refresh_token': tokens.refresh_token
 
   post_options =
     host: 'api.dailymotion.com'
@@ -102,37 +99,36 @@ refreshTokens = (tokens, userId) ->
 
   post_req.write post_data
   post_req.end()
-  
+
   deferred.promise
 
 exports.listMedia = (tokens) ->
-    
+
   processGetRequest tokens.access_token,
   '/user/me/videos?fields=id,thumbnail_60_url,title,description,status,created_time,views_total,comments_total',
   (videos) ->
-
     counts =
       view:0
       comment:0
     getStat = (name) ->
-      name : name
-      value : counts[name]
+      name: name
+      value: counts[name]
     videoList = videos.list.map (video) ->
       video.thumbnailURL = video.thumbnail_60_url
-      video.creationDate = new Date video.created_time*1000
+      video.creationDate = new Date video.created_time * 1000
       delete video.thumbnail_60_url
       delete video.created_time
-      counts.view+=video.views_total
-      counts.comment+=video.comments_total
+      counts.view += video.views_total
+      counts.comment += video.comments_total
       video.counts =
-        view : video.views_total
-        comment : video.comments_total
-      delete  video.views_total
+        view: video.views_total
+        comment: video.comments_total
+      delete video.views_total
       delete video.comments_total
       video
 
-    list : videoList
-    stats : [
+    list: videoList
+    stats: [
       getStat('view')
       getStat('comment')
     ]
@@ -141,39 +137,38 @@ exports.searchVideo = (videoName, limit, order, page) ->
 
   #TODO add token if user is connected
   tokens = null
-  fields = 'id,thumbnail_120_url,title,description,status,created_time,views_total'+
+  fields = 'id,thumbnail_120_url,title,description,status,created_time,views_total' +
   ',comments_total,owner.username,duration'
   sort = processOrder order
-  url = '/videos?fields='+fields+'&search='+encodeURI(videoName)+'&limit='+limit
-  if sort? then  url += '&sort='+sort
-  if page? then url += '&page='+page
+  url = '/videos?fields=' + fields + '&search=' + encodeURI(videoName) + '&limit=' + limit
+  if sort? then  url += '&sort=' + sort
+  if page? then url += '&page=' + page
 
   processGetRequest tokens, url, (results) ->
 
     videos : results.list.map (video) ->
       #FIXME html issue ?
-      if video.description? and video.description.length> DESCRIPTION_MAX_LENGTH
-        video.description = video.description.substr(0, DESCRIPTION_MAX_LENGTH)+" ..."
-
+      if video.description? and video.description.length > DESCRIPTION_MAX_LENGTH
+        video.description = video.description.substr(0, DESCRIPTION_MAX_LENGTH) + ' ...'
       video.thumbnailURL = video.thumbnail_120_url
-      video.creationDate = new Date video.created_time*1000
+      video.creationDate = new Date video.created_time * 1000
       video.counts =
-        view : video.views_total
-        comment : video.comments_total
+        view: video.views_total
+        comment: video.comments_total
       video.channel = video['owner.username']
-      video.channelURL = 'http://www.dailymotion.com/'+video['owner.username']
+      video.channelURL = 'http://www.dailymotion.com/' + video['owner.username']
       delete video['owner.username']
       delete video.views_total
       delete video.comments_total
       delete video.thumbnail_120_url
       delete video.created_time
       video
-    totalResults :  results.total
-    has_more : results.has_more
-    page : results.page
+    totalResults:  results.total
+    has_more: results.has_more
+    page: results.page
 
 processOrder = (order) ->
- 
+
   switch(order)
     when 'date'
       return 'recent'
@@ -189,7 +184,6 @@ processOrder = (order) ->
 exports.sendVideo = (tokens, file, userId, params, providerOptions) ->
 
   deferred = Promise.pending()
-
   getUploadURL tokens
   .then (urls) ->
     request
@@ -212,24 +206,23 @@ exports.sendVideo = (tokens, file, userId, params, providerOptions) ->
 
 # see https://developer.dailymotion.com/api#video-upload
 publishVideo = (videoURL, tokens, params, providerOptions, deferred) ->
-        
   request
-    method : 'POST'
-    uri :  'https://api.dailymotion.com/me/videos'
-    auth :
+    method: 'POST'
+    uri:  'https://api.dailymotion.com/me/videos'
+    auth:
       bearer: tokens.access_token
-    form :
+    form:
       url: videoURL
-      title : params.title
-      channel : providerOptions.channel.id
-      description : params.description
-      tags : params.tags
-      published : true
-      private : if providerOptions.private? then providerOptions.private else false
+      title: params.title
+      channel: providerOptions.channel.id
+      description: params.description
+      tags: params.tags
+      published: true
+      private: if providerOptions.private? then providerOptions.private else false
   , (err, response, body) ->
 
     if err?
-      console.log "cannot publish the video. Err: ",err
+      console.log 'cannot publish the video. Err: ',err
       deferred.reject new Error(err)
     else
       results = JSON.parse body
@@ -237,25 +230,22 @@ publishVideo = (videoURL, tokens, params, providerOptions, deferred) ->
         deferred.reject new Error(results.error.message)
       else
         deferred.resolve
-          url :'http://www.dailymotion.com/video/'+results.id+
-          '_'+results.title+'_'+results.channel
-          thumbnail : 'http://www.dailymotion.com/thumbnail/video/'+results.id
+          url: 'http://www.dailymotion.com/video/' + results.id +
+          '_' + results.title + '_' + results.channel
+          thumbnail: 'http://www.dailymotion.com/thumbnail/video/' + results.id
 
 getUploadURL = (tokens) ->
-
-  processGetRequest tokens.access_token,'/file/upload'
+  processGetRequest tokens.access_token, '/file/upload'
 
 exports.getUserInfo = (tokens) ->
-
-  processGetRequest tokens.access_token,'/user/me?fields=id,screenname,email', (userInfo) ->
-    userName:userInfo.screename
+  processGetRequest tokens.access_token, '/user/me?fields=id,screenname,email', (userInfo) ->
+    userName: userInfo.screename
 
 exports.listCategories = (tokens, userId) ->
-    
   deferred = Promise.pending()
   checkAccessTokenValidity tokens, userId
   .then (validTokens) ->
-    deferred.resolve processGetRequest validTokens.access_token,'/channels', (results) ->
+    deferred.resolve processGetRequest validTokens.access_token, '/channels', (results) ->
       results.list.map (channel) ->
         channel.description
         return channel
@@ -265,7 +255,6 @@ exports.listCategories = (tokens, userId) ->
   deferred.promise
 
 processGetRequest = (access_token, path, callback) ->
-    
   deferred = Promise.pending()
   req_options =
     host: 'api.dailymotion.com'
@@ -273,15 +262,14 @@ processGetRequest = (access_token, path, callback) ->
     path: path
     method: 'GET'
 
-  if access_token? then req_options.headers = 'Authorization': 'Bearer '+access_token
-
+  if access_token? then req_options.headers = 'Authorization': 'Bearer ' + access_token
   req = https.request req_options, (res) ->
-    data=""
+    data = ''
     res.on 'data', (chunk) ->
-      data+=chunk
+      data += chunk
     res.on 'end', ->
       if callback?
-        deferred.resolve callback( JSON.parse(data) )
+        deferred.resolve callback( JSON.parse data )
       else
         deferred.resolve JSON.parse(data)
 
@@ -290,4 +278,4 @@ processGetRequest = (access_token, path, callback) ->
   req.end()
   deferred.promise
 
-exports.refreshTokens=refreshTokens
+exports.refreshTokens = refreshTokens

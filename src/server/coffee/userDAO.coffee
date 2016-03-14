@@ -9,7 +9,7 @@ getDB = (callback) ->
       throw err
     else
       callback(db)
-      
+
 createUser = (user) ->
 
   deferred = Promise.pending()
@@ -21,7 +21,7 @@ createUser = (user) ->
       if err
         deferred.reject new Error(err)
       else
-        user._id=r.insertedIds[0]
+        user._id = r.insertedIds[0]
         deferred.resolve(user)
 
   deferred.promise
@@ -30,7 +30,7 @@ updateUser = (user) ->
 
   deferred = Promise.pending()
   query =
-    _id : user._id
+    _id: user._id
 
   getDB (db) ->
     db.collection(collection).update query, user, (err) ->
@@ -41,7 +41,7 @@ updateUser = (user) ->
       else
         deferred.resolve(user)
   deferred.promise
-  
+
 retrieveUser = (query) ->
 
   deferred = Promise.pending()
@@ -59,7 +59,7 @@ module.exports = class UserDAO
   constructor: ->
 
   #save user and its provider tokens
-  saveUser : (user) ->
+  saveUser: (user) ->
 
     if user._id is undefined
       createUser(user)
@@ -67,7 +67,7 @@ module.exports = class UserDAO
       updateUser(user)
 
   #asynch
-  updateUserTokens : (userId, provider, tokens) ->
+  updateUserTokens: (userId, provider, tokens) ->
 
     query =
       _id : new ObjectID(userId)
@@ -100,19 +100,19 @@ module.exports = class UserDAO
 
     deferred.promise
 
-  retrieveUserByLogin : (login) ->
+  retrieveUserByLogin: (login) ->
 
     query =
       login:login
     retrieveUser(query)
 
-  retrieveUserById : (userId) ->
+  retrieveUserById: (userId) ->
 
     query =
       _id : new ObjectID(userId)
     retrieveUser(query)
 
-  authenticate : (login, password) ->
+  authenticate: (login, password) ->
 
     deferred = Promise.pending()
     getDB (db) ->
@@ -127,7 +127,7 @@ module.exports = class UserDAO
 
     deferred.promise
 
-  deleteToken : (provider, userId) ->
+  deleteToken: (provider, userId) ->
 
     deferred = Promise.pending()
     getDB (db) ->

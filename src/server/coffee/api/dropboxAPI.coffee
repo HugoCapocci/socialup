@@ -43,19 +43,19 @@ exports.pushCode = (code) ->
 
   post_req.write post_data
   post_req.end()
-  
+
   deferred.promise
 
 exports.listFiles = (token, path, typeFilter) ->
-    
+
   if path is undefined or path is 'root'
-    path=''
+    path = ''
   else
     path = decodeURI path
   retrieveAllFiles token, path, typeFilter
 
 retrieveAllFiles = (token, path, typeFilter) ->
-    
+
   deferred = Promise.pending()
   post_data =
     path: path
@@ -63,10 +63,10 @@ retrieveAllFiles = (token, path, typeFilter) ->
     include_media_info: false
 
   request
-    uri: 'https://'+END_POINT+'/2/files/list_folder'
+    uri: 'https://' + END_POINT + '/2/files/list_folder'
     auth:
       bearer: token.access_token
-    method: "POST"
+    method: 'POST'
     json: true
     body: post_data
   , (error, response, body) ->
@@ -77,67 +77,66 @@ retrieveAllFiles = (token, path, typeFilter) ->
       for entry in body.entries
         if typeFilter is 'folder'
           if entry['.tag'] is 'folder'
-            results.push name : entry.name, id: entry.path_lower, mimeType : entry['.tag'],
-            isFolder : entry['.tag'] is 'folder'
+            results.push name: entry.name, id: entry.path_lower, mimeType: entry['.tag'],
+            isFolder: entry['.tag'] is 'folder'
         #TODOfile type filter
         else
-          results.push name : entry.name, id: entry.path_lower, mimeType : entry['.tag'],
-          isFolder : entry['.tag'] is 'folder'
+          results.push name: entry.name, id: entry.path_lower, mimeType: entry['.tag'],
+          isFolder: entry['.tag'] is 'folder'
 
       deferred.resolve results
 
   deferred.promise
 
 exports.getSpaceUsage = (tokens) ->
-  
   deferred = Promise.pending()
   request
-    uri: 'https://'+END_POINT+'/2/users/get_space_usage'
+    uri: 'https://' + END_POINT + '/2/users/get_space_usage'
     auth:
       bearer: tokens.access_token
-    method: "POST"
+    method: 'POST'
   , (error, response, body) ->
     if error?
       deferred.reject error
     else
       result = JSON.parse body
       deferred.resolve
-        used : result.used
-        total : result.allocation.allocated
-        
+        used: result.used
+        total: result.allocation.allocated
+
   deferred.promise
 
 exports.getFileMetaData = (tokens,filePath) ->
 
-  processGetRequest tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent(filePath),
+  processGetRequest tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent(filePath),
   (fileContent, response) ->
     metaData = JSON.parse response.headers['x-dropbox-metadata']
-    metaData.fileName = metaData.path.substring metaData.path.lastIndexOf('/')+1
+    metaData.fileName = metaData.path.substring metaData.path.lastIndexOf('/') + 1
     metaData
 
 exports.downloadFile = (tokens,filePath) ->
 
   request
-    uri: 'https://content.dropboxapi.com/1/files/auto/'+encodeURIComponent filePath
+    uri: 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent filePath
     auth:
       bearer: tokens.access_token
-    method: "GET"
+    method: 'GET'
 
 exports.deleteFile = (tokens,filePath) ->
- 
+
   deferred = Promise.pending()
   request
     uri: 'https://api.dropboxapi.com/2/files/delete'
     auth:
       bearer: tokens.access_token
-    headers :
-      'Content-Type' : 'application/json'
-    json : true
-    body :
-      path : '/'+filePath
-    method: "POST"
+    headers:
+      'Content-Type': 'application/json'
+    json: true
+    body:
+      path: '/' + filePath
+    method: 'POST'
   , (error, response, body) ->
-  
+
     if error?
       deferred.reject error
     else
@@ -146,36 +145,35 @@ exports.deleteFile = (tokens,filePath) ->
   deferred.promise
 
 exports.uploadDrive = (tokens, file, path) ->
-    
+
   deferred = Promise.pending()
-  url='https://content.dropboxapi.com/1/files_put/auto'
-  if path? then url+=encodeURIComponent path
-  url+='/'+file.originalname
+  url = 'https://content.dropboxapi.com/1/files_put/auto'
+  if path? then url += encodeURIComponent path
+  url += '/' + file.originalname
 
   request
     uri : url
     auth:
       bearer: tokens.access_token
-    method: "POST"
+    method: 'POST'
     body: fs.readFileSync file.path
   , (error, response, body) ->
-
     if error?
       deferred.reject error
     else
       results =
-        url : 'https://www.dropbox.com/home/Camera%C2%A0Uploads?preview='+file.originalname
+        url: 'https://www.dropbox.com/home/Camera%C2%A0Uploads?preview=' + file.originalname
       deferred.resolve results
   deferred.promise
 
 exports.getOAuthURL = ->
-  'https://www.dropbox.com/1/oauth2/authorize?client_id='+DROPBOX_APP_KEY+'&redirect_uri='+
-  DROPBOX_REDIRECT_URI+'&response_type=code'
+  'https://www.dropbox.com/1/oauth2/authorize?client_id=' + DROPBOX_APP_KEY + '&redirect_uri=' +
+  DROPBOX_REDIRECT_URI + '&response_type=code'
 
 getUserInfo = (tokens) ->
 
-  processGetRequest tokens.access_token, 'https://'+END_POINT+'/1/account/info', (userInfo) ->
-    userName:JSON.parse(userInfo).display_name
+  processGetRequest tokens.access_token, 'https://' + END_POINT + '/1/account/info', (userInfo) ->
+    userName: JSON.parse(userInfo).display_name
 
 processGetRequest = (access_token, url, callback) ->
 
@@ -184,7 +182,7 @@ processGetRequest = (access_token, url, callback) ->
     uri: url
     auth:
       bearer: access_token
-    method: "GET"
+    method: 'GET'
   , (error, response, body) ->
     if error?
       deferred.reject error
@@ -202,10 +200,10 @@ exports.createShareLink = (tokens, filePath) ->
       bearer: tokens.access_token
     json: true
     form :
-      path : encodeURIComponent '/'+filePath
-    method: "POST"
+      path : encodeURIComponent '/' + filePath
+    method: 'POST'
   , (error, response, body) ->
-    console.log "createShareLink response: ", response
+    console.log 'createShareLink response: ', response
     if error?
       deferred.reject error
     else

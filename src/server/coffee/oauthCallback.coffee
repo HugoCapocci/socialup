@@ -4,7 +4,7 @@ upload = multer dest: 'server/uploads/'
 fs = require 'fs'
 Q = require 'q'
 
-try require '../../localeConfig.coffee'
+try require '../localeConfig.js'
 catch
   console.log 'No configuration file found'
 console.log 'ENV ?', process.env.NODE_ENV
@@ -38,14 +38,14 @@ scheduler.addEventListerner 'message', (eventId, userId, providers, providersOpt
 scheduler.addEventListerner 'uploadVideo',
 (eventId, userId, providers, providersOptions, file, title, description, tags) ->
   params =
-    title:title
-    description:description
-    tags:tags
-    file : file
+    title: title
+    description: description
+    tags: tags
+    file: file
 
   publishFileToProviders userId, providers, providersOptions, file, params
   .then (results) ->
-    if results and results.length>0 and results[0].url
+    if results and results.length > 0 and results[0].url
       params.url = results[0].url
     console.log 'publishFileToProviders results: ', results
     eventsDAO.updateScheduledEventAfterExecution eventId, results
@@ -62,18 +62,18 @@ getRefreshedToken = (provider, userId) ->
   myToken = users[userId].providers[provider].tokens
   if provider isnt 'soundcloud' and myToken.expiry_date and myToken.expiry_date <= Date.now()
 
-    console.log("refresh oauth token for provider "+provider)
+    console.log("refresh oauth token for provider #{provider}")
     if providersAPI[provider].refreshTokens instanceof Function
       if provider is 'google'
         myToken = users[userId].providers[provider].originalTokens
       providersAPI[provider].refreshTokens(myToken, userId).then (tokens) ->
-        users[userId].providers[provider].tokens=tokens
+        users[userId].providers[provider].tokens = tokens
         userDAO.updateUserTokens(userId, provider, tokens)
         Q.fcall ->
           tokens
     else
       Q.fcall ->
-        throw new Error('no "refreshTokens" function for provider '+provider)
+        throw new Error('no "refreshTokens" function for provider ' + provider)
   else
     Q.fcall ->
       myToken
@@ -81,8 +81,8 @@ getRefreshedToken = (provider, userId) ->
 executeChainedEvents = (chainedEvents, args) ->
   results = []
   for chainedEvent in chainedEvents
-    console.log 'execute chainedEvent: ',chainedEvent
-    console.log 'with results: ',results
+    console.log 'execute chainedEvent: ', chainedEvent
+    console.log 'with results: ', results
     params = null
     if chainedEvent.eventType is'message'
       params =
@@ -97,24 +97,24 @@ executeChainedEvents = (chainedEvents, args) ->
 
 executeChainedEvent = (event, params) ->
 
-  console.log "executeChainedEvent: ",event
+  console.log 'executeChainedEvent: ',event
   if event.eventType is 'message'
     postMediaLinkToProviders event.user, event.providers, event.eventParams[0], params.url, params.title,
     params.description, event.providersOptions
   else if event.eventType is 'uploadCloud'
-    console.log "upload drive with params: ", params
+    console.log 'upload drive with params: ', params
     provider = event.providers[0]
 
     getRefreshedToken(provider, event.user).then (tokens) ->
       providersAPI[provider].uploadDrive tokens, params.file, event.eventParams[0]
     .then (results) ->
-      console.log "eventsDAO.updateChainedEventAfterExecution"
+      console.log 'eventsDAO.updateChainedEventAfterExecution'
       eventsDAO.updateChainedEventAfterExecution event._id, results
     .catch(err) ->
       eventsDAO.updateChainedEventAfterError event._id, err
 
 userDAO.retrieveUsers().then (usersFound) ->
-  console.log "retieved users: ", usersFound
+  console.log 'retieved users: ', usersFound
   for user in usersFound
     users[user._id] = user
   scheduler.loadScheduledEvents()
@@ -144,9 +144,8 @@ app.get '/oauthURL/:provider/:userId', (req, res) ->
       users[userId].providers[provider] =
         userName: ''
         tokens: tokens
-      res.send providersAPI.twitter.getOAuthURL()+'?oauth_token='+tokens.oauth_token
+      res.send providersAPI.twitter.getOAuthURL() + '?oauth_token=' + tokens.oauth_token
     .catch (err) ->
-      console.log "error when computing twitter oauth url for user: ", err
       res.send err
   else
     if not providersAPI[provider]
@@ -158,7 +157,7 @@ app.get '/*2callback', (req, res) ->
   provider = req.path.split('2callback')[0].substr(1)
   code = req.query.code
   userId = req.query.state
-  getTokens=null
+  getTokens = null
 
   initiateUser userId unless users[userId]?
   if provider is TWITTER
@@ -494,7 +493,7 @@ app.post '/publishFromCloud/:userId', (req, res) ->
 
   getRefreshedToken(cloudProvider, userId)
   .then (tokens) ->
-    writeStream=fs.createWriteStream './server/uploads/'+userId+fileName
+    writeStream = fs.createWriteStream './server/uploads/'+userId+fileName
     providersAPI[cloudProvider].downloadFile(tokens, fileId).pipe writeStream
     writeStream.on 'finish', ->
       console.log 'file downloaded '
@@ -505,7 +504,7 @@ app.post '/publishFromCloud/:userId', (req, res) ->
         params.tags = req.body.tags
         console.log 'publishFileToProviders params: ', params
       console.log 'providers: ',providers
-      publishFileToProviders userId, providers, providersOptions, path:'./server/uploads/'+userId+fileName, params
+      publishFileToProviders userId, providers, providersOptions, path: './server/uploads/' + userId + fileName, params
       .then (results) ->
         #delete temp file
         fs.unlink './server/uploads/'+userId+fileName

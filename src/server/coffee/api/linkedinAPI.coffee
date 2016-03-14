@@ -14,7 +14,7 @@ REDIRECT_URI = process.env.APP_URL + '/linkedin2callback'
 
 #see https://developer.linkedin.com/docs/oauth2
 getOAuthURL = ->
-  'https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id='+CLIENT_ID+'&redirect_uri='+
+  'https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=' + CLIENT_ID + '&redirect_uri=' +
   REDIRECT_URI
 
 pushCode = (code) ->
@@ -24,9 +24,9 @@ pushCode = (code) ->
   post_data = querystring.stringify
     'client_id': CLIENT_ID
     'client_secret': CLIENT_SECRET
-    'redirect_uri' : REDIRECT_URI
-    'grant_type' : 'authorization_code'
-    'code' : code
+    'redirect_uri': REDIRECT_URI
+    'grant_type': 'authorization_code'
+    'code': code
 
   post_options =
     host: 'www.linkedin.com'
@@ -60,15 +60,15 @@ getUserInfo = (tokens) ->
     path: '/v1/people/~?format=json'
     method: 'GET'
     headers:
-      'Authorization': 'Bearer '+tokens.access_token
+      'Authorization': 'Bearer ' + tokens.access_token
 
   req = https.request req_options, (res) ->
-    data=''
+    data = ''
     res.on 'data', (chunk) ->
-      data+=chunk
+      data += chunk
     res.on 'end', ->
       userInfo = JSON.parse(data)
-      deferred.resolve({userName:userInfo.firstName+' '+userInfo.lastName})
+      deferred.resolve userName:userInfo.firstName + ' ' + userInfo.lastName
 
   req.on 'error', (e) ->
     console.log('get user infos error: ', e)
@@ -82,17 +82,15 @@ postMessage = (tokens, message) ->
   deferred = Q.defer()
   post_data =
     comment: message
-    visibility:
-      code: 'anyone'
+    visibility: code: 'anyone'
 
   request
     uri: 'https://api.linkedin.com/v1/people/~/shares?format=json'
-    auth:
-      bearer: tokens.access_token
+    auth: bearer: tokens.access_token
     method: 'POST'
     json: true
     body: post_data
-  ,(error, response, body) ->
+  , (error, response, body) ->
     if error
       deferred.reject new Error(error)
     else
@@ -103,7 +101,7 @@ postMessage = (tokens, message) ->
 
   deferred.promise
 
-exports.getOAuthURL=getOAuthURL
-exports.pushCode=pushCode
-exports.getUserInfo=getUserInfo
-exports.postMessage=postMessage
+exports.getOAuthURL = getOAuthURL
+exports.pushCode = pushCode
+exports.getUserInfo = getUserInfo
+exports.postMessage = postMessage

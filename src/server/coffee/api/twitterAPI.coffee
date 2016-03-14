@@ -24,7 +24,7 @@ getOAuthURL = () ->
 getTokens = (userId) ->
   new bluebird (fulfill, reject) ->
     headerParams =
-      'oauth_callback': REDIRECT_URL+userId
+      'oauth_callback': REDIRECT_URL + userId
       'oauth_consumer_key': APP_KEY
       'oauth_nonce': oAuthNonce()
       'oauth_signature_method': 'HMAC-SHA1'
@@ -50,7 +50,7 @@ inLineParams = (params) ->
   line = ''
   for key in keys
     line += key + '="' + percentEncode(params[key]) + '",'
-  line.substring 0, line.length-1
+  line.substring 0, line.length - 1
 
 # see https://dev.twitter.com/oauth/overview/creating-signatures
 createSignatureBaseString = (params, httpMethod, url) ->
@@ -97,7 +97,7 @@ getAccessToken = (oauthVerifier, tokens) ->
       uri: url
       headers:
         'Authorization': 'OAuth ' + inLineParams headerParams
-      method: "POST"
+      method: 'POST'
       form:
         oauth_verifier: oauthVerifier
     , (error, response, body) ->
@@ -131,8 +131,8 @@ postMessage = (tokens, message) ->
         reject error
       else
         results = JSON.parse body
-        url ='https://twitter.com/'+results.user.screen_name+'/status/'+results.id_str
-        console.log "tweet published: ", url
+        url = 'https://twitter.com/' + results.user.screen_name + '/status/' + results.id_str
+        console.log "tweet published: #{url}"
         fulfill url:url
 
 getTweets = (tokens) ->
@@ -152,7 +152,7 @@ getTweets = (tokens) ->
   console.log 'headerParams.oauth_signature: ',headerParams.oauth_signature
   console.log 'get request'
   request
-    uri: url+'?user_id=' + tokens.user_id
+    uri: url + '?user_id=' + tokens.user_id
     headers:
       'Authorization': 'OAuth ' + inLineParams headerParams
     method: 'GET'

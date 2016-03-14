@@ -3,9 +3,9 @@ Q = require('q')
 MongoClient = require('mongodb').MongoClient
 ObjectID = require('mongodb').ObjectID
 uri = process.env.MONGOLAB_URI
-scheduledEventsCollection = "scheduledEvents"
-chainedEventsCollection = "chainedEvents"
-tracedEventsCollection = "tracedEvents"
+scheduledEventsCollection = 'scheduledEvents'
+chainedEventsCollection = 'chainedEvents'
+tracedEventsCollection = 'tracedEvents'
 
 getDB = (callback) ->
   MongoClient.connect uri, (err, db) ->
@@ -13,9 +13,8 @@ getDB = (callback) ->
       throw err
     else
       callback(db)
-      
-createEvent = (eventToSave, collection, callback) ->
 
+createEvent = (eventToSave, collection, callback) ->
   deferred = Q.defer()
   getDB (db) ->
     db.collection(collection).insert eventToSave, (err, result) ->
@@ -28,9 +27,8 @@ createEvent = (eventToSave, collection, callback) ->
         deferred.resolve(eventToSave.eventId)
 
   deferred.promise
-  
-updateEvent = (query, update, collection) ->
 
+updateEvent = (query, update, collection) ->
   deferred = Q.defer()
   getDB (db) ->
     db.collection(collection).update query, update, (err, r) ->
@@ -43,13 +41,12 @@ updateEvent = (query, update, collection) ->
   deferred.promise
 
 getEventToSave = (userId, eventType, eventParams, providers, providersOptions) ->
-  
-  user : userId
-  dateTime : (new Date()).getTime()
-  eventType : eventType
+  user: userId
+  dateTime: (new Date()).getTime()
+  eventType: eventType
   eventParams: eventParams
-  providers : providers
-  providersOptions : providersOptions
+  providers: providers
+  providersOptions: providersOptions
 
 deleteEvent = (eventToDelete, collection, callback) ->
   deferred = Q.defer()
@@ -66,7 +63,6 @@ deleteEvent = (eventToDelete, collection, callback) ->
   deferred.promise
 
 retrieveEvent = (query, collection) ->
-
   deferred = Q.defer()
   getDB (db) ->
     db.collection(collection).findOne query, (err, results) ->
@@ -77,9 +73,8 @@ retrieveEvent = (query, collection) ->
         deferred.resolve(results)
 
   deferred.promise
-  
-retrieveEventsByQuery = (query, collection, sortData) ->
 
+retrieveEventsByQuery = (query, collection, sortData) ->
   deferred = Q.defer()
   getDB (db) ->
     sort = {}
@@ -100,8 +95,8 @@ retrieveEvents = (collection, params) ->
   deferred = Q.defer()
   #no already-executed events only
   query =
-    results: {$exists:false}
-    error:{$exists:false}
+    results: $exists: false
+    error: $exists: false
 
   if params isnt undefined
     for param in params
@@ -122,66 +117,66 @@ module.exports = class EventsDAO
   constructor: ->
 
   #db key -> eventId
-  saveScheduledEvent : (eventId, userId, date, eventType, providers, providersOptions, eventParams) ->
+  saveScheduledEvent: (eventId, userId, date, eventType, providers, providersOptions, eventParams) ->
 
     eventToSave =
-      user : userId
-      dateTime : (new Date(date)).getTime()
-      eventType : eventType
+      user: userId
+      dateTime: (new Date(date)).getTime()
+      eventType: eventType
       eventParams: eventParams
-      providers : providers
-      providersOptions : providersOptions
-      eventId : eventId
+      providers: providers
+      providersOptions: providersOptions
+      eventId: eventId
       chainedEventsCounts :0
 
     createEvent(eventToSave, scheduledEventsCollection)
 
-  createChainedEvent : (eventParentId, userId, eventType, providers, providersOptions, eventParams) ->
+  createChainedEvent: (eventParentId, userId, eventType, providers, providersOptions, eventParams) ->
 
     eventToSave =
-      user : userId
-      eventType : eventType
+      user: userId
+      eventType: eventType
       eventParams: eventParams
-      providers : providers
-      eventParentId : eventParentId
-      providersOptions : providersOptions
+      providers: providers
+      eventParentId: eventParentId
+      providersOptions: providersOptions
 
     #async callback : increments chainedEvents count in scheduledEvent
     createEvent eventToSave, chainedEventsCollection, ->
-      updateEvent eventParentId, {$inc:{chainedEventsCounts:1}}, scheduledEventsCollection
+      updateEvent eventParentId, $inc: chainedEventsCounts:1, scheduledEventsCollection
 
-  createTracedEvent : (userId, eventType, eventParams, providers, providersOptions, results) ->
-
-    eventToSave = getEventToSave(userId, eventType, eventParams, providers, providersOptions)
-    eventToSave.results=results
-    createEvent(eventToSave, tracedEventsCollection)
-
-  createTracedEventError : (userId, eventType, eventParams, providers, providersOptions, error) ->
+  createTracedEvent: (userId, eventType, eventParams, providers, providersOptions, results) ->
 
     eventToSave = getEventToSave(userId, eventType, eventParams, providers, providersOptions)
-    eventToSave.error=error
+    eventToSave.results = results
     createEvent(eventToSave, tracedEventsCollection)
 
-  updateScheduledEvent : (eventId, scheduledEvent) ->
+  createTracedEventError: (userId, eventType, eventParams, providers, providersOptions, error) ->
+
+    eventToSave = getEventToSave(userId, eventType, eventParams, providers, providersOptions)
+    eventToSave.error = error
+    createEvent(eventToSave, tracedEventsCollection)
+
+  updateScheduledEvent: (eventId, scheduledEvent) ->
     delete scheduledEvent._id
-    updateEvent({eventId:eventId}, scheduledEvent, scheduledEventsCollection)
+    updateEvent(eventId: eventId, scheduledEvent, scheduledEventsCollection)
 
-  updateScheduledEventAfterExecution : (eventId, results) ->
-    updateEvent({eventId:eventId}, {$set:{results:results}}, scheduledEventsCollection)
+  updateScheduledEventAfterExecution: (eventId, results) ->
+    updateEvent(eventId: eventId, {$set:{results:results}}, scheduledEventsCollection)
 
-  updateScheduledEventAfterError : (eventId, error) ->
+  updateScheduledEventAfterError: (eventId, error) ->
     updateEvent({eventId:eventId}, {$set:{error:error.toString()}}, scheduledEventsCollection)
 
-  updateChainedEventAfterExecution : (eventId, results) ->
+  updateChainedEventAfterExecution: (eventId, results) ->
     updateEvent({_id : new ObjectID(eventId) }, {$set:{results:results}}, chainedEventsCollection)
 
-  updateChainedEventAfterError : (eventId, error) ->
+  updateChainedEventAfterError: (eventId, error) ->
     updateEvent({_id : new ObjectID(eventId) }, {$set:{error:error.toString()}}, chainedEventsCollection)
 
-  deleteScheduledEvent : (eventId) ->
-    deleteEvent({eventId:eventId}, scheduledEventsCollection)
+  deleteScheduledEvent: (eventId) ->
+    deleteEvent(eventId: eventId, scheduledEventsCollection)
 
-  deleteChainedEvent : (eventId, eventParentId) ->
+  deleteChainedEvent: (eventId, eventParentId) ->
     eventToDelete =
       _id : new ObjectID(eventId)
 
@@ -189,22 +184,22 @@ module.exports = class EventsDAO
       if r.result.ok is 1
         updateEvent(eventParentId, {$inc:{chainedEventsCounts:-1}}, scheduledEventsCollection)
 
-  deleteTracedEvent : (eventId) ->
+  deleteTracedEvent: (eventId) ->
     eventToDelete =
       _id : new ObjectID(eventId)
     deleteEvent(eventToDelete, tracedEventsCollection)
 
   #at startup, retrieve all events and put them in scheduler
-  retrieveScheduledEvents : ->
+  retrieveScheduledEvents: ->
     retrieveEvents(scheduledEventsCollection)
 
-  retrieveChainedEvents : (eventId) ->
+  retrieveChainedEvents: (eventId) ->
     retrieveEvents(chainedEventsCollection, [{name : 'eventParentId', value:eventId}])
 
-  retrieveScheduledEventsByUser : (userId) ->
+  retrieveScheduledEventsByUser: (userId) ->
     retrieveEventsByQuery({user:userId}, scheduledEventsCollection, 'dateTime')
 
-  retrieveTracedEventsByUser : (userId) ->
+  retrieveTracedEventsByUser: (userId) ->
     retrieveEventsByQuery({user:userId},  tracedEventsCollection, 'dateTime')
 
   ###
@@ -213,8 +208,8 @@ module.exports = class EventsDAO
   chainedEventsCollection)
   ###
 
-  retrieveScheduledEvent : (eventId) ->
-    retrieveEvent({eventId:eventId}, scheduledEventsCollection)
+  retrieveScheduledEvent: (eventId) ->
+    retrieveEvent(eventId: eventId, scheduledEventsCollection)
 
-  retrieveChainedEvent : (eventId) ->
-    retrieveEvent({_id : new ObjectID(eventId)}, chainedEventsCollection)
+  retrieveChainedEvent: (eventId) ->
+    retrieveEvent(_id: new ObjectID(eventId), chainedEventsCollection)
