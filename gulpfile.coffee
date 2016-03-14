@@ -4,6 +4,8 @@ gulp = require 'gulp'
 istanbul = require 'gulp-coffee-istanbul'
 mocha = require 'gulp-mocha'
 uglify = require 'gulp-uglify'
+gulpFilter = require 'gulp-filter'
+guppy = require('git-guppy')(gulp)
 
 gulp.task 'coverage', ->
   gulp.src [
@@ -63,7 +65,25 @@ gulp.task "compileAngularCoffee", ->
   .pipe coffee(bare: true).on "error", (err) -> console.error err
   .pipe gulp.dest "./temp/client"
 
-gulp.task 'pre-commit', ['coffeelintNode']
+gulp.task 'pre-commit', guppy.src 'pre-commit', (files) ->
+  opt =
+    max_line_length:
+      value: 120
+      level: 'error'
+    cyclomatic_complexity:
+      level: 'error'
+    space_operators:
+      level: 'error'
+    no_unnecessary_double_quotes:
+      level: 'error'
+    eol_last:
+      level: 'error'
+    no_debugger:
+      level: 'error'
+  gulp.src(files)
+  .pipe gulpFilter(['./src/server/**/*.coffee'])
+  .pipe coffeelint opt
+  .pipe coffeelint.reporter('fail')
 
 gulp.task 'default', [
   'coffeelintNode'
