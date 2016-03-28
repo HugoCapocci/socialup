@@ -25,32 +25,32 @@ describe 'test Twitter API', ->
     oauth_timestamp: 1318622958
     oauth_token: '370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb'
     oauth_version: '1.0'
-  httpMethod='post'
+  httpMethod = 'post'
   url = 'https://api.twitter.com/1/statuses/update.json'
-  consumerSecret='kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw'
+  consumerSecret = 'kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw'
   tokenSecret = 'LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE'
 
   describe 'Signature', ->
 
     it 'STEP 1 - signature base string encoding', ->
-      twitterAPI.createSignatureBaseString(params, httpMethod, url).should.equal(TEST_BASE_STRING)
+      twitterAPI.createSignatureBaseString(params, httpMethod, url).should.equal TEST_BASE_STRING
 
     it 'STEP 2 - signing key', ->
-      twitterAPI.createSigningKey(consumerSecret, tokenSecret).should.equal(TEST_SIGNING_KEY)
+      twitterAPI.createSigningKey(consumerSecret, tokenSecret).should.equal TEST_SIGNING_KEY
 
     it 'STEP 3 - create signature', ->
-      twitterAPI.createSignature(TEST_BASE_STRING, TEST_SIGNING_KEY).should.equal(TEST_SIGNATURE)
+      twitterAPI.createSignature(TEST_BASE_STRING, TEST_SIGNING_KEY).should.equal TEST_SIGNATURE
 
     it 'Global Signature TEST ', ->
-      twitterAPI.getSignature(params, httpMethod, url, tokenSecret, consumerSecret).should.equal(TEST_SIGNATURE)
+      twitterAPI.getSignature(params, httpMethod, url, tokenSecret, consumerSecret).should.equal TEST_SIGNATURE
 
     it 'body response to token object', ->
-      tokens = twitterAPI.bodyToTokens("param1=value1&param2=value2")
-      tokens.param1.should.equal('value1')
-      tokens.param2.should.equal('value2')
+      tokens = twitterAPI.bodyToTokens 'param1=value1&param2=value2'
+      tokens.param1.should.equal 'value1'
+      tokens.param2.should.equal 'value2'
 
     it 'check oauth url', ->
-      twitterAPI.getOAuthURL().should.equal('https://api.twitter.com/oauth/authorize')
+      twitterAPI.getOAuthURL().should.equal 'https://api.twitter.com/oauth/authorize'
 
   describe 'DAO API', ->
     beforeEach ->
@@ -62,12 +62,11 @@ describe 'test Twitter API', ->
     describe 'tweets', ->
       it 'should get tweets', (done) ->
         sinon.stub(twitterAPI, 'getSignature').returns 'dummySignature'
-        sinon.stub(request, 'get').yields(null, null, {})
-        twitterAPI.getTweets(oauth_token: 'dummy_oauth_token').then (tweets) ->
-          #console.log 'tweets: ', tweets
+        sinon.stub(request, 'get').yields null, null, {}
+        twitterAPI.getTweets oauth_token: 'dummy_oauth_token'
+        .then (tweets) ->
           console.log twitterAPI.getSignature()
           done()
         .catch (error) ->
           console.log 'error: ', console.error
           done error
-        #.and.notify done

@@ -11,7 +11,7 @@ describe 'UserDAO', ->
   deleteTestData = (done) ->
     MongoClient = require('mongodb').MongoClient
     MongoClient.connect process.env.MONGOLAB_URI, (err, db) ->
-      db.collection "users"
+      db.collection 'users'
       .remove login: $in: ['test', 'test2', 'test3'], ->
         db.close()
         done()

@@ -10,8 +10,10 @@ guppy = require('git-guppy')(gulp)
 gulp.task 'coverage', ->
   gulp.src [
     'src/server/**/*.coffee'
+    '!src/server/coffee/providersAPI.coffee'
+    '!src/server/coffee/oauthCallback.coffee'
   ]
-  .pipe istanbul includeUntested: true
+  .pipe istanbul includeUntested: false
   .pipe istanbul.hookRequire()
   .on 'finish', ->
     gulp.src [
@@ -22,9 +24,8 @@ gulp.task 'coverage', ->
       reporters: [ 'lcov', 'json' ]
       dir: 'coverage/server-report'
     .once 'error', -> process.exit 1
-    .once 'end', -> process.exit 0
 
-gulp.task 'coffeelintNode', ['compileCoffee'], ->
+gulp.task 'coffeelintNode', ->
   opt =
     max_line_length:
       value: 120
@@ -42,16 +43,12 @@ gulp.task 'coffeelintNode', ['compileCoffee'], ->
   gulp.src ['src/server/**/*.coffee']
   .pipe coffeelint opt
   .pipe coffeelint.reporter()
-  .pipe coffeelint.reporter('fail')
-  .on 'error', (code) ->
-    process.exit 1
-  .on 'end', ->
-    process.exit 0
+  .pipe coffeelint.reporter 'fail'
+  .on 'error', (code) -> process.exit 1
 
-gulp.task 'pre-commit', ['coffeelintNode']
+gulp.task 'pre-commit', ['coffeelintNode', 'coverage']
 
 gulp.task 'minifyServer', ['compileCoffee'], ->
-  #TODO remove temp files
   gulp.src ['./temp/server/**/*.js']
   .pipe uglify()
   .pipe gulp.dest './server'
@@ -63,16 +60,18 @@ gulp.task 'minifyClient', ['compileAngularCoffee'], ->
   .pipe gulp.dest './public'
 
 gulp.task 'compileCoffee', ->
-  gulp.src ["./src/server/coffee/**/*.coffee"]
-  .pipe coffee(bare: true).on "error", (err) -> console.error err
-  .pipe gulp.dest "./temp/server"
+  gulp.src ['./src/server/coffee/**/*.coffee']
+  .pipe coffee(bare: true).on 'error', (err) ->
+    console.error 'compileCoffee error: ', err
+    process.exit 1
+  .pipe gulp.dest './temp/server'
 
-gulp.task "compileAngularCoffee", ->
-  gulp.src ["./src/client/**/*.coffee"]
-  .pipe coffee(bare: true).on "error", (err) -> console.error err
-  .pipe gulp.dest "./temp/client"
-
-
+gulp.task 'compileAngularCoffee', ->
+  gulp.src ['./src/client/**/*.coffee']
+  .pipe coffee(bare: true).on 'error', (err) ->
+    console.error 'compileAngularCoffee error: ', err
+    process.exit 1
+  .pipe gulp.dest './temp/client'
 
 gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
   opt =
@@ -90,8 +89,8 @@ gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
     no_debugger:
       level: 'error'
   console.log 'files? ', files
-  gulp.src(files)
-  .pipe gulpFilter(['.coffee'])
+  gulp.src files
+  .pipe gulpFilter ['.coffee']
   .pipe coffeelint opt
   .pipe coffeelint.reporter()
   .on 'error', ->
