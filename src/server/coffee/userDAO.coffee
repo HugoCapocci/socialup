@@ -1,149 +1,139 @@
 Promise = require 'bluebird'
-MongoClient = require('mongodb').MongoClient
-ObjectID = require('mongodb').ObjectID
-collection = "users"
+MongoDB = require 'mongodb'
+Promise.promisifyAll MongoDB
+MongoClient = MongoDB.MongoClient
+Promise.promisifyAll MongoClient
+ObjectID = MongoDB.ObjectID
+collection = 'users'
 
-getDB = (callback) ->
-  MongoClient.connect process.env.MONGOLAB_URI, (err, db) ->
-    if err
-      throw err
-    else
-      callback(db)
+getDB = ->
+  MongoClient.connect process.env.MONGOLAB_URI
 
 createUser = (user) ->
-
   deferred = Promise.pending()
-  getDB (db) ->
-    #console.log('update event '+eventId+' with result: ', result);
-    db.collection(collection).insert user, (err, r) ->
-      #console.log("user saved ?", r.result);
-      db.close()
-      if err
-        deferred.reject new Error(err)
-      else
-        user._id = r.insertedIds[0]
-        deferred.resolve(user)
+  @db = null
+  getDB()
+  .then (db) ->
+    @db = db
+    @db.collection(collection).insert user
+  .then (r) ->
+    @db.close()
+    deferred.resolve r.ops[0]
+  .catch (error) ->
+    deferred.reject new Error error
 
   deferred.promise
 
 updateUser = (user) ->
-
   deferred = Promise.pending()
-  query =
-    _id: user._id
+  query = _id: user._id
+  @db = null
+  getDB()
+  .then (db) ->
+    @db = db
+    @db.collection(collection).update query, user
+  .then ->
+    @db.close()
+    deferred.resolve user
+  .catch (error) ->
+    deferred.reject new Error error
 
-  getDB (db) ->
-    db.collection(collection).update query, user, (err) ->
-      db.close()
-      if err
-        console.log("err: ", err)
-        deferred.reject new Error(err)
-      else
-        deferred.resolve(user)
   deferred.promise
 
 retrieveUser = (query) ->
-
   deferred = Promise.pending()
-  getDB (db) ->
-    db.collection(collection).findOne query, (err, user) ->
-      db.close()
-      if err
-        deferred.reject new Error(err)
-      else
-        deferred.resolve(user)
+  @db = null
+  getDB()
+  .then (db) ->
+    @db = db
+    @db.collection(collection).findOne query
+  .then (user) ->
+    @db.close()
+    deferred.resolve user
+  .catch (error) ->
+    deferred.reject new Error error
   deferred.promise
 
 module.exports = class UserDAO
-
   constructor: ->
-
   #save user and its provider tokens
   saveUser: (user) ->
-
-    if user._id is undefined
-      createUser(user)
+    if not user._id?
+      createUser user
     else
-      updateUser(user)
-
+      updateUser user
   #asynch
   updateUserTokens: (userId, provider, tokens) ->
-
-    query =
-      _id : new ObjectID(userId)
-
-    fieldUpdate =
-      $set : {}
-
-    fieldUpdate.$set["providers."+provider+".tokens"]=tokens
-
-    getDB (db) ->
-      db.collection(collection).updateOne query, fieldUpdate, {upsert:false}, (err) ->
-        db.close()
-        if err
-          console.log("err: ", err)
-        else
-          console.log("update token for provider "+provider+" OK")
+    query = _id: new ObjectID userId
+    fieldUpdate = $set : {}
+    fieldUpdate.$set["providers.#{provider}.tokens"] = tokens
+    @db = null
+    getDB()
+    .then (db) ->
+      @db = db
+      @db.collection(collection).updateOne query, fieldUpdate, {upsert:false}
+    .then ->
+      console.log "update token for provider #{provider} OK"
+      @db.close()
+    .catch (error) ->
+      console.log 'err: ', error
 
   retrieveUsers: ->
-
     deferred = Promise.pending()
-    getDB (db) ->
-      #console.log('update event '+eventId+' with result: ', result);
-      db.collection(collection).find({}).toArray (err, users) ->
-        #console.log("user retrieved ?", result);
-        db.close()
-        if err
-          deferred.reject new Error(err)
-        else
-          deferred.resolve(users)
+    @db = null
+    getDB()
+    .then (db) ->
+      @db = db
+      #console.log('update event '+eventId+' with result: ', result)
+      @db.collection(collection).find({}).toArray()
+    .then (users) ->
+      @db.close()
+      deferred.resolve users
+    .catch (error) ->
+      deferred.reject new Error error
 
     deferred.promise
 
   retrieveUserByLogin: (login) ->
-
-    query =
-      login:login
-    retrieveUser(query)
+    query = login: login
+    retrieveUser query
 
   retrieveUserById: (userId) ->
-
-    query =
-      _id : new ObjectID(userId)
-    retrieveUser(query)
+    query = _id: new ObjectID userId
+    retrieveUser query
 
   authenticate: (login, password) ->
-
     deferred = Promise.pending()
-    getDB (db) ->
-      db.collection(collection).findOne {login:login, password:password}, (err, result) ->
-        db.close()
-        if err
-          deferred.reject new Error(err)
-        else if result is null
-          deferred.reject('no user found')
-        else
-          deferred.resolve(result)
+    @db = null
+    getDB()
+    .then (db) ->
+      @db = db
+      @db.collection(collection).findOne {login: login, password: password}
+    .then (result) ->
+      @db.close()
+      if result is null
+        deferred.reject 'no user found'
+      else
+        deferred.resolve result
+    .catch (error) ->
+      deferred.reject new Error error
 
     deferred.promise
 
   deleteToken: (provider, userId) ->
-
     deferred = Promise.pending()
-    getDB (db) ->
-
-      query =
-        _id : new ObjectID(userId)
-
-      unset =
-        $unset: {}
-
-      unset.$unset["providers."+provider+".tokens"] = ''
-      db.collection(collection).update query, unset, (err, r) ->
-        db.close()
-        if err
-          deferred.reject new Error(err)
-        else
-          deferred.resolve(r.result.n)
+    @db = null
+    getDB()
+    .then (db) ->
+      @db = db
+      query = _id : new ObjectID userId
+      unset = $unset: {}
+      unset.$unset["providers.#{provider}.tokens"] = ''
+      @db.collection(collection).update query, unset
+    .then (r) ->
+      @db.close()
+      deferred.resolve r.result.n
+    .catch (error) ->
+      deferred.reject new Error error
 
     deferred.promise

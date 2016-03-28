@@ -1,65 +1,60 @@
 fs = require 'fs'
 should = require 'should'
 
-if process.env.MONGOLAB_URI is undefined
-  try
-    require '../../localeConfig.coffee'
-  catch
-    console.log "No configuration file found"
+require '../../localeConfig' unless process.env.MONGOLAB_URI?
 
 UserDAO = require '../../src/server/coffee/userDAO'
 userDAO = new UserDAO
 
-describe.skip "UserDAO", ->
+describe 'UserDAO', ->
 
   deleteTestData = (done) ->
     MongoClient = require('mongodb').MongoClient
     MongoClient.connect process.env.MONGOLAB_URI, (err, db) ->
       db.collection "users"
-      .remove login:'test', ->
+      .remove login: $in: ['test', 'test2', 'test3'], ->
         db.close()
         done()
 
   before (done) ->
-    this.timeout 10000
+    @timeout 10000
     deleteTestData done
 
-  after (done) ->
-    this.timeout 10000
+  before (done) ->
+    @timeout 10000
     deleteTestData done
 
-  it "create new User", (done) ->
-      this.timeout 10000
-      user =
-        login: 'test'
-      userDAO.saveUser user
-      .then (result) ->
-        should.exist result._id
-        done()
-
-  it "retrieve User", (done) ->
-    this.timeout 10000
-    userDAO.retrieveUserByLogin 'test'
+  it 'create new User', (done) ->
+    @timeout 10000
+    userDAO.saveUser login: 'test'
     .then (result) ->
-      ('test').should.equal result.login
-      done()
-
-  it "update User", (done) ->
-    this.timeout(15000)
-    user =
-      login: 'test'
-      newParam : 'newValue'
-    userDAO.retrieveUserByLogin 'test'
-    .then (result) ->
-
-      ('test').should.equal result.login
       should.exist result._id
-      user._id = result._id
+      done()
+    .catch (error) -> done error
+
+  it 'retrieve User', (done) ->
+    @timeout 10000
+    userDAO.saveUser login: 'test2'
+    .then ->
+      userDAO.retrieveUserByLogin 'test2'
+    .then (result) ->
+      ('test2').should.equal result.login
+      done()
+    .catch (error) -> done error
+
+  it 'update User', (done) ->
+    @timeout 15000
+    user = login: 'test3', newParam : 'newValue'
+    userDAO.saveUser login: 'test3'
+    .then ->
+      userDAO.retrieveUserByLogin 'test3'
+    .then (userFound) ->
+      ('test3').should.equal userFound.login
+      should.exist userFound._id
+      user._id = userFound._id
       userDAO.saveUser user
-      .then (result2) ->
-        should.exist result2._id
-        ('newValue').should.equal result2.newParam
-        done()
-      ,(err) ->
-        console.log "error : ", err
-        done err
+    .then (userUpdated) ->
+      should.exist userUpdated._id
+      ('newValue').should.equal userUpdated.newParam
+      done()
+    .catch (error) -> done error

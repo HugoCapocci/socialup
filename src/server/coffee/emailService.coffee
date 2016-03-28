@@ -2,7 +2,7 @@ nodemailer = require 'nodemailer'
 Promise = require 'bluebird'
 fs = require 'fs'
 
-try  require '../../localeConfig.coffee'
+try  require '../../localeConfig'
 catch
   console.warn 'No configuration file found'
 

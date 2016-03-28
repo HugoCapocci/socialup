@@ -21,8 +21,8 @@ gulp.task 'coverage', ->
     .pipe istanbul.writeReports
       reporters: [ 'lcov', 'json' ]
       dir: 'coverage/server-report'
-    .once 'error', -> process.exit()
-    .once 'end', -> process.exit()
+    .once 'error', -> process.exit 1
+    .once 'end', -> process.exit 0
 
 gulp.task 'coffeelintNode', ->
   opt =
@@ -65,7 +65,9 @@ gulp.task "compileAngularCoffee", ->
   .pipe coffee(bare: true).on "error", (err) -> console.error err
   .pipe gulp.dest "./temp/client"
 
-gulp.task 'pre-commit', guppy.src 'pre-commit', (files) ->
+gulp.task 'pre-commit', ['coffeelintNode']
+
+gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
   opt =
     max_line_length:
       value: 120
@@ -80,8 +82,9 @@ gulp.task 'pre-commit', guppy.src 'pre-commit', (files) ->
       level: 'error'
     no_debugger:
       level: 'error'
+  console.log 'files? ', files
   gulp.src(files)
-  .pipe gulpFilter(['./src/server/**/*.coffee'])
+  .pipe gulpFilter(['.coffee'])
   .pipe coffeelint opt
   .pipe coffeelint.reporter('fail')
 

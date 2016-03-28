@@ -2,11 +2,7 @@ fs = require 'fs'
 moment = require 'moment'
 should = require 'should'
 
-if not process.env.MONGOLAB_URI?
-  try
-    require '../../localeConfig.coffee'
-  catch
-    console.warn 'No configuration file found'
+require '../../localeConfig' unless process.env.MONGOLAB_URI?
 
 scheduler = require '../../src/server/coffee/scheduler.coffee'
 
@@ -15,7 +11,7 @@ describe 'scheduler', ->
   USER2 = 'test_user_bis'
 
   after (done) ->
-    @.timeout(10000)
+    @timeout(10000)
     #empty collection after tests
     MongoClient = require('mongodb').MongoClient
     MongoClient.connect process.env.MONGOLAB_URI, (err, db) ->
@@ -34,7 +30,7 @@ describe 'scheduler', ->
     console.log 'eventId: , eventId'
 
   it 'schedule event with 3 parameters', (done) ->
-    @.timeout 3000
+    @timeout 3000
     #old date so job will be executed directly
     date = new Date(Date.now() + 1500)
     event = (eventId, userId, params) ->
@@ -47,7 +43,7 @@ describe 'scheduler', ->
     console.log "eventId: ",eventId
 
   it 'schedule late event', (done) ->
-    @.timeout 4000
+    @timeout 4000
     #newer date
     date = new Date(Date.now() + 1500)
     eventId
@@ -69,7 +65,7 @@ describe 'scheduler', ->
     scheduler.cancelEvent(USER2+Date.now()).should.equal false
 
   it 'schedule complex function', (done) ->
-    @.timeout 3000
+    @timeout 3000
     facebookAPI = require '../../src/server/coffee/api/facebookAPI.coffee'
     event = ->
       oauthURL = facebookAPI.getOAuthURL()
@@ -80,7 +76,7 @@ describe 'scheduler', ->
     eventId = scheduler.scheduleEvent USER, date, "event4", [""]
 
   it 'save scheduled event in database (then execute it)', (done) ->
-    this.timeout 5000
+    @timeout 5000
     date = new Date Date.now() + 3000
     eventId=null
     event = (eventId, userId, params) ->
@@ -100,7 +96,7 @@ describe 'scheduler', ->
   it 'save complex scheduled event in database (then execute it)', (done) ->
     facebookAPI = require '../../src/server/coffee/api/facebookAPI.coffee'
     event = facebookAPI.getOAuthURL
-    @.timeout 10000
+    @timeout 10000
     date = new Date(Date.now() + 3000)
     scheduler.addEventListerner 'event6', event
     scheduler.saveScheduledEvent USER, date, 'event6', [""]
@@ -109,4 +105,4 @@ describe 'scheduler', ->
       done()
     .catch (err) ->
       console.log "err dans save Scheduled Event: ", err
-      done(err)
+      done err
