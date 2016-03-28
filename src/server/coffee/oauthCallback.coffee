@@ -84,7 +84,7 @@ executeChainedEvents = (chainedEvents, args) ->
     console.log 'execute chainedEvent: ', chainedEvent
     console.log 'with results: ', results
     params = null
-    if chainedEvent.eventType is'message'
+    if chainedEvent.eventType is 'message'
       params =
         url: args.url
         title: args.title
@@ -135,7 +135,7 @@ app.get '/oauthURL/:provider/:userId', (req, res) ->
   userId = req.params.userId
 
   #twitter is more complicated and cannot give synch url
-  if provider is'twitter'
+  if provider is 'twitter'
     providersAPI.twitter.getTokens userId
     .then (tokens) ->
       #store token for user
@@ -166,7 +166,7 @@ app.get '/*2callback', (req, res) ->
     oauth_token = req.query.oauth_token
     oauth_verifier = req.query.oauth_verifier
     tokens = users[userId].providers[TWITTER].tokens
-    tokens.oauth_token=oauth_token
+    tokens.oauth_token = oauth_token
     getTokens = ->
       providersAPI.twitter.getAccessToken oauth_verifier, tokens
     return
@@ -178,24 +178,22 @@ app.get '/*2callback', (req, res) ->
   getTokens()
   .then (tokens) ->
     if tokens.expires_in
-      tokens.expiry_date = Date.now() + ( if provider is 'linkedin' then tokens.expires_in*1000 else tokens.expires_in)
+      tokens.expiry_date = Date.now() + (if provider is 'linkedin' then tokens.expires_in * 1000 else tokens.expires_in)
       delete tokens.expires_in
-    users[userId].providers[provider] =
-      tokens : tokens
+    users[userId].providers[provider] = tokens: tokens
     #save google original token with refresh-token apart
     if provider is 'google' and tokens.refresh_token
-      users[userId].providers[provider].originalTokens=tokens
+      users[userId].providers[provider].originalTokens = tokens
     providersAPI[provider].getUserInfo(tokens)
 
   .then (userInfo) ->
     users[userId].providers[provider].userName = userInfo.userName
-    userDAO.saveUser(users[userId])
-
+    userDAO.saveUser users[userId]
   .then (userSaved) ->
     users[userId] = userSaved
     res.redirect '/#?close=true'
   .catch (err) ->
-    console.error "error : ", err
+    console.error 'error: ', err
     res.send err
 
 app.get '/events/:userId', (req, res) ->
@@ -204,7 +202,7 @@ app.get '/events/:userId', (req, res) ->
   .then (events) ->
     res.send events
   .catch (err) ->
-    res.send(err)
+    res.send err
 
 app.get '/chainedEvents/:eventParentId', (req, res) ->
   eventParentId = req.params.eventParentId
@@ -212,22 +210,22 @@ app.get '/chainedEvents/:eventParentId', (req, res) ->
   .then (events) ->
     res.send(events)
   .catch (err) ->
-    res.send(err)
+    res.send err
 
 app.get '/tracedEvents/:userId', (req, res) ->
   userId = req.params.userId
   eventsDAO.retrieveTracedEventsByUser(userId).then (events) ->
     res.send(events)
   .catch (err) ->
-    res.send(err)
+    res.send err
 
 app.get '/event/:eventId', (req, res) ->
 
   eventId = req.params.eventId
   eventsDAO.retrieveScheduledEvent(eventId).then (events) ->
-    res.send(events)
+    res.send events
   .catch (err) ->
-    res.send(err)
+    res.send err
 
 app.post '/event/:eventId', (req, res) ->
 
@@ -237,47 +235,46 @@ app.post '/event/:eventId', (req, res) ->
   eventsDAO.updateScheduledEvent(eventId, scheduledEvent).then(result) ->
     res.send(result)
   .catch (err) ->
-    res.send(err)
+    res.send err
 
 app.post '/event/chained/:provider/:eventId/:userId', (req, res) ->
 
   eventId = req.params.eventId
   userId = req.params.userId
-  provider= req.params.provider
+  provider = req.params.provider
   scheduledEvent = req.body
   eventsDAO.createChainedEvent eventId, userId, scheduledEvent.eventType, [provider], undefined,
-  scheduledEvent.eventParams .then (result) ->
-    res.send(result)
+  scheduledEvent.eventParams
+  .then (result) ->
+    res.send result
   .catch (err) ->
-    res.send(err)
+    res.send err
 
 app.delete '/event/:eventId', (req, res) ->
 
   eventId = req.params.eventId
   eventsDAO.deleteScheduledEvent(eventId).then (result) ->
     res.status( if result is 1 then 200 else 400).end()
-  .catch (err) ->
-    res.send(err)
+  .catch (err) -> res.send err
 
 app.delete '/event/chained/:eventId/:eventParentId', (req, res) ->
   eventId = req.params.eventId
   eventParentId = req.params.eventParentId
   eventsDAO.deleteChainedEvent(eventId, eventParentId).then (result) ->
     res.status(if result is 1 then 200 else 400).end()
-  .catch (err) ->
-    res.send(err)
+  .catch (err) -> res.send err
 
 app.delete '/event/traced/:eventId', (req, res) ->
   eventId = req.params.eventId
   eventsDAO.deleteTracedEvent(eventId).then (result) ->
     res.status(if result is 1 then 200 else 400).end()
-  .catch (err) ->
-    res.send(err)
+  .catch (err) -> res.send err
 
 app.delete '/token/:provider/:userId', (req, res) ->
   provider = req.params.provider
   userId = req.params.userId
-  userDAO.deleteToken(provider, userId).then (result) ->
+  userDAO.deleteToken provider, userId
+  .then (result) ->
     delete users[userId].providers[provider]
     res.status(if result is 1 then 200 else 400).end()
   .catch (err) ->
@@ -287,19 +284,18 @@ app.get '/refreshToken/:provider/:userId', (req, res) ->
 
   provider = req.params.provider
   userId = req.params.userId
-  getRefreshedToken(provider, userId).then (tokens) ->
-    users[userId].tokens[provider]=tokens
-    userDAO.updateUserTokens(userId, provider, tokens)
+  getRefreshedToken provider, userId
+  .then (tokens) ->
+    users[userId].tokens[provider] = tokens
+    userDAO.updateUserTokens userId, provider, tokens
     res.status(200).end()
-  .catch (err) ->
-    res.send(err)
+  .catch (err) -> res.send err
 
 app.get '/user/:userId', (req, res) ->
   userId = req.params.userId
   userDAO.retrieveUserById(userId).then (user) ->
-    res.send(user)
-  .catch (err) ->
-    res.send(err)
+    res.send user
+  .catch (err) -> res.send err
 
 app.get '/cloudExplorer/:provider/:folderId/:userId', (req, res) ->
 
@@ -320,7 +316,6 @@ app.get '/file/:provider/:fileId/:userId', (req, res) ->
   fileId = req.params.fileId
   provider = req.params.provider
   userId = req.params.userId
-
   getRefreshedToken(provider, userId).then (tokens) ->
     #pipe the bytes returned from request to the response 'res', in order to directly download the file
     providersAPI[provider].downloadFile(tokens, fileId).pipe(res)
@@ -332,26 +327,22 @@ app.delete '/file/:provider/:fileId/:userId', (req, res) ->
   fileId = req.params.fileId
   provider = req.params.provider
   userId = req.params.userId
-
   getRefreshedToken(provider, userId).then (tokens) ->
     #pipe the bytes returned from request to the response 'res', in order to directly download the file
     providersAPI[provider].deleteFile(tokens, fileId)
   .then ->
     res.status(204).end()
-  .catch (err) ->
-    res.send(err)
+  .catch (err) -> res.send err
 
 app.get '/spaceUsage/:provider/:userId', (req, res) ->
 
   provider = req.params.provider
   userId = req.params.userId
-
   getRefreshedToken(provider, userId).then (tokens) ->
     providersAPI[provider].getSpaceUsage(tokens)
   .then (spaceUsage) ->
     res.send(spaceUsage)
-  .catch (err) ->
-    res.send(err)
+  .catch (err) -> res.send err
 
 app.get '/searchPage/:provider/:pageName', (req, res) ->
 
@@ -361,15 +352,13 @@ app.get '/searchPage/:provider/:pageName', (req, res) ->
   if not userId
     providersAPI[provider].searchPage(undefined, pageName).then (pagesFound) ->
       res.send(pagesFound)
-    .catch (err) ->
-      res.send(err)
+    .catch (err) -> res.send err
   else
     getRefreshedToken(provider, userId).then (tokens) ->
       providersAPI[provider].searchPage(tokens, pageName)
     .then (pagesFound) ->
       res.send(pagesFound)
-    .catch (err) ->
-      res.send(err)
+    .catch (err) -> res.send err
 
 app.get '/pageMetrics/:provider/:metricType/:pageId', (req, res) ->
 
@@ -379,19 +368,18 @@ app.get '/pageMetrics/:provider/:metricType/:pageId', (req, res) ->
   sinceData = req.query.since
   untilDate = req.query.until
   userId = req.query.userId
-
   if not userId
-    providersAPI[provider].getPageMetrics(undefined, metricType, pageId, sinceData, untilDate).then (pagesFound) ->
+    providersAPI[provider].getPageMetrics undefined, metricType, pageId, sinceData, untilDate
+    .then (pagesFound) ->
       res.send(pagesFound)
     .catch (err) ->
       res.send(err)
   else
     getRefreshedToken(provider, userId).then (tokens) ->
-      providersAPI[provider].getPageMetrics(tokens, metricType, pageId, sinceData, untilDate)
+      providersAPI[provider].getPageMetrics tokens, metricType, pageId, sinceData, untilDate
     .then (pagesFound) ->
       res.send(pagesFound)
-    .catch (err) ->
-      res.send(err)
+    .catch (err) -> res.send err
 
 app.post '/message/:userId', (req, res) ->
 
@@ -403,30 +391,30 @@ app.post '/message/:userId', (req, res) ->
   providersOptions = req.body.providersOptions
 
   if eventParentId
-    eventsDAO.createChainedEvent eventParentId, userId, "message", providers, providersOptions, [message]
+    eventsDAO.createChainedEvent eventParentId, userId, 'message', providers, providersOptions, [message]
     .then (eventId) ->
       res.send(eventId)
     .catch (err) ->
-      res.send("Cannot create or save chained event: "+err)
+      res.send('Cannot create or save chained event: ' + err)
 
-  else if scheduledDate? or (new Date(scheduledDate)).getTime()<=Date.now()
+  else if scheduledDate? or (new Date scheduledDate).getTime() < =Date.now()
     #direct message
     postMessageToProviders userId, providers, providersOptions, message
     .then (results) ->
-      eventsDAO.createTracedEvent(userId, "message", [message], providers, providers, results)
+      eventsDAO.createTracedEvent(userId, 'message', [message], providers, providers, results)
       res.send(results)
     .catch (err) ->
-      eventsDAO.createTracedEventError(userId, "message", [message], providers, providers, err)
-      res.send("Cannot send message err: "+err)
+      eventsDAO.createTracedEventError(userId, 'message', [message], providers, providers, err)
+      res.send('Cannot send message err: ' + err)
 
   else
     #scheduled event (eventId, userId, date, eventType, providers, eventParams)
-    console.log("schedule event for ",scheduledDate)
-    scheduler.saveScheduledEvent userId, scheduledDate, "message", providers, providersOptions, [message]
+    console.log('schedule event for ',scheduledDate)
+    scheduler.saveScheduledEvent userId, scheduledDate, 'message', providers, providersOptions, [message]
     .then (eventId) ->
       res.send(eventId)
     .catch (err) ->
-      res.send("Cannot create or save scheduled event: "+err)
+      res.send('Cannot create or save scheduled event: ' + err)
 
 #simple message
 postMessageToProviders = (userId, providers, providersOptions, message) ->
@@ -440,7 +428,7 @@ postMessageToProvider = (userId, provider, providerOptions, message) ->
 
   deffered = Q.defer()
   if not providersAPI[provider] or not providersAPI[provider].postMessage
-    deffered.reject(new Error "unknow provider "+provider+" or unsupported function postMessage" )
+    deffered.reject(new Error 'unknow provider ' + provider + ' or unsupported function postMessage' )
 
   getRefreshedToken provider, userId
   .then (tokens) ->
@@ -455,7 +443,7 @@ postMessageToProvider = (userId, provider, providerOptions, message) ->
 #message with media link
 postMediaLinkToProviders = (userId, providers, message, url, name, description, messageProvidersOptions) ->
   results = []
-  console.log "postMediaLinkToProviders, messageProvidersOptions: ",messageProvidersOptions
+  console.log 'postMediaLinkToProviders, messageProvidersOptions: ',messageProvidersOptions
   for provider in providers
     if messageProvidersOptions?
       results.push postMediaLinkToProvider userId, provider, message, url, name, description,
@@ -466,10 +454,10 @@ postMediaLinkToProviders = (userId, providers, message, url, name, description, 
 
 postMediaLinkToProvider = (userId, provider, message, url, name, description, messageProviderOptions) ->
 
-  console.log "postMediaLinkToProvider, messageProviderOptions: ",messageProviderOptions
+  console.log 'postMediaLinkToProvider, messageProviderOptions: ',messageProviderOptions
   deffered = Q.defer()
   if not providersAPI[provider] or not providersAPI[provider].postMediaLink
-    deffered.reject new Error "unknow provider "+provider+" or unsupported function postMessage"
+    deffered.reject new Error 'unknow provider '+provider+' or unsupported function postMessage'
 
   getRefreshedToken provider, userId
   .then (tokens) ->
@@ -529,7 +517,7 @@ app.post '/uploadFileToCloud/:userId', upload.single 'file', (req, res) ->
   .then (tokens) ->
     providersAPI[provider].uploadDrive tokens, req.file, req.body.target
   .then (result) ->
-    eventsDAO.createTracedEvent userId, "uploadFileToCloud", [req.file.originalname], [provider], undefined, result
+    eventsDAO.createTracedEvent userId, 'uploadFileToCloud', [req.file.originalname], [provider], undefined, result
     res.send result
   .catch (err) ->
     res.status(403).send err
@@ -551,7 +539,7 @@ app.post '/uploadMusic/:userId', upload.single('file'), (req, res) ->
   sendMusicToProviders providers, userId, req.file, params
   .then (results) ->
     fs.unlink req.file.path
-    eventsDAO.createTracedEvent userId, "uploadMusic", params, providers, undefined, results
+    eventsDAO.createTracedEvent userId, 'uploadMusic', params, providers, undefined, results
     res.send results
   .catch (err) ->
     console.log err
@@ -568,7 +556,7 @@ sendMusicToProvider = (provider, userId, file, params) ->
   deffered = Q.defer()
   getRefreshedToken provider, userId
   .then (tokens) ->
-    console.log "sendMusic with provider: ", provider
+    console.log 'sendMusic with provider: ', provider
     providersAPI[provider].sendMusic tokens, file, params
   .then (result) ->
     result.provider=provider
@@ -601,24 +589,24 @@ app.post '/uploadFile/:userId', upload.single('file'), (req, res) ->
 
     publishFileToProviders userId, providers, providersOptions, req.file, params
     .then (results) ->
-      console.log("uploadFile OK")
+      console.log('uploadFile OK')
       fs.unlink(req.file.path)
       #async save
-      eventsDAO.createTracedEvent(userId, "uploadVideo", params, providers, providersOptions, results)
+      eventsDAO.createTracedEvent(userId, 'uploadVideo', params, providers, providersOptions, results)
       res.send(results)
     .catch (err) ->
-      console.error("error in uploadFile: ", err)
-      eventsDAO.createTracedEventError(userId, "uploadVideo", params, providers, providersOptions, err)
+      console.error('error in uploadFile: ', err)
+      eventsDAO.createTracedEventError(userId, 'uploadVideo', params, providers, providersOptions, err)
       res.status(403).send(err)
   #scheduled event
   else
-    scheduler.saveScheduledEvent userId, scheduledDate, "uploadVideo", providers, providersOptions, [req.file,
+    scheduler.saveScheduledEvent userId, scheduledDate, 'uploadVideo', providers, providersOptions, [req.file,
     params.title, params.description, params.tags]
     .then (eventId) ->
       res.send(eventId)
     .catch (err) ->
-      console.log("err dans save Scheduled Event: ", err)
-      res.send("Cannot create or save scheduled event: "+err)
+      console.log('err dans save Scheduled Event: ', err)
+      res.send('Cannot create or save scheduled event: ' + err)
 
 publishFileToProviders = (userId, providers, providersOptions, file, params) ->
 
@@ -633,7 +621,7 @@ publishFileToProvider = (userId, provider, providerOptions, file, params) ->
   getRefreshedToken(provider, userId).then (tokens) ->
     providersAPI[provider].sendVideo(tokens, file, userId, params, providerOptions)
   .then (result) ->
-    result.provider=provider
+    result.provider = provider
     deffered.resolve(result)
   .catch (err) ->
     deffered.reject(err)
@@ -708,7 +696,7 @@ app.get '/search/video/:provider', (req, res) ->
   order = req.query.order
   next = req.query.next
   limit = req.query.limit
-  if not limit or parseInt(limit)<10 or parseInt(limit)>50
+  if not limit or parseInt(limit) < 10 or parseInt(limit) > 50
     res.status(422).send 'limit field not properly set (must be >= 10 and <=50)'
   else
     providersAPI[provider].searchVideo videoName, limit, order, next
@@ -720,7 +708,7 @@ app.get '/search/video/:provider', (req, res) ->
 app.get '/media/:provider/:userId', (req, res) ->
 
   provider = req.params.provider
-  userId=req.params.userId
+  userId = req.params.userId
   getRefreshedToken provider, userId
   .then (tokens) ->
     providersAPI[provider].listMedia tokens, userId, users[userId].providers[provider].userName
@@ -732,7 +720,7 @@ app.get '/media/:provider/:userId', (req, res) ->
 app.get '/authenticate', (req, res) ->
 
   login = req.query.login
-  password= req.query.password
+  password = req.query.password
   if login? and password?
     userDAO.authenticate login, password
     .then (data) ->
@@ -741,7 +729,7 @@ app.get '/authenticate', (req, res) ->
       console.log err
       res.status(403).end()
   else
-    console.log "social auth not yet implemented"
+    console.log 'social auth not yet implemented'
     res.status(404).end()
 
 app.post '/user/create', (req, res) ->
@@ -767,13 +755,13 @@ app.post '/user/create', (req, res) ->
       console.log err
       res.status(404).end()
   else
-    console.log "social user registration not yet implemented"
+    console.log 'social user registration not yet implemented'
     res.status(404).end()
 
 app.post '/user/resetPassword/:userEmail', (req, res) ->
-  userEmail=req.params.userEmail
+  userEmail = req.params.userEmail
   #TODO verifier que le user existe
-  emailService.sendMail "reset", userEmail
+  emailService.sendMail 'reset', userEmail
   .then (data) ->
     res.send data
   .catch (err) ->

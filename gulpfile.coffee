@@ -24,7 +24,7 @@ gulp.task 'coverage', ->
     .once 'error', -> process.exit 1
     .once 'end', -> process.exit 0
 
-gulp.task 'coffeelintNode', ->
+gulp.task 'coffeelintNode', ['compileCoffee'], ->
   opt =
     max_line_length:
       value: 120
@@ -42,16 +42,23 @@ gulp.task 'coffeelintNode', ->
   gulp.src ['src/server/**/*.coffee']
   .pipe coffeelint opt
   .pipe coffeelint.reporter()
+  .pipe coffeelint.reporter('fail')
+  .on 'error', (code) ->
+    process.exit 1
+  .on 'end', ->
+    process.exit 0
+
+gulp.task 'pre-commit', ['coffeelintNode']
 
 gulp.task 'minifyServer', ['compileCoffee'], ->
   #TODO remove temp files
-  gulp.src ["./temp/server/**/*.js"]
+  gulp.src ['./temp/server/**/*.js']
   .pipe uglify()
-  .pipe gulp.dest "./server"
+  .pipe gulp.dest './server'
 
 gulp.task 'minifyClient', ['compileAngularCoffee'], ->
   #TODO remove temp files
-  gulp.src ["./temp/client/**/*.js"]
+  gulp.src ['./temp/client/**/*.js']
   .pipe uglify()
   .pipe gulp.dest './public'
 
@@ -65,9 +72,9 @@ gulp.task "compileAngularCoffee", ->
   .pipe coffee(bare: true).on "error", (err) -> console.error err
   .pipe gulp.dest "./temp/client"
 
-gulp.task 'pre-commit.test', ['coffeelintNode']
 
-gulp.task 'pre-commit', guppy.src 'pre-commit', (files) ->
+
+gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
   opt =
     max_line_length:
       value: 120
@@ -88,10 +95,8 @@ gulp.task 'pre-commit', guppy.src 'pre-commit', (files) ->
   .pipe coffeelint opt
   .pipe coffeelint.reporter()
   .on 'error', ->
-    console.log 'pre-commit error'
     process.exit 1
   .on 'end', ->
-    console.log 'pre-commit end'
     process.exit 0
 
 gulp.task 'default', [
