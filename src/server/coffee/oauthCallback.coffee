@@ -434,7 +434,7 @@ postMessageToProvider = (userId, provider, providerOptions, message) ->
   .then (tokens) ->
     providersAPI[provider].postMessage tokens, message, providerOptions
   .then (result) ->
-    result.provider=provider
+    result.provider = provider
     deffered.resolve result
   .catch (err) ->
     deffered.reject err
@@ -457,7 +457,7 @@ postMediaLinkToProvider = (userId, provider, message, url, name, description, me
   console.log 'postMediaLinkToProvider, messageProviderOptions: ',messageProviderOptions
   deffered = Q.defer()
   if not providersAPI[provider] or not providersAPI[provider].postMediaLink
-    deffered.reject new Error 'unknow provider '+provider+' or unsupported function postMessage'
+    deffered.reject new Error 'unknow provider ' + provider + ' or unsupported function postMessage'
 
   getRefreshedToken provider, userId
   .then (tokens) ->
@@ -481,7 +481,7 @@ app.post '/publishFromCloud/:userId', (req, res) ->
 
   getRefreshedToken(cloudProvider, userId)
   .then (tokens) ->
-    writeStream = fs.createWriteStream './server/uploads/'+userId+fileName
+    writeStream = fs.createWriteStream './server/uploads/' + userId + fileName
     providersAPI[cloudProvider].downloadFile(tokens, fileId).pipe writeStream
     writeStream.on 'finish', ->
       console.log 'file downloaded '
@@ -495,7 +495,7 @@ app.post '/publishFromCloud/:userId', (req, res) ->
       publishFileToProviders userId, providers, providersOptions, path: './server/uploads/' + userId + fileName, params
       .then (results) ->
         #delete temp file
-        fs.unlink './server/uploads/'+userId+fileName
+        fs.unlink './server/uploads/' + userId + fileName
         eventsDAO.createTracedEvent userId, 'publishFromCloud', [params.title, params.description, params.tags,
         cloudProvider], providers, providersOptions, results
         res.send results
@@ -525,15 +525,15 @@ app.post '/uploadFileToCloud/:userId', upload.single 'file', (req, res) ->
 app.post '/uploadMusic/:userId', upload.single('file'), (req, res) ->
 
   path = req.file.path
-  fs.renameSync path, path+'_'+req.file.originalname
-  req.file.path = path+'_'+req.file.originalname
+  fs.renameSync path, path + '_' + req.file.originalname
+  req.file.path = path + '_' + req.file.originalname
   userId = req.params.userId
   #TODO add scheduler
   #var scheduledDate = req.body.scheduledDate
   providers = req.body.providers.split ','
   params =
-    title : req.body.title
-    description : req.body.description
+    title: req.body.title
+    description: req.body.description
   if req.body.tags?
     params.tags = req.body.tags.split ','
   sendMusicToProviders providers, userId, req.file, params
@@ -543,7 +543,7 @@ app.post '/uploadMusic/:userId', upload.single('file'), (req, res) ->
     res.send results
   .catch (err) ->
     console.log err
-    eventsDAO.createTracedEventError userId, "uploadMusic", params, providers, undefined, err
+    eventsDAO.createTracedEventError userId, 'uploadMusic', params, providers, undefined, err
     res.status(403).send err
 
 sendMusicToProviders = (providers, userId, file, params) ->
@@ -559,7 +559,7 @@ sendMusicToProvider = (provider, userId, file, params) ->
     console.log 'sendMusic with provider: ', provider
     providersAPI[provider].sendMusic tokens, file, params
   .then (result) ->
-    result.provider=provider
+    result.provider = provider
     deffered.resolve result
   .catch (err) ->
     deffered.reject err
@@ -569,8 +569,8 @@ sendMusicToProvider = (provider, userId, file, params) ->
 app.post '/uploadFile/:userId', upload.single('file'), (req, res) ->
   #dailymotion issue : need file extension
   path = req.file.path
-  fs.renameSync path, path+'_'+req.file.originalname
-  req.file.path = path+'_'+req.file.originalname
+  fs.renameSync path, path + '_' + req.file.originalname
+  req.file.path = path + '_' + req.file.originalname
   userId = req.params.userId
   scheduledDate = req.body.scheduledDate
   providers = req.body.providers.split ','

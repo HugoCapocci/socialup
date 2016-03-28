@@ -48,13 +48,13 @@ cancelEvent = (eventId) ->
   if schedule.scheduledJobs[eventId] is undefined
     return false
   else
-    user= eventId.split('|')[0]
+    user = eventId.split('|')[0]
     schedule.scheduledJobs[eventId].cancel()
     deleteEventFromUser user, eventId
 
 deleteEventFromUser = (userId, eventId) ->
   #console.log 'deleteEventFromUser'
-  for i in [0..scheduleEvents[userId].length-1]
+  for i in [0..scheduleEvents[userId].length - 1]
     if scheduleEvents[userId][i] is eventId
       delete scheduleEvents[userId][i]
       return true
@@ -74,7 +74,7 @@ loadScheduledEvents = ->
   .catch (error) ->
     console.log 'cannot load events, error occurs: ', error
 
-exports.scheduleEvent=scheduleEvent
-exports.cancelEvent=cancelEvent
-exports.saveScheduledEvent=saveScheduledEvent
-exports.loadScheduledEvents=loadScheduledEvents
+exports.scheduleEvent = scheduleEvent
+exports.cancelEvent = cancelEvent
+exports.saveScheduledEvent = saveScheduledEvent
+exports.loadScheduledEvents = loadScheduledEvents
