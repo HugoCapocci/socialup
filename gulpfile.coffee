@@ -65,9 +65,9 @@ gulp.task "compileAngularCoffee", ->
   .pipe coffee(bare: true).on "error", (err) -> console.error err
   .pipe gulp.dest "./temp/client"
 
-gulp.task 'pre-commit', ['coffeelintNode']
+gulp.task 'pre-commit.test', ['coffeelintNode']
 
-gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
+gulp.task 'pre-commit', guppy.src 'pre-commit', (files) ->
   opt =
     max_line_length:
       value: 120
@@ -86,7 +86,13 @@ gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
   gulp.src(files)
   .pipe gulpFilter(['.coffee'])
   .pipe coffeelint opt
-  .pipe coffeelint.reporter('fail')
+  .pipe coffeelint.reporter()
+  .on 'error', ->
+    console.log 'pre-commit error'
+    process.exit 1
+  .on 'end', ->
+    console.log 'pre-commit end'
+    process.exit 0
 
 gulp.task 'default', [
   'coffeelintNode'
