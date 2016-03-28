@@ -397,7 +397,7 @@ app.post '/message/:userId', (req, res) ->
     .catch (err) ->
       res.send('Cannot create or save chained event: ' + err)
 
-  else if scheduledDate? or (new Date scheduledDate).getTime() < =Date.now()
+  else if scheduledDate? or (new Date scheduledDate).getTime() <= Date.now()
     #direct message
     postMessageToProviders userId, providers, providersOptions, message
     .then (results) ->
@@ -585,7 +585,7 @@ app.post '/uploadFile/:userId', upload.single('file'), (req, res) ->
   if req.body.tags
     params.tags = req.body.tags.split ','
 
-  if not scheduledDate or (new Date(scheduledDate)).getTime()<=Date.now()
+  if not scheduledDate or (new Date scheduledDate).getTime() <= Date.now()
 
     publishFileToProviders userId, providers, providersOptions, req.file, params
     .then (results) ->
