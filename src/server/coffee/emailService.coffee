@@ -22,7 +22,7 @@ module.exports = class EmailService
 
   sendMail: (message, mailTo, transporter = myTransporter) ->
 
-    loadTemplate = (message) ->
+    loadTemplate = ->
       template = fs.readFileSync TEMPLATE_PASSWORD_RESET, 'utf-8'
       template.replace '%URL%', 'http://localhost:5000/#/resetPassword'
 
@@ -45,9 +45,9 @@ module.exports = class EmailService
         console.log 'Message sent: ' + info.response
     deferred.promise
 
-  sendConfirmationMail: (mailTo, userId) ->
+  sendConfirmationMail: (mailTo, userId, transporter = myTransporter) ->
 
-    loadTemplate = (message) ->
+    loadTemplate = ->
       template = fs.readFileSync TEMPLATE_EMAIL_CONFIRMATION, 'utf-8'
       template.replace '%URL%', 'http://localhost:5000/#/confirm?id=' + userId
 
@@ -58,8 +58,8 @@ module.exports = class EmailService
       from: 'socialup@gmail.com'
       to: mailTo
       subject: ''
-      text: message
-      html: loadTemplate(message)
+      text: 'yo'
+      html: loadTemplate()
 
     #send mail with defined transport object
     transporter.sendMail mailOptions, (error, info) ->

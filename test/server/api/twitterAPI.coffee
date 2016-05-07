@@ -60,12 +60,13 @@ describe 'test Twitter API', ->
       @sandbox.restore()
 
     describe 'tweets', ->
+
       it 'should get tweets', (done) ->
-        sinon.stub(twitterAPI, 'getSignature').returns 'dummySignature'
-        sinon.stub(request, 'get').yields null, null, {}
+        @sandbox.stub(twitterAPI, 'getSignature').returns 'dummySignature'
+        @sandbox.stub(request, 'get').yields null, null, {}
         twitterAPI.getTweets oauth_token: 'dummy_oauth_token'
         .then (tweets) ->
-          console.log twitterAPI.getSignature()
+          'dummySignature'.should.equal twitterAPI.getSignature()
           done()
         .catch (error) ->
           console.log 'error: ', console.error

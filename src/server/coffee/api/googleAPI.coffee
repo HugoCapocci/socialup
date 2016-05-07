@@ -7,7 +7,6 @@
 # TODO check tokens.expiry_date and update user data in database
 # if needed with refreshed tokens (automatically refresh by googleAPI)
 ###
-
 googleAPI = require 'googleapis'
 Q = require 'q'
 fs = require 'fs'
@@ -44,7 +43,6 @@ exports.getOAuthURL = ->
     scope: scopes
 
 exports.pushCode = (code) ->
-
   deferred = Q.defer()
   #ask for token
   oauth2Client.getToken code, (err, tokens) ->
@@ -59,13 +57,11 @@ exports.pushCode = (code) ->
   deferred.promise
 
 exports.refreshTokens = (tokens, userId) ->
-
   deferred = Q.defer()
   credentials = access_token: tokens.access_token
 
   if tokens.refresh_token? then credentials.refresh_token = tokens.refresh_token
   oauth2Client.setCredentials credentials
-
   oauth2Client.refreshAccessToken (err, tokens) ->
     if not err
       oauth2Client.setCredentials tokens
@@ -127,7 +123,6 @@ exports.listMedia = (tokens, userId) ->
 
       youtubeAPI.videos.list part: 'statistics', id: videoIDs.toString(),
       (e, res) ->
-
         i = 0
         for item in res.items
           videos[i].counts = item.statistics
@@ -137,7 +132,6 @@ exports.listMedia = (tokens, userId) ->
           counts.favorite += parseInt(item.statistics.favoriteCount)
           counts.comment += parseInt(item.statistics.commentCount)
           i++
-
         deferred.resolve
           list: videos
           stats: [
@@ -150,7 +144,6 @@ exports.listMedia = (tokens, userId) ->
   deferred.promise
 
 exports.searchPage = (tokens, channelName) ->
-
   deferred = Q.defer()
   query =
     auth: API_KEY
@@ -176,7 +169,6 @@ exports.searchPage = (tokens, channelName) ->
 
       youtubeAPI.channels.list auth: API_KEY, part:'statistics', id: Object.keys(channels).toString(),
       (err, res) ->
-
         if res
           for item in res.items
             channels[item.id].counts =
@@ -184,7 +176,6 @@ exports.searchPage = (tokens, channelName) ->
               subscriber: parseInt item.statistics.subscriberCount
               video: parseInt item.statistics.videoCount
               comment: parseInt item.statistics.commentCount
-
         deferred.resolve Object.keys(channels).map (id) -> channels[id]
 
   deferred.promise
@@ -211,7 +202,6 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
   prevPageToken = null
   youtubeAPI.search.list query,
   (err, response) ->
-
     if err?
       deferred.reject err
     else
@@ -220,7 +210,6 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
       prevPageToken = response.prevPageToken
       videos = []
       for item in response.items
-
         videos[item.id.videoId] =
           id: item.id.videoId
           channelId: item.snippet.channelId
@@ -229,14 +218,12 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
           title: item.snippet.title
           description: item.snippet.description
           thumbnailURL: item.snippet.thumbnails['default'].url
-
         if channelIDs.indexOf(item.snippet.channelId) is -1
-          channelIDs.push(item.snippet.channelId)
+          channelIDs.push item.snippet.channelId
 
     #TODO use tokens if user is connected
     youtubeAPI.videos.list auth: API_KEY, part: 'statistics,contentDetails', id : Object.keys(videos).toString()
     ,(err, res) ->
-
       if err
         console.error err
         deferred.reject err
@@ -251,10 +238,8 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
               dislike: parseInt item.statistics.dislikeCount
               favorite: parseInt item.statistics.favoriteCount
               comment: parseInt item.statistics.commentCount
-
         youtubeAPI.channels.list auth: API_KEY, part:'snippet', id : channelIDs.toString(),
         (err, channelsResult) ->
-
           if err?
             console.error err
             deferred.reject err
@@ -266,7 +251,6 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
               videos[id].channel = channels[videos[id].channelId]
               delete videos[id].channelId
               videos[id]
-
           deferred.resolve
             videos: videoArray
             totalResults:  totalResults
@@ -276,7 +260,6 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
   deferred.promise
 
 exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
-
   deferred = Q.defer()
   oauth2Client.setCredentials tokens
   metaData =
@@ -287,10 +270,9 @@ exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
       categoryId: providerOptions.category.id
     status:
       privacyStatus: providerOptions.privacyStatus
-
   buf = fs.readFileSync file.path
   if buf is undefined
-    deferred.reject new Error('cannot load file from path: ' + file.path)
+    deferred.reject new Error 'cannot load file from path: ' + file.path
   params =
     part: Object.keys(metaData).join ','
     media:
@@ -301,38 +283,32 @@ exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
   videoUploadRequest = youtubeAPI.videos.insert params
   videoUploadRequest.on 'complete', (response) ->
     try
-      body = JSON.parse(response.body)
+      body = JSON.parse response.body
       if body.error?
-        deferred.reject(body.error)
+        deferred.reject body.error
       else
         deferred.resolve
           url: 'https://www.youtube.com/watch?v=' + body.id
           thumbnail: body.snippet.thumbnails.high.url
     catch
       deferred.reject error
-
   videoUploadRequest.on 'error', (err) ->
     deferred.reject new Error(err)
-
   #TODO do 'on data'?
   deferred.promise
 
 exports.uploadDrive = (tokens, file, parent) ->
-
   deferred = Q.defer()
   oauth2Client.setCredentials tokens
   metaData =
     uploadType: 'media'
     visibility: 'PRIVATE'
     title: file.originalname
-
   if parent isnt undefined
     metaData.parents = [id: parent]
-
   buf = fs.readFileSync(file.path)
   if buf is undefined
     deferred.reject new Error 'cannot load file from path: ' + file.path
-
   params =
     part: Object.keys(metaData).join ','
     media:
@@ -340,7 +316,6 @@ exports.uploadDrive = (tokens, file, parent) ->
       body: buf
       title: file.originalname
     resource: metaData
-
   videoUploadRequest = drive.files.insert params
   videoUploadRequest.on 'complete', (response) ->
     result
@@ -350,22 +325,17 @@ exports.uploadDrive = (tokens, file, parent) ->
         url: 'https://drive.google.com/file/d/' + result.id + '/view'
         downloadUrl: result.downloadUrl
     catch
-      deferred.reject(error)
-
+      deferred.reject error
   videoUploadRequest.on 'error', (err) ->
     console.log 'video upload request failed: ', err
-    deferred.reject new Error(err)
-
+    deferred.reject new Error err
   deferred.promise
 
 exports.listFiles = (tokens, folderId, typeFilter) ->
-
   deferred = Q.defer()
   filter = 'trashed=false'
-
   if folderId is undefined
     folderId = 'root'
-
   filter += ' and "' + folderId + '" in parents'
   #image or video
   if typeFilter?
@@ -373,15 +343,13 @@ exports.listFiles = (tokens, folderId, typeFilter) ->
       filter += ' and mimeType="application/vnd.google-apps.folder" '
     else
       filter += ' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "' + typeFilter + '/") '
-
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   drive.files.list folderId: folderId, q: filter,
   (err, response) ->
     if err?
-      console.log('The API returned an error: ' + err)
-      deferred.reject new Error(err)
+      console.log 'The API returned an error: ' + err
+      deferred.reject new Error err
       return
-
     files = response.items
     if files.length is 0
       deferred.resolve()
@@ -393,28 +361,23 @@ exports.listFiles = (tokens, folderId, typeFilter) ->
           mimeType: file.mimeType
           isFolder: file.mimeType is FOLDER_MIME_TYPE
         if file.downloadUrl?
-          fileInfo.downloadUrl = file.downloadUrl.replace '&gd=true',''
+          fileInfo.downloadUrl = file.downloadUrl.replace '&gd=true', ''
         fileInfo
-
   deferred.promise
 
 exports.getUserInfo = (tokens) ->
-
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
   googlePlus.people.get userId: 'me', (err, response) ->
-
     if err?
       console.log 'getUserInfo error: ', err
-      deferred.reject new Error(err)
+      deferred.reject new Error err
     else
       deferred.resolve userName: response.displayName
-
   deferred.promise
 
 exports.downloadFile = (tokens,fileId) ->
-
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   #bytes are to be handled with a pipe()
   drive.files.get fileId: fileId + '?alt=media',
   (err) ->
@@ -424,7 +387,7 @@ exports.downloadFile = (tokens,fileId) ->
 exports.checkFileData = (tokens, fileId) ->
 
   deferred = Q.defer()
-  drive.files.get fileId:fileId, (err, file) ->
+  drive.files.get fileId: fileId, (err, file) ->
     if err
       console.log "cannot get data for fileId: #{fileId} error: ", err
       deferred.reject err
@@ -434,7 +397,6 @@ exports.checkFileData = (tokens, fileId) ->
         id: fileId
         mimeType: file.mimeType
         isFolder: file.mimeType is FOLDER_MIME_TYPE
-
       if file.downloadUrl
         fileInfo.downloadUrl = file.downloadUrl.replace '&gd=true', ''
       deferred.resolve fileInfo
@@ -442,7 +404,6 @@ exports.checkFileData = (tokens, fileId) ->
   deferred.promise
 
 exports.getSpaceUsage = (tokens) ->
-
   oauth2Client.setCredentials(tokens)
   deferred = Q.defer()
   drive.about.get (err, infos) ->
@@ -457,7 +418,6 @@ exports.getSpaceUsage = (tokens) ->
   deferred.promise
 
 exports.createShareLink = (tokens, fileId) ->
-
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
   permission =
@@ -470,31 +430,31 @@ exports.createShareLink = (tokens, fileId) ->
   drive.permissions.insert fileId:fileId, resource: permission, (err, results) ->
     if err?
       console.log 'cannot change file permission ', err
-      deferred.reject(err)
+      deferred.reject err
     else
-      deferred.resolve(results)
+      deferred.resolve results
   deferred.promise
 
 exports.deleteFile = (tokens, fileId) ->
 
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  drive.files.delete fileId:fileId, (err, res) ->
+  drive.files.delete fileId: fileId, (err, res) ->
     if err
-      console.log('cannot delete file ', err)
-      deferred.reject(err)
+      console.log 'cannot delete file ', err
+      deferred.reject err
     else
-      deferred.resolve(res)
+      deferred.resolve res
 
   deferred.promise
 
 exports.getUserCalendars = (tokens) ->
-  oauth2Client.setCredentials(tokens)
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
   calendar.calendarList.list {}, (err, calendars) ->
     if err
-      console.error('err: ', err)
-      deferred.reject(err)
+      console.error 'err: ', err
+      deferred.reject err
     else
     deferred.resolve calendars.items.map (item) ->
       accessRole: item.accessRole
@@ -509,22 +469,20 @@ exports.getUserCalendars = (tokens) ->
 
 exports.getUserEvents = (tokens, sinceDate, untilDate, calendarId) ->
   deferred = Q.defer()
-  timeMin = moment(parseInt(sinceDate)).toISOString()
-  timeMax = moment(parseInt(untilDate)).toISOString()
-  oauth2Client.setCredentials(tokens)
-
+  timeMin = moment(parseInt sinceDate).toISOString()
+  timeMax = moment(parseInt untilDate).toISOString()
+  oauth2Client.setCredentials tokens
   calendar.events.list
-    calendarId: encodeURIComponent(calendarId)
+    calendarId: encodeURIComponent calendarId
     showHiddenInvitations: true
     timeMin: timeMin
     timeMax: timeMax
     singleEvents: true
     orderBy: 'startTime'
-
   ,(err, events) ->
     if err
       console.error 'calendarId: ' + calendarId  + ', err: ', err
-      deferred.reject(err)
+      deferred.reject err
     else
       results = []
       items = events.items
@@ -540,7 +498,6 @@ exports.getUserEvents = (tokens, sinceDate, untilDate, calendarId) ->
           creator: item.creator
           htmlLink: item.htmlLink
           location: item.location
-
-      deferred.resolve(results)
+      deferred.resolve results
 
   deferred.promise

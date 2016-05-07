@@ -9,8 +9,7 @@ events = require 'events'
 #Create an eventEmitter object
 eventEmitter = new events.EventEmitter()
 
-exports.addEventListerner = (eventType, listener) ->
-  #console.log 'addEventListerner: eventType? ',eventType
+addEventListerner = (eventType, listener) ->
   eventEmitter.addListener eventType, listener
 
 #returned job can be canceled : job.cancel()
@@ -37,12 +36,13 @@ addEventToSchedule = (userId, date, eventType, providers, providersOptions, even
   scheduleEvents[userId].push eventId
   return
 
-exports.executeChainedEvent = (userId, eventType, providers, providersOptions, eventParams, eventId) ->
+executeChainedEvent = (userId, eventType, providers, providersOptions, eventParams, eventId) ->
   args = [eventType, eventId, userId, providers]
   args = args.concat eventParams
   hasListeners = eventEmitter.emit.apply eventEmitter, args
   if not hasListeners
     console.log 'no listener for chained event: ', eventType
+  hasListeners
 
 cancelEvent = (eventId) ->
   if schedule.scheduledJobs[eventId] is undefined
@@ -53,7 +53,6 @@ cancelEvent = (eventId) ->
     deleteEventFromUser user, eventId
 
 deleteEventFromUser = (userId, eventId) ->
-  #console.log 'deleteEventFromUser'
   for i in [0..scheduleEvents[userId].length - 1]
     if scheduleEvents[userId][i] is eventId
       delete scheduleEvents[userId][i]
@@ -62,19 +61,20 @@ deleteEventFromUser = (userId, eventId) ->
 #db key -> eventId
 saveScheduledEvent = (userId, date, eventType, providers, providersOptions, eventParams) ->
   eventId = scheduleEvent userId, date, eventType, providers, providersOptions, eventParams
-  eventsDAO.saveScheduledEvent eventId,userId, date, eventType, providers, providersOptions, eventParams
+  console.log 'eventId: ', eventId
+  eventsDAO.saveScheduledEvent eventId, userId, date, eventType, providers, providersOptions, eventParams
 
 loadScheduledEvents = ->
   eventsDAO.retrieveScheduledEvents()
   .then (results) ->
-    if results isnt undefined
-      for result in results
-        addEventToSchedule result.user, new Date(result.dateTime), result.eventType, result.providers,
-          result.providersOptions, result.eventParams, result.eventId
-  .catch (error) ->
-    console.log 'cannot load events, error occurs: ', error
+    for result in results?
+      addEventToSchedule result.user, new Date(result.dateTime), result.eventType, result.providers,
+        result.providersOptions, result.eventParams, result.eventId
 
-exports.scheduleEvent = scheduleEvent
-exports.cancelEvent = cancelEvent
-exports.saveScheduledEvent = saveScheduledEvent
-exports.loadScheduledEvents = loadScheduledEvents
+module.exports =
+  scheduleEvent: scheduleEvent
+  cancelEvent: cancelEvent
+  saveScheduledEvent: saveScheduledEvent
+  loadScheduledEvents: loadScheduledEvents
+  addEventListerner: addEventListerner
+  _addEventToSchedule: addEventToSchedule

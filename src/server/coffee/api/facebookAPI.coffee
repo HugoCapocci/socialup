@@ -6,17 +6,16 @@
 APP_ID = process.env.FACEBOOK_APP_ID
 APP_SECRET = process.env.FACEBOOK_APP_SECRET
 REDIRECT_URI = process.env.APP_URL + '/facebook2callback'
-querystring = require('querystring')
-https = require('https')
-Q = require('q')
-request = require('request')
-fs = require('fs')
-userDAO = require('../userDAO')
-moment = require('moment')
+querystring = require 'querystring'
+https = require 'https'
+Q = require 'q'
+request = require 'request'
+fs = require 'fs'
+userDAO = require '../userDAO'
+moment = require 'moment'
 appToken = null
 
 exports.pushCode = (code) ->
-
   deferred = Q.defer()
   req_options =
     host: 'graph.facebook.com'
@@ -26,7 +25,6 @@ exports.pushCode = (code) ->
     method: 'GET'
 
   req = https.request req_options, (res) ->
-
     data = ''
     res.on 'data', (chunk) ->
       data += chunk
@@ -42,7 +40,6 @@ exports.pushCode = (code) ->
   deferred.promise
 
 exports.refreshTokens = (tokens, userId) ->
-
   deferred = Q.defer()
   req_options =
     host: 'graph.facebook.com'
@@ -105,10 +102,10 @@ exports.sendVideo = (token, file, user, params, providerOptions) ->
     targetId = providerOptions.group.id
 
   formData =
-    access_token : token.access_token
+    access_token: token.access_token
     source: fs.createReadStream(file.path)
-    title : params.title
-    description : params.description + tagsAsHashtags(params.tags)
+    title: params.title
+    description: params.description + tagsAsHashtags(params.tags)
 
   console.log 'providerOptions? ', providerOptions
   if providerOptions is undefined
@@ -120,8 +117,7 @@ exports.sendVideo = (token, file, user, params, providerOptions) ->
     method: 'POST'
     uri: 'https://graph-video.facebook.com/v2.5/' + targetId + '/videos'
     formData: formData
-  ,(err, response, body) ->
-
+  , (err, response, body) ->
     if err
       deferred.reject(err)
     else
@@ -129,7 +125,6 @@ exports.sendVideo = (token, file, user, params, providerOptions) ->
       videoId = JSON.parse(body).id
       deferred.resolve
         url: 'https://www.facebook.com/' + videoId
-
   deferred.promise
 
 #/v2.5/{video-id}
@@ -143,7 +138,7 @@ exports.getOAuthURL = ->
   '&scope=public_profile +publish_actions+user_posts+user_managed_groups+manage_pages+read_insights+user_events'
 
 exports.postMessage = (tokens, message, providerOptions) ->
-  publishOnFeed(tokens, message: message, providerOptions)
+  publishOnFeed tokens, message: message, providerOptions
 
 exports.postMediaLink = (tokens, message, url, title, description, providerOptions ) ->
   publishOnFeed tokens
@@ -167,19 +162,19 @@ publishOnFeed = (tokens, data, providerOptions) ->
   , (err, response, body) ->
 
     if err
-      deferred.reject(err)
+      deferred.reject err
     else
       console.log 'publishOnFeed response body: ', body
       id = body.id
       #TODO fix hardcoded url
       body.url = 'https://www.facebook.com/yug357/posts/' + id.split('_')[1]
-      deferred.resolve(body)
+      deferred.resolve body
 
   deferred.promise
 
 exports.getPages = (tokens) ->
   processGetRequest tokens.access_token, '/me/accounts?locale=fr_FR', (pages) ->
-    console.log('Facebook users pages: ', pages.data)
+    console.log 'Facebook users pages: ', pages.data
     pages.data
 
 #TODO get events (created by user / where user is admin)
@@ -187,7 +182,7 @@ exports.getPages = (tokens) ->
 
 exports.getUserInfo = (tokens) ->
   processGetRequest tokens.access_token, '/me', (userInfo) ->
-    return userName:userInfo.name
+    return userName: userInfo.name
 
 processGetRequest = (access_token, path, callback, isOldPath) ->
   deferred = Q.defer()
@@ -207,11 +202,11 @@ processGetRequest = (access_token, path, callback, isOldPath) ->
     res.on 'data', (chunk) ->
       data += chunk
     res.on 'end', ->
-      deferred.resolve callback(JSON.parse(data))
+      deferred.resolve callback JSON.parse data
 
   req.on 'error', (e) ->
-    console.log('processRequest error: ', e)
-    deferred.reject(e)
+    console.log 'processRequest error: ', e
+    deferred.reject e
 
   req.end()
   deferred.promise
