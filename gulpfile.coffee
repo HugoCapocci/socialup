@@ -2,6 +2,7 @@ coffee = require 'gulp-coffee'
 coffeelint = require 'gulp-coffeelint'
 gulp = require 'gulp'
 istanbul = require 'gulp-coffee-istanbul'
+jade = require 'gulp-jade'
 mocha = require 'gulp-mocha'
 uglify = require 'gulp-uglify'
 gulpFilter = require 'gulp-filter'
@@ -71,7 +72,8 @@ gulp.task 'compileAngularCoffee', ->
   .pipe coffee(bare: true).on 'error', (err) ->
     console.error 'compileAngularCoffee error: ', err
     process.exit 1
-  .pipe gulp.dest './temp/client'
+  #.pipe gulp.dest './temp/client'
+  .pipe gulp.dest './public'
 
 gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
   opt =
@@ -98,8 +100,14 @@ gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
   .on 'end', ->
     process.exit 0
 
+gulp.task 'compileJade', ->
+  gulp.src './src/client/**/*.jade'
+  .pipe jade(locals: {})
+  .pipe gulp.dest './public/'
+
 gulp.task 'default', [
   'coffeelintNode'
   'minifyServer'
-  'minifyClient'
+  'compileAngularCoffee'
+  'compileJade'
 ]

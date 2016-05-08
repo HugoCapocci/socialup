@@ -36,7 +36,8 @@
     "angular-bootstrap-calendar": "~0.18.3",
     "interact": "^1.2.6",
     "angular-social-video-player": "~0.1.1",
-    "requirejs": "^2.1.22"
+    "requirejs": "^2.1.22",
+    "angular-dashboard-framework": "^0.11.0"
   },
   "resolutions": {
     "angular": "~1.5.3"

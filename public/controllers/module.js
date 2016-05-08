@@ -1,1 +1,3 @@
-define(["../bower_components/angular/angular"],function(n){return n.module("SocialUp.controllers",[])});
+define(['angular'], function(angular) {
+  return angular.module('SocialUp.controllers', []);
+});

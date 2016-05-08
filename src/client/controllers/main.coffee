@@ -49,23 +49,43 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
   class MainController
 
     constructor: (@$scope, @$rootScope, @$location, @$window, @alertsService, @userService) ->
-
-      parameters= $location.search()
+      console.log 'MainController constructor loaded'
+      parameters = @$location.search()
       if parameters.close
         alertsService.success 'OAuth authentication sucessfull'
-        $window.close()
-      @localData = userService.getUserData()
-      console.log "localData found: ",@localData
+        @$window.close()
+      @localData = @userService.getUserData()
+      console.log "localData found: ", @localData
 
-      @$scope.closeAlert=($index) ->
+    closeAlert: ($index) ->
       console.log "close alert index: ", $index
       @$rootScope.alerts.splice $index, 1
 
-      @$scope.signout = ->
-        userService.deleteData()
+    signout: ->
+      @userService.deleteData()
+
+    model:
+      rows: [
+        columns: [{
+          styleClass: 'col-md-3'
+          widgets: [
+            type: 'twitter'
+            config: {}
+            title: 'Derniers tweets'
+          ]
+        }, {
+          styleClass: "col-md-9"
+          widgets: [{
+            type: 'videoPlayer'
+            config: {}
+            title: 'Chercher une vidéo'
+          }]
+        }]
+      ]
+    console.log 'dashboard model: ', @model
 
   MainController.$inject = ['$scope', '$rootScope', '$location', '$window', 'alertsService', 'userService']
-  appModule.controller 'MainController',MainController
+  appModule.controller 'MainController', MainController
 
   class WaitingModalController
 
@@ -85,13 +105,15 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
         @$scope.modal.progress = 100
 
       @$rootScope.doProgress = (progress) ->
-        if progress<=25
+        if progress <= 25
           @$scope.modal.type = 'danger'
-        else if progress<=60
+        else if progress <= 60
           @$scope.modal.type = 'warning'
         else
           @$scope.modal.type = 'info'
         @$scope.modal.progress = progress
+
+      return
 
   WaitingModalController.$inject = ['$scope', '$rootScope', '$location', '$uibModalInstance']
   appModule.controller 'WaitingModalController', WaitingModalController

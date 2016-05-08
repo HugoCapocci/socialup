@@ -1,0 +1,156 @@
+.video-player
+
+  .row
+    .col-md-8.colg-lg-8
+      div(
+        sv-player 
+        auto-play="{{searchVideoForm.autoplay}}" 
+        height="530"
+         width="830" 
+        pause="{{searchVideoForm.isPaused}}"
+        video-provider="{{searchVideoForm.selected.provider}}" 
+        video-id="{{searchVideoForm.selected.video.id}}"
+        ng-if="searchVideoForm.selected"
+      )
+      .text-center(ng-if="!isEmpty(searchVideoForm.results) && !searchVideoForm.selected")
+        h6 Aucune vidéo sélectionnée
+
+    .col-xs-7.col-md-4.colg-lg-4(style="max-height:500px; overflow-y: auto;")
+      ul(dnd-list="searchVideoForm.playlist")
+          li(
+            ng-repeat="element in searchVideoForm.playlist"
+            dnd-draggable="element"
+            dnd-moved="searchVideoForm.playlist.splice($index, 1)"
+            dnd-effect-allowed="move"
+            dnd-selected="setSelected(element)"               
+            ng-class="{selected: getPlaylistIndex(searchVideoForm.selected) === $index}"
+          )
+            .row
+              .col-xs-3.col-md-3
+                  img(ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px")
+              .col-xs-7.col-md-7
+                h5(style="margin-top:0px;")
+                  label
+                    | {{ (element.video.title.length > 50 ? element.video.title.substr(0,50) : element.video.title) }}
+                h6(style="margin-bottom:0px;")
+                  a(href="javascript:void(0);" ng-click="openChannel(element.video.channelURL); $event.stopPropagation();")
+                    | {{ element.video.channel }}
+              .col-xs-2.col-md-2
+                &nbsp;
+                button.btn.btn-xs.btn-danger(type="button" ng-click="removeFromPlaylist(element); $event.stopPropagation();" style="height:20px;")
+                  i.glyphicon.glyphicon-trash
+
+    .col-xs-7.col-md-4.colg-lg-4(ng-if="searchVideoForm.playlist.length>0")
+      | &nbsp;
+      label.checkbox-inline
+        input(type="checkbox" ng-model="searchVideoForm.autoplay")
+        | Lecture auto
+      label.checkbox-inline
+        input(type="checkbox" ng-model="searchVideoForm.loop")
+        | Boucle
+      &nbsp;
+      button.btn.btn-default.btn-md(type="button" ng-click="changeCurrentPlaying('backward')")
+        i.glyphicon.glyphicon-step-backward
+      button.btn.btn-default.btn-md(type="button" ng-click="changePlayingState()")
+        i.glyphicon.glyphicon-pause(ng-if="searchVideoForm.isReading")
+        i.glyphicon.glyphicon-play(ng-if="!searchVideoForm.isReading")
+      button.btn.btn-default.btn-md(type="button" class="btn btn-default btn-md" ng-click="changeCurrentPlaying('forward')")
+        i.glyphicon.glyphicon-step-forward
+
+.input-group(style="margin-top:20px;")
+  span.input-group-addon Trier par :
+  select.form-control(
+    ng-model="searchVideoForm.order"
+    ng-options="option.label for option in searchVideoForm.orders"
+    ng-keyup="$event.keyCode === 13? searchVideo():''"
+  )
+  span.input-group-addon Titre :
+  input.form-control(
+    type="text"
+    ng-model="searchVideoForm.videoName"
+    placeholder="Vidéo à rechercher"
+    value="Title"
+    ng-keyup="$event.keyCode === 13? searchVideo():''"
+  )
+  span.input-group-addon Résultats / page
+  input.form-control(
+    type="number"
+    ng-model="searchVideoForm.limit"
+    min="10"
+    max="50"
+    step="5"
+    placeholder="Limite"
+    ng-keyup="$event.keyCode === 13? searchVideo():''"
+    value="Limit"
+  )
+  span.input-group-btn
+    button.btn.btn-primary(id="signInButt" ng-click="searchVideo()") Rechercher
+
+.row(style="margin-top:20px;")
+  uib-tabset.panel.panel-default(ng-if="!isEmpty(searchVideoForm.results)")
+    uib-tab(ng-repeat="provider in providers")
+      uib-tab-heading
+        span {{provider}}
+        | ({{ searchVideoForm.results[provider].totalResults }})
+      .panel-body(style="max-height:600px; overflow-y: auto;")
+
+        .row(ng-if="searchVideoForm.provider[provider].isLoading" style="text-align:center;")
+          img(src="images/loading.gif" width="64" height="64")
+          | Chargement en cours...
+        
+        table.table.table-striped(ng-if="!searchVideoForm.provider[provider].isLoading" st-table="searchVideoForm.results[provider].videos")
+          tbody
+            tr(ng-repeat="video in searchVideoForm.results[provider].videos" ng-click="addToPlaylist(provider, $index)")
+              td
+                img(ng-src="{{video.thumbnailURL}}" style="max-height:90px; max-width:120px")
+              td
+                .row
+                  .col-lg-12
+                    label {{ video.title }}
+                  .col-lg-2
+                    h6(style="margin-bottom:0px;margin-top:0px")
+                        a(href="javascript:void(0);" ng-click="openChannel(video.channelURL); $event.stopPropagation();")
+                          | {{ video.channel }}
+                    h5
+                      a(href="" uib-tooltip="Publié le {{video.creationDate | date : 'dd MMMM yyyy HH mm'}}")
+                        | Il y a {{ video.creationDate | formatDate }}
+                                                      
+                    h6(ng-if="video.duration")
+                      | Durée {{ video.duration | formatDurationInSeconds }}
+                    h6
+                      | {{ video.counts.view | formatNumber }} vues&nbsp;
+                      span(ng-if="video.counts.like")
+                        | {{ video.counts.like | formatNumber }}
+                        i.glyphicon.glyphicon-thumbs-up(style="color:green;")
+                        | &nbsp;
+                      span(ng-if="video.counts.dislike")
+                        | {{video.counts.dislike | formatNumber}}
+                        i.glyphicon.glyphicon-thumbs-down(style="color:red;")
+
+                  .col-lg-10
+                    div(ng-bind-html="sanitize(video.description)")
+    .text-center(style="margin-top:5px; margin-bottom:10px;")
+      hr               
+      span(ng-if="searchVideoForm.results[provider].prevPageToken")                                    
+        button.btn.btn-sm.btn-primary(type="button" ng-click="searchVideoForm.changeStep(provider, 'backward')" uib-tooltip="Résultats précédents")
+          i.glyphicon.glyphicon-step-backward
+      span(ng-if="searchVideoForm.results[provider].page === null")
+        | &nbsp;
+        label -
+        | &nbsp;
+      span(ng-if="searchVideoForm.results[provider].nextPageToken !== null")
+        button.btn.btn-sm.btn-primary(type="button" ng-click="searchVideoForm.changeStep(provider, 'forward')" uib-tooltip="Résultats suivants")
+          i.glyphicon.glyphicon-step-forward
+      span(ng-if="searchVideoForm.results[provider].page !== null")
+        uib-pagination(
+          total-items="searchVideoForm.results[provider].totalPages" 
+          items-per-page="10" 
+          max-size="10" 
+          ng-model="searchVideoForm.provider[provider].currentPage" 
+          ng-change="searchVideoForm.changePage(provider)" 
+          boundary-links="true" 
+          previous-text="<" 
+          next-text=">" 
+          first-text="<<" 
+          last-text=">>"
+        )

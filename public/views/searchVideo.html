@@ -1,25 +1,25 @@
 <div class="row">
-    
+
     <div class="col-md-8 colg-lg-8">
-                
+
         <div sv-player auto-play="{{searchVideoForm.autoplay}}" height="530" width="830" pause="{{searchVideoForm.isPaused}}"
-             video-provider="{{searchVideoForm.selected.provider}}" 
+             video-provider="{{searchVideoForm.selected.provider}}"
              video-id="{{searchVideoForm.selected.video.id}}"
              ng-if="searchVideoForm.selected"></div>
 
         <div ng-if="!isEmpty(searchVideoForm.results) && !searchVideoForm.selected" class="text-center">
             <h6>Aucune vidéo sélectionnée</h6>
         </div>
-        
+
     </div>
-    
+
     <div class="col-xs-7 col-md-4 colg-lg-4" style="max-height:500px; overflow-y: auto;">
         <ul dnd-list="searchVideoForm.playlist">
             <li ng-repeat="element in searchVideoForm.playlist"
                 dnd-draggable="element"
                 dnd-moved="searchVideoForm.playlist.splice($index, 1)"
                 dnd-effect-allowed="move"
-                dnd-selected="setSelected(element)"               
+                dnd-selected="setSelected(element)"
                 ng-class="{selected: getPlaylistIndex(searchVideoForm.selected) === $index}" >
                 <div class="row">
                     <div class="col-xs-3 col-md-3">
@@ -38,16 +38,16 @@
             </li>
         </ul>
     </div>
-    
+
     <div class="col-xs-7 col-md-4 colg-lg-4" ng-if="searchVideoForm.playlist.length>0">
-         &nbsp; 
+         &nbsp;
         <label class="checkbox-inline">
             <input type="checkbox" ng-model="searchVideoForm.autoplay">Lecture auto
         </label>
-         <label class="checkbox-inline">
+        <label class="checkbox-inline">
             <input type="checkbox" ng-model="searchVideoForm.loop">Boucle
         </label>
-         &nbsp; 
+         &nbsp;
         <button type="button" class="btn btn-default btn-md" ng-click="changeCurrentPlaying('backward')">
             <i class="glyphicon glyphicon-step-backward"></i>
         </button>
@@ -57,11 +57,11 @@
         </button>
         <button type="button" class="btn btn-default btn-md" ng-click="changeCurrentPlaying('forward')">
             <i class="glyphicon glyphicon-step-forward"></i>
-        </button>        
+        </button>
     </div>
-    
+
 </div>
-    
+
 <div class="input-group" style="margin-top:20px;">
     <span class="input-group-addon">Trier par :</span>
     <select class="form-control" ng-model="searchVideoForm.order" ng-options="option.label for option in searchVideoForm.orders" ng-keyup="$event.keyCode === 13? searchVideo():''"></select>
@@ -75,19 +75,19 @@
 </div>
 
 <div class="row" style="margin-top:20px;">
-    
+
     <uib-tabset ng-if="!isEmpty(searchVideoForm.results)" class="panel panel-default">
         <uib-tab ng-repeat="provider in providers">
             <uib-tab-heading>
                 <span>{{provider}}</span> ({{searchVideoForm.results[provider].totalResults}})
             </uib-tab-heading>
-            
+
             <div class="panel-body" style="max-height:600px; overflow-y: auto;">
-                
+
                 <div ng-if="searchVideoForm.provider[provider].isLoading" class="row" style="text-align:center;">
                     <img src="images/loading.gif" width="64" height="64"/> Chargement en cours...
                 </div>
-                
+
                  <table ng-if="!searchVideoForm.provider[provider].isLoading" st-table="searchVideoForm.results[provider].videos" class="table table-striped">
                     <tbody>
                         <tr ng-repeat="video in searchVideoForm.results[provider].videos" ng-click="addToPlaylist(provider, $index)">
@@ -105,8 +105,8 @@
                                             <a href="" uib-tooltip="Publié le {{video.creationDate | date : 'dd MMMM yyyy à&nbsp;HH\'h\'mm'}}">
                                                 Il y a {{video.creationDate | formatDate}}
                                             </a>
-                                        </h5>                                    
-                                      <!--  <h6>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm"}}</h6>  -->                         
+                                        </h5>
+                                      <!--  <h6>{{video.creationDate | date:"dd/MM/yyyy'&nbsp;'HH'h'mm"}}</h6>  -->
                                         <h6 ng-if="video.duration">Durée {{video.duration | formatDurationInSeconds}}</h6>
                                         <h6>
                                             {{video.counts.view | formatNumber}} vues&nbsp;
@@ -128,37 +128,37 @@
                 </table>
             </div>
             <div class="text-center" style="margin-top:5px; margin-bottom:10px;">
-                <hr/>                
-                <span ng-if="searchVideoForm.results[provider].prevPageToken">                                    
+                <hr/>
+                <span ng-if="searchVideoForm.results[provider].prevPageToken">
                     <button type="button" ng-click="searchVideoForm.changeStep(provider, 'backward')" class="btn btn-sm btn-primary" uib-tooltip="Résultats précédents">
                         <i class="glyphicon glyphicon-step-backward"></i>
-                    </button>                               
-                </span>                                
+                    </button>
+                </span>
                 <span ng-if="!searchVideoForm.results[provider].page">
                     &nbsp;<label> - </label>&nbsp;
-                </span>                                
-                <span ng-if="searchVideoForm.results[provider].nextPageToken">                                    
+                </span>
+                <span ng-if="searchVideoForm.results[provider].nextPageToken">
                     <button type="button" ng-click="searchVideoForm.changeStep(provider, 'forward')" class="btn btn-sm btn-primary" uib-tooltip="Résultats suivants">
                         <i class="glyphicon glyphicon-step-forward"></i>
                     </button>
                 </span>
 
                 <span ng-if="searchVideoForm.results[provider].page">
-                    <uib-pagination 
-                        total-items="searchVideoForm.results[provider].totalPages" 
-                        items-per-page="10" 
-                        max-size="10" 
-                        ng-model="searchVideoForm.provider[provider].currentPage" 
-                        ng-change="searchVideoForm.changePage(provider)" 
-                        boundary-links="true" 
-                        previous-text="&lsaquo;" 
-                        next-text="&rsaquo;" 
-                        first-text="&laquo;" 
+                    <uib-pagination
+                        total-items="searchVideoForm.results[provider].totalPages"
+                        items-per-page="10"
+                        max-size="10"
+                        ng-model="searchVideoForm.provider[provider].currentPage"
+                        ng-change="searchVideoForm.changePage(provider)"
+                        boundary-links="true"
+                        previous-text="&lsaquo;"
+                        next-text="&rsaquo;"
+                        first-text="&laquo;"
                         last-text="&raquo;"
                         ></uib-pagination>
-                </span>                
-            </div>            
-            
+                </span>
+            </div>
+
         </uib-tab>
     </uib-tabset>
 

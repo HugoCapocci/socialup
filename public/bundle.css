@@ -42,7 +42,13 @@
 }
 
 body {
-  /* padding-top: 70px;  Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+
+}
+/* fixe for modal-backdrop*/
+.modal-backdrop {
+ bottom: 0;
+ /* some fixes appear to use this, too: */
+ position: fixed;
 }
 
 /* hex: #a1bbc5 */
