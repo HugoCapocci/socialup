@@ -11,9 +11,9 @@ console.log 'ENV ?', process.env.NODE_ENV
 
 providersAPI = require './providersAPI'
 UserDAO = require './userDAO'
-userDAO = new UserDAO
+userDAO = new UserDAO()
 EventsDAO = require './eventsDAO'
-eventsDAO = new EventsDAO
+eventsDAO = new EventsDAO()
 emailService = require './emailService'
 app = express()
 TWITTER = 'twitter'
@@ -61,22 +61,19 @@ scheduler.addEventListerner 'uploadVideo',
 getRefreshedToken = (provider, userId) ->
   myToken = users[userId].providers[provider].tokens
   if provider isnt 'soundcloud' and myToken.expiry_date and myToken.expiry_date <= Date.now()
-
-    console.log("refresh oauth token for provider #{provider}")
+    console.log "refresh oauth token for provider #{provider}"
     if providersAPI[provider].refreshTokens instanceof Function
       if provider is 'google'
         myToken = users[userId].providers[provider].originalTokens
-      providersAPI[provider].refreshTokens(myToken, userId).then (tokens) ->
+      providersAPI[provider].refreshTokens(myToken, userId)
+      .then (tokens) ->
         users[userId].providers[provider].tokens = tokens
         userDAO.updateUserTokens(userId, provider, tokens)
-        Q.fcall ->
-          tokens
+        Q.fcall -> tokens
     else
-      Q.fcall ->
-        throw new Error('no "refreshTokens" function for provider ' + provider)
+      Q.fcall -> throw new Error('no "refreshTokens" function for provider ' + provider)
   else
-    Q.fcall ->
-      myToken
+    Q.fcall -> myToken
 
 executeChainedEvents = (chainedEvents, args) ->
   results = []
@@ -96,7 +93,6 @@ executeChainedEvents = (chainedEvents, args) ->
   Q.all results
 
 executeChainedEvent = (event, params) ->
-
   console.log 'executeChainedEvent: ',event
   if event.eventType is 'message'
     postMediaLinkToProviders event.user, event.providers, event.eventParams[0], params.url, params.title,
@@ -220,7 +216,6 @@ app.get '/tracedEvents/:userId', (req, res) ->
     res.send err
 
 app.get '/event/:eventId', (req, res) ->
-
   eventId = req.params.eventId
   eventsDAO.retrieveScheduledEvent(eventId).then (events) ->
     res.send events
@@ -228,17 +223,14 @@ app.get '/event/:eventId', (req, res) ->
     res.send err
 
 app.post '/event/:eventId', (req, res) ->
-
   eventId = req.params.eventId
   scheduledEvent = req.body
-
   eventsDAO.updateScheduledEvent(eventId, scheduledEvent).then(result) ->
     res.send(result)
   .catch (err) ->
     res.send err
 
 app.post '/event/chained/:provider/:eventId/:userId', (req, res) ->
-
   eventId = req.params.eventId
   userId = req.params.userId
   provider = req.params.provider
@@ -251,7 +243,6 @@ app.post '/event/chained/:provider/:eventId/:userId', (req, res) ->
     res.send err
 
 app.delete '/event/:eventId', (req, res) ->
-
   eventId = req.params.eventId
   eventsDAO.deleteScheduledEvent(eventId).then (result) ->
     res.status( if result is 1 then 200 else 400).end()
@@ -281,7 +272,6 @@ app.delete '/token/:provider/:userId', (req, res) ->
     res.send(err)
 
 app.get '/refreshToken/:provider/:userId', (req, res) ->
-
   provider = req.params.provider
   userId = req.params.userId
   getRefreshedToken provider, userId
@@ -298,7 +288,6 @@ app.get '/user/:userId', (req, res) ->
   .catch (err) -> res.send err
 
 app.get '/cloudExplorer/:provider/:folderId/:userId', (req, res) ->
-
   folderId = req.params.folderId
   provider = req.params.provider
   userId = req.params.userId
@@ -312,7 +301,6 @@ app.get '/cloudExplorer/:provider/:folderId/:userId', (req, res) ->
     res.send(err)
 
 app.get '/file/:provider/:fileId/:userId', (req, res) ->
-
   fileId = req.params.fileId
   provider = req.params.provider
   userId = req.params.userId
@@ -323,7 +311,6 @@ app.get '/file/:provider/:fileId/:userId', (req, res) ->
     res.send(err)
 
 app.delete '/file/:provider/:fileId/:userId', (req, res) ->
-
   fileId = req.params.fileId
   provider = req.params.provider
   userId = req.params.userId
@@ -335,7 +322,6 @@ app.delete '/file/:provider/:fileId/:userId', (req, res) ->
   .catch (err) -> res.send err
 
 app.get '/spaceUsage/:provider/:userId', (req, res) ->
-
   provider = req.params.provider
   userId = req.params.userId
   getRefreshedToken(provider, userId).then (tokens) ->
@@ -345,7 +331,6 @@ app.get '/spaceUsage/:provider/:userId', (req, res) ->
   .catch (err) -> res.send err
 
 app.get '/searchPage/:provider/:pageName', (req, res) ->
-
   provider = req.params.provider
   pageName = req.params.pageName
   userId = req.query.userId
@@ -361,7 +346,6 @@ app.get '/searchPage/:provider/:pageName', (req, res) ->
     .catch (err) -> res.send err
 
 app.get '/pageMetrics/:provider/:metricType/:pageId', (req, res) ->
-
   provider = req.params.provider
   metricType = req.params.metricType
   pageId = req.params.pageId
@@ -382,7 +366,6 @@ app.get '/pageMetrics/:provider/:metricType/:pageId', (req, res) ->
     .catch (err) -> res.send err
 
 app.post '/message/:userId', (req, res) ->
-
   userId = req.params.userId
   providers = req.body.providers
   message = req.body.message
@@ -425,7 +408,6 @@ postMessageToProviders = (userId, providers, providersOptions, message) ->
   Q.all results
 
 postMessageToProvider = (userId, provider, providerOptions, message) ->
-
   deffered = Q.defer()
   if not providersAPI[provider] or not providersAPI[provider].postMessage
     deffered.reject(new Error 'unknow provider ' + provider + ' or unsupported function postMessage' )
@@ -453,7 +435,6 @@ postMediaLinkToProviders = (userId, providers, message, url, name, description, 
   Q.all results
 
 postMediaLinkToProvider = (userId, provider, message, url, name, description, messageProviderOptions) ->
-
   console.log 'postMediaLinkToProvider, messageProviderOptions: ',messageProviderOptions
   deffered = Q.defer()
   if not providersAPI[provider] or not providersAPI[provider].postMediaLink
@@ -469,7 +450,6 @@ postMediaLinkToProvider = (userId, provider, message, url, name, description, me
   deffered.promise
 
 app.post '/publishFromCloud/:userId', (req, res) ->
-
   userId = req.params.userId
   providers = req.body.providers
   providersOptions = req.body.providersOptions
@@ -510,7 +490,6 @@ app.post '/publishFromCloud/:userId', (req, res) ->
       res.status(403).send err
 
 app.post '/uploadFileToCloud/:userId', upload.single 'file', (req, res) ->
-
   provider = req.body.provider
   userId = req.params.userId
   getRefreshedToken provider, userId
@@ -523,7 +502,6 @@ app.post '/uploadFileToCloud/:userId', upload.single 'file', (req, res) ->
     res.status(403).send err
 
 app.post '/uploadMusic/:userId', upload.single('file'), (req, res) ->
-
   path = req.file.path
   fs.renameSync path, path + '_' + req.file.originalname
   req.file.path = path + '_' + req.file.originalname
@@ -563,7 +541,6 @@ sendMusicToProvider = (provider, userId, file, params) ->
     deffered.resolve result
   .catch (err) ->
     deffered.reject err
-
   deffered.promise
 
 app.post '/uploadFile/:userId', upload.single('file'), (req, res) ->
@@ -586,7 +563,6 @@ app.post '/uploadFile/:userId', upload.single('file'), (req, res) ->
     params.tags = req.body.tags.split ','
 
   if not scheduledDate or (new Date scheduledDate).getTime() <= Date.now()
-
     publishFileToProviders userId, providers, providersOptions, req.file, params
     .then (results) ->
       console.log('uploadFile OK')
@@ -609,14 +585,12 @@ app.post '/uploadFile/:userId', upload.single('file'), (req, res) ->
       res.send('Cannot create or save scheduled event: ' + err)
 
 publishFileToProviders = (userId, providers, providersOptions, file, params) ->
-
   results = []
   for provider in providers
     results.push publishFileToProvider(userId, provider, providersOptions[provider],file, params)
   Q.all(results)
 
 publishFileToProvider = (userId, provider, providerOptions, file, params) ->
-
   deffered = Q.defer()
   getRefreshedToken(provider, userId).then (tokens) ->
     providersAPI[provider].sendVideo(tokens, file, userId, params, providerOptions)
@@ -628,7 +602,6 @@ publishFileToProvider = (userId, provider, providerOptions, file, params) ->
   deffered.promise
 
 app.get '/calendars/:provider/:userId', (req, res) ->
-
   userId = req.params.userId
   provider = req.params.provider
   getRefreshedToken provider, userId
@@ -673,7 +646,6 @@ app.get '/facebookPages/:userId', (req, res) ->
 #cache
 providersCategories = {}
 app.get '/categories/:provider/:userId', (req, res) ->
-
   provider = req.params.provider
   userId = req.params.userId
   #put categories in cache (avoid calls for almost static data)
@@ -690,7 +662,6 @@ app.get '/categories/:provider/:userId', (req, res) ->
       res.status(403).send err
 
 app.get '/search/video/:provider', (req, res) ->
-
   provider = req.params.provider
   videoName = req.query.videoName
   order = req.query.order
@@ -706,7 +677,6 @@ app.get '/search/video/:provider', (req, res) ->
       res.status(403).send err
 
 app.get '/media/:provider/:userId', (req, res) ->
-
   provider = req.params.provider
   userId = req.params.userId
   getRefreshedToken provider, userId
@@ -718,7 +688,6 @@ app.get '/media/:provider/:userId', (req, res) ->
     res.status(403).send err
 
 app.get '/authenticate', (req, res) ->
-
   login = req.query.login
   password = req.query.password
   if login? and password?
@@ -733,7 +702,6 @@ app.get '/authenticate', (req, res) ->
     res.status(404).end()
 
 app.post '/user/create', (req, res) ->
-
   firstName = req.body.firstName
   lastName = req.body.lastName
   login = req.body.login

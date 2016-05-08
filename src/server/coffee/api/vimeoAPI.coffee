@@ -17,7 +17,6 @@ exports.getOAuthURL = ->
   '&scope=' + encodeURI 'public private purchased create edit delete upload interact'
 
 exports.pushCode = (code, userId) ->
-
   deferred = Q.defer()
   request
     method: 'POST'
@@ -46,7 +45,7 @@ getUnauthenticatedToken = ->
   deferred = Q.defer()
   request
     method: 'POST'
-    uri:  'http://api.vimeo.com/oauth/authorize/client'
+    uri: 'http://api.vimeo.com/oauth/authorize/client'
     auth:
       user: CLIENT_ID
       pass: CLIENT_SECRET
@@ -57,15 +56,14 @@ getUnauthenticatedToken = ->
 
     if err
       console.log 'Err: ', err
-      deferred.reject(err)
+      deferred.reject err
     else
-      results = JSON.parse(body)
-      console.log 'UnauthenticatedToken ?', results
+      results = JSON.parse body
+      console.log 'VimeoUnauthenticatedToken? ', results
       if results.error
-        deferred.reject(results)
-      else
-        unauthenticatedToken = results
-        deferred.resolve(results)
+        return deferred.reject results
+      unauthenticatedToken = results
+      deferred.resolve results
 
   deferred.promise
 
@@ -96,13 +94,13 @@ exports.listMedia = (tokens) ->
         counts.comment += video.metadata.connections.comments.total
         counts.like += video.metadata.connections.likes.total
         video.counts =
-          view : video.stats.plays
-          comment : video.metadata.connections.comments.total
-          like : video.metadata.connections.likes.total
+          view: video.stats.plays
+          comment: video.metadata.connections.comments.total
+          like: video.metadata.connections.likes.total
         delete video.stats
         delete video.metadata.connections
         video
-      stats : [
+      stats: [
         getStat 'view'
         getStat 'comment'
         getStat 'like'
@@ -144,18 +142,17 @@ exports.searchVideo = (videoName, limit, order, page) ->
       page: response.page
 
 processOrder = (order) ->
-
   switch (order)
     when 'date'
-      return 'date'
+      'date'
     when 'rating'
-      return 'likes'
+      'likes'
     when 'relevance'
-      return 'relevant'
+      'relevant'
     when 'viewCount'
-      return 'plays'
+      'plays'
     else
-      return undefined
+      undefined
 
 #see https://developer.vimeo.com/api/upload/videos
 exports.sendVideo = (tokens, file, userId, params, providerOptions) ->
@@ -182,7 +179,7 @@ exports.sendVideo = (tokens, file, userId, params, providerOptions) ->
     #PUT https://api.vimeo.com/videos/{video_id}/tags/{word}
     deferred.resolve url: 'https://vimeo.com/' + videoId
   .catch (err) ->
-    deferred.reject(err)
+    deferred.reject err
 
   deferred.promise
 
@@ -208,7 +205,7 @@ generateUploadTicket = (tokens) ->
 
 publishVideo = (uploadLink, tokens, file) ->
   deferred = Q.defer()
-  stat = fs.statSync(file.path)
+  stat = fs.statSync file.path
   request
     method: 'PUT'
     uri: uploadLink
@@ -217,19 +214,18 @@ publishVideo = (uploadLink, tokens, file) ->
       'Content-Length': stat.size
       'Content-Type': 'video/mp4'
     body: fs.readFileSync(file.path)
-
   , (err, response, body) ->
 
     if err
       console.log 'cannot publish the video. Err: ', err
-      deferred.reject(err)
+      deferred.reject err
     else
-      results = JSON.parse(body)
-      console.log('publishVideo statusCode ?', response.statusCode)
+      results = JSON.parse body
+      console.log 'publishVideo statusCode ?', response.statusCode
       if body.error
-        deferred.reject(body.error)
+        deferred.reject body.error
       else
-        deferred.resolve(body)
+        deferred.resolve body
 
   deferred.promise
 
@@ -241,19 +237,17 @@ verifyUpload = (uploadLink, tokens) ->
     uri:  uploadLink
     auth: bearer: tokens.access_token
     headers: 'Content-Range': 'bytes */*'
-
   ,(err, response, body) ->
     if err
       console.log 'cannot verifyUpload. Err: ',err
-      deferred.reject(err)
+      deferred.reject err
     else
       console.log 'verifyUpload statusCode ?', response.statusCode
       console.log "headers range: #{response.headers.range}"
       if body.error
-        deferred.reject(body.error)
+        deferred.reject body.error
       else
-        deferred.resolve(body)
-
+        deferred.resolve body
   deferred.promise
 
 finalizeUpload = (completeURI, tokens) ->
@@ -267,14 +261,14 @@ finalizeUpload = (completeURI, tokens) ->
   , (err, response, body) ->
 
     if err
-      console.log 'cannot finalizeUpload. Err: ',err
-      deferred.reject(err)
+      console.log 'cannot finalizeUpload. Err: ', err
+      deferred.reject err
     else
       if response.statusCode isnt 201
         deferred.reject body.error
       else
         location = response.headers.location
-        deferred.resolve location.substr(location.lastIndexOf('/') + 1)
+        deferred.resolve location.substr location.lastIndexOf('/') + 1
 
   deferred.promise
 
@@ -285,7 +279,7 @@ patchMetadata = (tokens, videoId, title, description, providerOptions) ->
   request
     method: 'PATCH'
     json: true
-    uri:  "https://api.vimeo.com/videos/#{videoId}"
+    uri: "https://api.vimeo.com/videos/#{videoId}"
     auth:
       bearer: tokens.access_token
     body:
@@ -296,17 +290,16 @@ patchMetadata = (tokens, videoId, title, description, providerOptions) ->
   , (err, response, body) ->
     if err
       console.log "cannot patchMetadata. Err: #{err}"
-      deferred.reject(err)
+      deferred.reject err
     else
       console.log 'patchMetadata statusCode ?', response.statusCode
       if body.error
-        deferred.reject(body.error)
+        deferred.reject body.error
       else
         deferred.resolve()
   deferred.promise
 
 processGetRequest = (access_token, path, callback) ->
-
   deferred = Q.defer()
   req_options =
     host: 'api.vimeo.com'
@@ -319,10 +312,10 @@ processGetRequest = (access_token, path, callback) ->
     res.on 'data', (chunk) ->
       data += chunk
     res.on 'end', ->
-      deferred.resolve callback(JSON.parse(data))
+      deferred.resolve callback JSON.parse data
 
   req.on 'error', (err) ->
-    deferred.reject(err)
+    deferred.reject err
   req.end()
   deferred.promise
 
