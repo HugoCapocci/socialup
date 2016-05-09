@@ -266,4 +266,4 @@ getAppToken = ->
   req.end()
   deferred.promise
 
-getAppToken()
+#getAppToken()
