@@ -1,0 +1,96 @@
+{
+  "name": "socialup",
+  "scripts": {
+  },
+  "env": {
+    "APP_URL": {
+      "required": true
+    },
+    "DAILYMOTION_API_KEY": {
+      "required": true
+    },
+    "DAILYMOTION_API_SECRET": {
+      "required": true
+    },
+    "DROPBOX_APP_KEY": {
+      "required": true
+    },
+    "DROPBOX_APP_SECRET": {
+      "required": true
+    },
+    "FACEBOOK_APP_ID": {
+      "required": true
+    },
+    "FACEBOOK_APP_SECRET": {
+      "required": true
+    },
+    "GMAIL_PASSWORD": {
+      "required": true
+    },
+    "GMAIL_USER": {
+      "required": true
+    },
+    "GOOGLE_API_ID": {
+      "required": true
+    },
+    "GOOGLE_API_KEY": {
+      "required": true
+    },
+    "GOOGLE_API_SECRET": {
+      "required": true
+    },
+    "LINKEDIN_CLIENT_ID": {
+      "required": true
+    },
+    "LINKEDIN_CLIENT_SECRET": {
+      "required": true
+    },
+    "MIXCLOUD_CLIENT_ID": {
+      "required": true
+    },
+    "MIXCLOUD_CLIENT_SECRET": {
+      "required": true
+    },
+    "MONGOLAB_URI": {
+      "required": true
+    },
+    "SOUNDCLOUD_CLIENT_ID": {
+      "required": true
+    },
+    "SOUNDCLOUD_CLIENT_SECRET": {
+      "required": true
+    },
+    "TWITTER_ACCESS_TOKEN": {
+      "required": true
+    },
+    "TWITTER_ACCESS_TOKEN_SECRET": {
+      "required": true
+    },
+    "TWITTER_APP_KEY": {
+      "required": true
+    },
+    "TWITTER_APP_SECRET": {
+      "required": true
+    },
+    "VIMEO_CLIENT_ID": {
+      "required": true
+    },
+    "VIMEO_CLIENT_SECRET": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+    "codeship",
+    "mongolab"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-nodejs.git"
+    }
+  ]
+}
