@@ -1,0 +1,16 @@
+form.form-inline(role="form")
+  div
+    label Links
+  .padding-bottom(ng-repeat="link in config.links")
+    .form-group
+      label.sr-only(for="title-{{$index}}") | Title
+      input.form-control(type="text" id="title-{{$index}}" placeholder="Title" ng-model="link.title" required="")
+    .form-group
+      label.sr-only(for="href-{{$index}}") | URL
+      input.form-control(type="url" id="href-{{$index}}" placeholder="http://example.com" ng-model="link.href" required="")
+    button(type="button" class="btn btn-warning" ng-click="removeLink($index)")
+      i.fa.fa-minus
+      | Remove
+  button.btn.btn-primary(type="button" ng-click="addLink()")
+    i.fa.fa-plus
+    | Add

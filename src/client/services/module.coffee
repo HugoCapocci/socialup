@@ -1,2 +1,2 @@
-define ['../bower_components/angular/angular'], (angular) ->
+define ['angular'], (angular) ->
   angular.module 'SocialUp.services', []

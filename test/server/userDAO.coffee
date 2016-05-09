@@ -13,7 +13,7 @@ Promise = require 'bluebird'
 UserDAO = require '../../src/server/coffee/userDAO'
 userDAO = new UserDAO()
 
-describe 'UserDAO', ->
+describe.skip 'UserDAO', ->
 
   deleteTestData = (done) ->
     MongoClient = require('mongodb').MongoClient

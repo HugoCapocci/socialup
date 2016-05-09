@@ -8,7 +8,7 @@ if process.env.GOOGLE_API_KEY is undefined
   catch
    console.log 'No configuration file found for googleAPI test'
 
-describe 'test Google API', ->
+describe.skip 'test Google API', ->
 
   it 'check auth url', ->
 

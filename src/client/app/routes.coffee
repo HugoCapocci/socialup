@@ -1,9 +1,9 @@
-define ['../bower_components/angular/angular', 'app'], (angular, app) ->
+define ['angular', 'app'], (angular, app) ->
 
   generateRouteProviders = ($routeProvider, route) ->
-    $routeProvider.when '/'+route,
-      templateUrl: 'views/'+route+'.html',
-      controller: route.substring(0,1).toUpperCase()+route.substring(1)+'Controller',
+    $routeProvider.when '/' + route,
+      templateUrl: 'views/' + route + '.html',
+      controller: route.substring(0,1).toUpperCase() + route.substring(1) + 'Controller',
       reloadOnSearch : false
 
   return app.config ['$routeProvider', ($routeProvider) ->
@@ -49,4 +49,10 @@ define ['../bower_components/angular/angular', 'app'], (angular, app) ->
     calendarConfig.displayAllMonthEvents = true #This will display all events on a month view even if they're not in the current month. Default false.
     calendarConfig.displayEventEndTimes = false #This will display event end times on the month and year views. Default false.
     calendarConfig.showTimesOnWeekView = true #Make the week view more like the day view, with the caveat that event end times are ignored.
+  ]
+
+  .config ['dashboardProvider', (dashboardProvider) ->
+    dashboardProvider.structure '3-9', rows: [
+      columns: [{styleClass: 'col-md-3'}, {styleClass: 'col-md-9'}]
+    ]
   ]

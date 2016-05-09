@@ -3,7 +3,7 @@
 ###
 define [
   'require',
-  '../bower_components/angular/angular',
+  'angular',
   'app',
   'routes'
 ], (require, angular, app) ->

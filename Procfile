@@ -1,1 +1,1 @@
-web: node server/js/oauthCallback.js
+web: node server/oauthCallback.js

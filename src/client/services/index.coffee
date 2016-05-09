@@ -1,6 +1,8 @@
 define [
   './authentication'
   './alerts'
+  './user'
+  './videos'
 ], ->
 
 ###

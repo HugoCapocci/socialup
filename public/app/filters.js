@@ -1,1 +1,73 @@
-define(["../bower_components/angular/angular","moment"],function(e,n){return e.module("SocialUp.filters",[]).filter("formatNumber",[function(){return function(e,n){var r,t,o;return e=parseFloat(e),isNaN(e)?"-":1e3>e?e:(t=e/1e3,1e3>t?r(t)+"k":(o=t/1e3,1e3>o?r(o)+"M":r(o/1e3)+" Md"))}}]).filter("formatFileSize",[function(){return function(e){var n,r,t,o;return t=e/1024,1>t?e+" o":(o=t/1024,1>o?Number(t).toFixed(2)+" ko":(r=o/1024,Number(o).toFixed(2)+(null!=(n=1>r)?n:{" Mo":" Go"})))}}]).filter("formatDurationInSeconds",[function(){return function(e){var r;return r=e>=3600?"HH[h]mm:ss":"mm:ss",n(1e3*e).format(r)}}]).filter("formatDate",[function(){return function(e){var r;return r=Date.now()-new Date(e).getTime(),n.duration(r).humanize()}}])});
+define(['angular', 'moment'], function(angular, moment) {
+  return angular.module('SocialUp.filters', []).filter('formatNumber', [
+    function() {
+      return function(number, decimals) {
+        var formatValue, numberInKilos, numberInMillions;
+        formatValue = function(value) {
+          if (!decimals) {
+            return parseInt(value);
+          } else {
+            return value.toFixed(decimals);
+          }
+        };
+        number = parseFloat(number);
+        if (isNaN(number)) {
+          return '-';
+        }
+        if (number < 1000) {
+          return number;
+        } else {
+          numberInKilos = number / 1000;
+          if (numberInKilos < 1000) {
+            return formatValue(numberInKilos) + 'k';
+          } else {
+            numberInMillions = numberInKilos / 1000;
+            if (numberInMillions < 1000) {
+              return formatValue(numberInMillions) + 'M';
+            } else {
+              return formatValue(numberInMillions / 1000) + ' Md';
+            }
+          }
+        }
+      };
+    }
+  ]).filter('formatFileSize', [
+    function() {
+      return function(sizeInBytes) {
+        var ref, sizeInGigaBytes, sizeInKiloBytes, sizeInMegaBytes;
+        sizeInKiloBytes = sizeInBytes / 1024;
+        if (sizeInKiloBytes < 1) {
+          return sizeInBytes + " o";
+        } else {
+
+        }
+        sizeInMegaBytes = sizeInKiloBytes / 1024;
+        if (sizeInMegaBytes < 1) {
+          return Number(sizeInKiloBytes).toFixed(2) + " ko";
+        } else {
+
+        }
+        sizeInGigaBytes = sizeInMegaBytes / 1024;
+        return Number(sizeInMegaBytes).toFixed(2) + ((ref = sizeInGigaBytes < 1) != null ? ref : {
+          " Mo": " Go"
+        });
+      };
+    }
+  ]).filter('formatDurationInSeconds', [
+    function() {
+      return function(durationInSeconds) {
+        var format;
+        format = durationInSeconds >= 3600 ? "HH[h]mm:ss" : "mm:ss";
+        return moment(durationInSeconds * 1000).format(format);
+      };
+    }
+  ]).filter('formatDate', [
+    function() {
+      return function(date) {
+        var time;
+        time = Date.now() - new Date(date).getTime();
+        return moment.duration(time).humanize();
+      };
+    }
+  ]);
+});
