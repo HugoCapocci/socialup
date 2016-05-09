@@ -49,7 +49,6 @@ exports.refreshTokens = (tokens, userId) ->
     method: 'GET'
 
   req = https.request req_options, (res) ->
-
     data = ''
     res.on 'data', (chunk) ->
       data += chunk
@@ -84,7 +83,6 @@ exports.getUserGroups = (tokens) ->
     groupsData.data
 
 exports.getUserEvents = (tokens, sinceDate, untilDate) ->
-
   #TODO add parameter 'type' (attending, created, declined, maybe, not_replied) in order to filter events
   sinceDate = moment(parseInt(sinceDate)).unix()
   untilDate = moment(parseInt(untilDate)).unix()
@@ -123,8 +121,7 @@ exports.sendVideo = (token, file, user, params, providerOptions) ->
     else
       console.log('FB Video Upload Response body: ', body)
       videoId = JSON.parse(body).id
-      deferred.resolve
-        url: 'https://www.facebook.com/' + videoId
+      deferred.resolve url: 'https://www.facebook.com/' + videoId
   deferred.promise
 
 #/v2.5/{video-id}
@@ -146,7 +143,6 @@ exports.postMediaLink = (tokens, message, url, title, description, providerOptio
   providerOptions
 
 publishOnFeed = (tokens, data, providerOptions) ->
-
   data.access_token = tokens.access_token
   if providerOptions is undefined
     data['privacy.value'] = 'SELF'
@@ -169,7 +165,6 @@ publishOnFeed = (tokens, data, providerOptions) ->
       #TODO fix hardcoded url
       body.url = 'https://www.facebook.com/yug357/posts/' + id.split('_')[1]
       deferred.resolve body
-
   deferred.promise
 
 exports.getPages = (tokens) ->
@@ -256,7 +251,10 @@ getAppToken = ->
     res.on 'end', ->
       results = JSON.parse(data)
       appToken = results
-      console.log 'appToken? ',appToken
+      if appToken.error
+        console.log 'FB getAppToken error: ', appToken
+        return deferred.reject appToken
+      console.log 'appToken? ', appToken
       deferred.resolve results
 
   req.on 'error', (e) ->

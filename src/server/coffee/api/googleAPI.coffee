@@ -177,7 +177,6 @@ exports.searchPage = (tokens, channelName) ->
               video: parseInt item.statistics.videoCount
               comment: parseInt item.statistics.commentCount
         deferred.resolve Object.keys(channels).map (id) -> channels[id]
-
   deferred.promise
 
 exports.searchVideo = (videoName, maxResults, order, pageToken) ->
@@ -256,7 +255,6 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
             totalResults:  totalResults
             nextPageToken: nextPageToken
             prevPageToken: prevPageToken
-
   deferred.promise
 
 exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
@@ -400,7 +398,6 @@ exports.checkFileData = (tokens, fileId) ->
       if file.downloadUrl
         fileInfo.downloadUrl = file.downloadUrl.replace '&gd=true', ''
       deferred.resolve fileInfo
-
   deferred.promise
 
 exports.getSpaceUsage = (tokens) ->
@@ -414,7 +411,6 @@ exports.getSpaceUsage = (tokens) ->
       deferred.resolve
         used: parseInt infos.quotaBytesUsedAggregate
         total: parseInt infos.quotaBytesTotal
-
   deferred.promise
 
 exports.createShareLink = (tokens, fileId) ->
@@ -436,7 +432,6 @@ exports.createShareLink = (tokens, fileId) ->
   deferred.promise
 
 exports.deleteFile = (tokens, fileId) ->
-
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
   drive.files.delete fileId: fileId, (err, res) ->
@@ -445,7 +440,6 @@ exports.deleteFile = (tokens, fileId) ->
       deferred.reject err
     else
       deferred.resolve res
-
   deferred.promise
 
 exports.getUserCalendars = (tokens) ->

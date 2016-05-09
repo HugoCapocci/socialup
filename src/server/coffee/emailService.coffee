@@ -34,7 +34,7 @@ module.exports = class EmailService
       to: mailTo
       subject: ''
       text: message
-      html: loadTemplate(message)
+      html: loadTemplate message
 
     #send mail with defined transport object
     transporter.sendMail mailOptions, (error, info) ->

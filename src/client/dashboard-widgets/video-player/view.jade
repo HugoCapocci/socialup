@@ -36,7 +36,7 @@
                   a(href="javascript:void(0);" ng-click="openChannel(element.video.channelURL); $event.stopPropagation();")
                     | {{ element.video.channel }}
               .col-xs-2.col-md-2
-                &nbsp;
+                | &nbsp;
                 button.btn.btn-xs.btn-danger(type="button" ng-click="removeFromPlaylist(element); $event.stopPropagation();" style="height:20px;")
                   i.glyphicon.glyphicon-trash
 
@@ -48,7 +48,7 @@
       label.checkbox-inline
         input(type="checkbox" ng-model="searchVideoForm.loop")
         | Boucle
-      &nbsp;
+      | &nbsp;
       button.btn.btn-default.btn-md(type="button" ng-click="changeCurrentPlaying('backward')")
         i.glyphicon.glyphicon-step-backward
       button.btn.btn-default.btn-md(type="button" ng-click="changePlayingState()")
