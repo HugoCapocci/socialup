@@ -3,6 +3,7 @@ public
 server
 coverage
 localeConfig.coffee
+localeConfig.js
 tasks.json
 build
 dist
