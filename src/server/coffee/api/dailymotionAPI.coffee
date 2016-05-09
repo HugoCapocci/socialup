@@ -223,11 +223,11 @@ publishVideo = (videoURL, tokens, params, providerOptions, deferred) ->
 
     if err?
       console.log 'cannot publish the video. Err: ',err
-      deferred.reject new Error(err)
+      deferred.reject new Error err
     else
       results = JSON.parse body
       if results.error?
-        deferred.reject new Error(results.error.message)
+        deferred.reject new Error results.error.message
       else
         deferred.resolve
           url: 'http://www.dailymotion.com/video/' + results.id +
@@ -248,7 +248,7 @@ exports.listCategories = (tokens, userId) ->
     deferred.resolve processGetRequest validTokens.access_token, '/channels', (results) ->
       results.list.map (channel) ->
         channel.description
-        return channel
+        channel
   , (err) ->
     deferred.reject err
 
@@ -269,9 +269,9 @@ processGetRequest = (access_token, path, callback) ->
       data += chunk
     res.on 'end', ->
       if callback?
-        deferred.resolve callback( JSON.parse data )
+        deferred.resolve callback JSON.parse data
       else
-        deferred.resolve JSON.parse(data)
+        deferred.resolve JSON.parse data
 
   req.on 'error', (err) ->
     deferred.reject err
