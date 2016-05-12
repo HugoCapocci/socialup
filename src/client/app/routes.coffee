@@ -56,3 +56,7 @@ define ['angular', 'app'], (angular, app) ->
       columns: [{styleClass: 'col-md-3'}, {styleClass: 'col-md-9'}]
     ]
   ]
+
+  .config ['$compileProvider', ($compileProvider) ->
+    $compileProvider.debugInfoEnabled false
+  ]

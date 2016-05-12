@@ -52,6 +52,13 @@ describe 'test Twitter API', ->
     it 'check oauth url', ->
       twitterAPI.getOAuthURL().should.equal 'https://api.twitter.com/oauth/authorize'
 
+  describe 'Bearer token', ->
+
+    it 'should return base64 encoded token', ->
+      consumerKey = 'xvz1evFS4wEEPTGEFPHBog'
+      consumerSecret = 'L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg'
+      encodedBearedTokenCredentials = twitterAPI._getEncodedBearedTokenCredentials consumerKey, consumerSecret
+      encodedBearedTokenCredentials.should.equal 'eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw=='
   describe 'DAO API', ->
     beforeEach ->
       @sandbox = sinon.sandbox.create()

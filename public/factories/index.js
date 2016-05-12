@@ -1,1 +1,0 @@
-define(['./event'], function() {});
