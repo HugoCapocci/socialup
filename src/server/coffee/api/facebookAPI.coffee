@@ -117,9 +117,9 @@ exports.sendVideo = (token, file, user, params, providerOptions) ->
     formData: formData
   , (err, response, body) ->
     if err
-      deferred.reject(err)
+      deferred.reject err
     else
-      console.log('FB Video Upload Response body: ', body)
+      console.log 'FB Video Upload Response body: ', body
       videoId = JSON.parse(body).id
       deferred.resolve url: 'https://www.facebook.com/' + videoId
   deferred.promise
@@ -156,7 +156,6 @@ publishOnFeed = (tokens, data, providerOptions) ->
     json: true
     body: data
   , (err, response, body) ->
-
     if err
       deferred.reject err
     else
