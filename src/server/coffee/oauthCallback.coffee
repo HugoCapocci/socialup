@@ -71,7 +71,7 @@ getRefreshedToken = (provider, userId) ->
         userDAO.updateUserTokens(userId, provider, tokens)
         Q.fcall -> tokens
     else
-      Q.fcall -> throw new Error('no "refreshTokens" function for provider ' + provider)
+      Q.fcall -> throw new Error 'no "refreshTokens" function for provider ' + provider
   else
     Q.fcall -> myToken
 

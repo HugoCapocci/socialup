@@ -17,7 +17,6 @@ define ['./module'], (appModule) ->
       $window.localStorage.setItem 'SocialUp', JSON.stringify user: userData, timestamp: new Date().getTime()
 
     @getData = ->
-      deferred = $q.defer()
       $http.get '/user/'+getUserData().id
       .then (response) ->
         userData =
@@ -28,10 +27,9 @@ define ['./module'], (appModule) ->
           providers: response.data.providers
         setUserData userData
         $rootScope.user = userData
-        deferred.resolve userData
-      , (err) ->
-        deferred.reject err
-      deferred.promise
+        userData
+      .catch (err) ->
+        $q.reject err
 
     @setData = (userData) ->
       setUserData userData

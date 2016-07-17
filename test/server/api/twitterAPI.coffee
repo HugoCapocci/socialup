@@ -69,8 +69,9 @@ describe 'test Twitter API', ->
     describe 'tweets', ->
 
       it 'should get tweets', (done) ->
+        @timeout 5000
         @sandbox.stub(twitterAPI, 'getSignature').returns 'dummySignature'
-        @sandbox.stub(request, 'get').yields null, null, {}
+        @sandbox.stub(request, 'get').yields undefined, {}, {}
         twitterAPI.getTweets oauth_token: 'dummy_oauth_token'
         .then (tweets) ->
           'dummySignature'.should.equal twitterAPI.getSignature()

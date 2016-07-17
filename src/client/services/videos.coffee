@@ -3,18 +3,15 @@ define ['./module'], (appModule) ->
   videosService = ($http, $q, $window) ->
     localData = JSON.parse $window.localStorage.getItem 'SocialUp'
     @getMedia = (provider) ->
-      deferred = $q.defer()
-      $http.get('/media/'+provider+'/'+localData.user.id)
+      $http.get '/media/' + provider + '/' + localData.user.id
       .then (response) ->
         console.log 'getMedia response data: ', response.data
-        deferred.resolve response.data
-      , (err) ->
-        console.log "err: ", err
-        deferred.reject err
-      deferred.promise
+        response.data
+      .catch (err) ->
+        console.log 'err: ', err
+        $q.reject err
 
     @searchVideo = (provider, videoName, limit, order, next) ->
-      deferred = $q.defer()
       url = 'search/video/'+provider+'?videoName='+encodeURI(videoName)+'&limit='+limit
       if order
         url += "&order=" + order
@@ -23,11 +20,10 @@ define ['./module'], (appModule) ->
       $http.get(url)
       .then (response) ->
         console.log "searchVideo response data for provider: #{provider}", response.data
-        deferred.resolve(response.data)
-      , (err) ->
+        response.data
+      .catch (err) ->
         console.error "err: ", err
-        deferred.reject err
-      deferred.promise
+        $q.reject err
 
     return
 

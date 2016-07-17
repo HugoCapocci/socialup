@@ -1,6 +1,7 @@
 define [
   './authentication'
   './alerts'
+  './event'
   './message'
   './user'
   './videos'
