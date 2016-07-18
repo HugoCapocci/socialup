@@ -133,6 +133,7 @@ exports.getUserInfo = (tokens) ->
     userName: userInfo.screen_name
 
 processHeader = ({oauth_token, oauth_token_secret}, url, httpVerb, oauthCallback) ->
+  console.log 'process header'
   return 'Authorization': 'Bearer ' + applicationOnlyToken?.access_token unless tokens?
   headerParams =
     'oauth_consumer_key': APP_KEY

@@ -5,17 +5,14 @@ define ['./module'], (appModule) ->
     return data###
 
     @getProviderURL = (provider) ->
-      deferred = $q.defer()
       $http.get '/oauthURL/'+provider+'/'+$rootScope.user.id
       .then (response) ->
-        deferred.resolve response.data
+        response.data
       .catch (err) ->
         console.log 'err: ', err
-        deferred.reject err
-      deferred.promise
+        $q.reject err
 
     @authenticate = (login, hashedPassword) ->
-      deferred = $q.defer()
       $http.get('/authenticate/?login='+login+'&password='+hashedPassword)
       .then (response) ->
         userData =
@@ -24,57 +21,49 @@ define ['./module'], (appModule) ->
           login: response.data.login
           id: response.data._id
           providers: response.data.providers
-        deferred.resolve userData
+        userData
       .catch (err) ->
-        deferred.reject(err)
-      deferred.promise
+        console.error 'err: ', err
+        $q.reject err
 
     @createUser = (firstName, lastName, login, hashedPassword) ->
-      deferred = $q.defer()
       $http.post '/user/create', {firstName: firstName, lastName: lastName, login: login, password: hashedPassword}
       .then (response) ->
         console.log 'response for ', response
-        deferred.resolve response.data
+        response.data
       .catch (err) ->
         console.log 'err: ', err
-        deferred.reject err
-      deferred.promise
+        $q.reject err
 
     @getUserTokens = ->
       $rootScope.tokens
 
     @deleteToken = (provider) ->
-      deferred = $q.defer()
       $http.delete '/token/'+provider+'/'+$rootScope.user.id
       .then (response) ->
         console.log 'response for eventService.deleteEvent: ', response
-        deferred.resolve()
+        return
       .catch (err) ->
         console.log 'err in eventService.deleteEvent: ', err
-        deferred.reject err
-      deferred.promise
+        $q.reject err
 
     @refreshToken = (provider) ->
-      deferred = $q.defer()
       $http.get '/refreshToken/'+provider+'/'+$rootScope.user.id
       .then (response) ->
         console.log 'response for eventService.refreshToken: ', response
-        deferred.resolve()
+        return
       .catch (err) ->
         console.log 'err in eventService.refreshToken: ', err
-        deferred.reject err
-      deferred.promise
+        $q.reject err
 
     @resetPassword = (userEmail) ->
-      deferred = $q.defer()
       $http.post '/user/resetPassword/'+userEmail, {}
       .then (response) ->
         console.log 'response for ', response
-        deferred.resolve response.data
+        response.data
       .catch (err) ->
         console.log 'err: ', err
-        deferred.reject err
-      deferred.promise
+        $q.reject err
 
     return
 

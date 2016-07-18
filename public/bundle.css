@@ -1,3 +1,19 @@
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  justify-content: center;
+}
+
+.flex-align-items-center {
+  align-items: center;
+}
+
+.space-between {
+  justify-content: space-between;
+}
+
 .stripped div:nth-child(even) {
   background-color: #dcdcdc;
 }

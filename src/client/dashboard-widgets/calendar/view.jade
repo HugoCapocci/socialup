@@ -1,0 +1,66 @@
+.row(ng-init="loadDefaultCalendars()")
+
+  .col-lg-6.col-lg-offset-1.col-md-6.text-center.flex.space-between.flex-align-items-center
+    button.flex(
+      class="btn btn-primary"
+      mwl-date-modifier
+      date="viewDate"
+      decrement="calendarView" ng-click="loadEvents()"
+    )  Précédent
+    label.flex
+      |  {{ calendarTitle }}
+    button.flex(
+      class="btn btn-primary"
+      mwl-date-modifier
+      date="viewDate"
+      increment="calendarView" ng-click="loadEvents()"  
+    )  Suivant
+
+  br.visible-xs.visible-sm
+
+  .col-lg-5.cold-md-6.text-right
+    .btn-group(role="group")
+      button.btn.btn-primary(ng-model="calendarView" uib-btn-radio="'year'" ng-click="loadEvents()")  Année
+      button.btn.btn-primary(ng-model="calendarView" uib-btn-radio="'month'" ng-click="loadEvents()")  Mois
+      button.btn.btn-primary(ng-model="calendarView" uib-btn-radio="'week'" ng-click="loadEvents()")  Semaine
+      button.btn.btn-primary(ng-model="calendarView" uib-btn-radio="'day'")  Jour
+      button.btn.btn-default(ng-click="isCollapsed = !isCollapsed")
+        i.glyphicon.glyphicon-cog
+  
+  .col-lg-12(ng-init="isCollapsed=true" uib-collapse="isCollapsed")
+    .well
+      div(ng-repeat="calendar in calendars")
+        label
+          input(type="checkbox" ng-model="calendars[$index].selected" ng-change="loadEvents()")
+          | {{calendar.name}}
+
+br
+
+mwl-calendar(
+  events="events"
+  view="calendarView"
+  view-title="calendarTitle"
+  view-date="viewDate"
+  on-event-click="displayEvent(calendarEvent)"
+  on-event-times-changed="eventTimesChanged(calendarEvent); calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
+  edit-event-html="'<i class=\"glyphicon glyphicon-pencil\"></i>'"
+  delete-event-html="'<i class=\"glyphicon glyphicon-remove\"></i>'"
+  on-edit-event-click="eventEdited(calendarEvent)"
+  on-delete-event-click="eventDeleted(calendarEvent)"
+  cell-is-open="isCellOpen"
+  day-view-start="06:00"
+  day-view-end="22:00"
+  day-view-split="30"
+  cell-modifier="modifyCell(calendarCell)"
+)
+
+// modal window
+script(type="text/ng-template" id="modalEvent.html")
+  .modal-header
+    h3.modal-title
+      | {{ modal.event.title }}           
+  .modal-body       
+    | {{ modal.event.description }}
+  .modal-footer
+    button.btn.btn-primary(type="button" ng-click="modal.ok()") OK
+    button.btn.btn-warning(type="button" ng-click="modal.cancel()") Cancel

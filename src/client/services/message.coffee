@@ -12,14 +12,12 @@ define ['./module'], (appModule) ->
       return sendMessage message: chainedMessage, providers: providers, eventParentId: eventParentId, providersOptions: providersOptions
 
     sendMessage = (messageObject) ->
-      deferred = $q.defer();
       $http.post('/message/'+localData.user.id,  messageObject)
       .then (response) ->
-          console.log 'response for ', response
-          deferred.resolve response.data
-      , (err) ->
-        deferred.reject err
-      deferred.promise
+        console.log 'response for ', response
+        response.data
+      .catch (err) ->
+        $q.reject err
     return
 
   appModule.service 'messageService', ['$http', '$q', '$window', messageService]

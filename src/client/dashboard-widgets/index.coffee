@@ -1,5 +1,6 @@
 define [
   './module'
+  './calendar/controller'
   './video-player/controller'
   './twitter/controller'
 ], (appModule) ->
@@ -24,5 +25,14 @@ define [
       edit:
         templateUrl: "#{widgetsPath}/twitter/view.html"
         controller: 'TwitterController'
+
+    .widget 'calendar',
+      title: 'Calendar'
+      description: 'Displays and manage events'
+      templateUrl: "#{widgetsPath}/calendar/view.html"
+      controller: 'CalendarEventsController'
+      edit:
+        templateUrl: "#{widgetsPath}/calendar/view.html"
+        controller: 'CalendarEventsController'
     return
   ]
