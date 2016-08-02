@@ -2,6 +2,7 @@ define [
   'angular'
   'angular-resource'
   'angular-route'
+  'angular-sanitize'
   'angular-bootstrap'
   'angular-bootstrap-tpls'
   'angular-file-upload'
@@ -26,6 +27,7 @@ define [
   angular.module 'SocialUp', [
     'ngResource'
     'ngRoute'
+    'ngSanitize'
     'ui.bootstrap'
     'ui.bootstrap.tpls'
     'angularFileUpload'

@@ -32,9 +32,9 @@ exports.pushCode = (code) ->
       console.log 'code validated ? ', data
       deferred.resolve JSON.parse data
 
-  req.on 'error', (e) ->
-    console.log 'FB authentication error: ', e
-    deferred.reject new Error(e)
+  req.on 'error', (error) ->
+    console.log 'FB authentication error: ', error
+    deferred.reject error
 
   req.end()
   deferred.promise
