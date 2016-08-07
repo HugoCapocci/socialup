@@ -1,3 +1,20 @@
 div(style="display: flex; flex-direction: column")
-  span(ng-repeat="tweet in tweets")
-    | {{ tweet }}
+  div(style="display: flex; flex-direction: row; align-items: flex-start")
+    input(ng-model="query")
+    button(ng-click="searchTweets()") Go
+  div(ng-repeat="status in statuses" style="margin-top: 5px")
+    div(style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-between")
+      img(src="{{ status.user.profile_image_url }}" class="avatar")
+      div(style="display: flex; flex-direction: column; flex-wrap: wrap; flex-grow: 1; justify-content: space-around")
+        div(style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-between")
+          a(href="{{ 'https://twitter.com/' + status.user.screen_name }}" target="_blank")
+            span.fullname(tooltip="{{ '@' + status.user.screen_name }}") {{ status.user.name }}
+          a(
+            href="{{ 'https://twitter.com/' + status.user.screen_name + '/status/' + status.id_str }}"
+            target="_blank"
+          )
+            span {{ formatStringDate(status.created_at) }}
+        p(ng-bind-html="status.text | linky:'_blank'")
+    div(style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-around; align-items: flex-end")
+      i.glyphicon.glyphicon-heart(style="color: red")  {{ status.favorite_count }}
+      i.glyphicon.glyphicon-repeat(style="color: blue") {{ status.retweet_count }}

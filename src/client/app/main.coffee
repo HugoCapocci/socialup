@@ -9,6 +9,7 @@ require.config
     'angular-dashboard-framework': '../bower_components/angular-dashboard-framework/dist/angular-dashboard-framework.min'
     'angular-file-upload': '../bower_components/angular-file-upload/dist/angular-file-upload.min'
     'angular-tree-control': '../bower_components/angular-tree-control/angular-tree-control'
+    'angular-sanitize': '../bower_components/angular-sanitize/angular-sanitize.min'
     'ng-tags-input': '../bower_components/ng-tags-input/ng-tags-input'
     'sha1': '../bower_components/SHA-1/sha1'
     'angular-smart-table': '../bower_components/angular-smart-table/dist/smart-table'
@@ -54,6 +55,8 @@ require.config
     'angular-bootstrap-calendar':
       deps: ['angular', 'moment','angular-bootstrap']
     'player':
+      deps: ['angular']
+    'angular-sanitize':
       deps: ['angular']
 
   #kick start application

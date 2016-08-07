@@ -2,6 +2,7 @@ define ['./module'], (appModule) ->
 
   messageService = ($http, $q, $window) ->
     localData =  JSON.parse $window.localStorage.getItem 'SocialUp'
+
     @postMessage = (providers, message, providersOptions, scheduledDate) ->
       console.log "messageService.postMessage " + message
       console.log "providersOptions: ", providersOptions
@@ -18,6 +19,14 @@ define ['./module'], (appModule) ->
         response.data
       .catch (err) ->
         $q.reject err
+
+    @searchTweets = (query) ->
+      $http.get '/searchTweets?q=' + encodeURIComponent query
+      .then (response) ->
+        response.data
+      .catch (err) ->
+        $q.reject err
+
     return
 
   appModule.service 'messageService', ['$http', '$q', '$window', messageService]

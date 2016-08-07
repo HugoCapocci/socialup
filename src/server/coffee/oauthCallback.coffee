@@ -192,6 +192,14 @@ app.get '/*2callback', (req, res) ->
     console.error 'error: ', err
     res.send err
 
+app.get '/searchTweets/', (req, res) ->
+  query = req.query.q
+  providersAPI.twitter.searchTweets query
+  .then (tweets) ->
+    res.send tweets
+  .catch (err) ->
+    res.send err
+
 app.get '/events/:userId', (req, res) ->
   userId = req.params.userId
   eventsDAO.retrieveScheduledEventsByUser userId

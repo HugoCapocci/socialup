@@ -82,8 +82,7 @@ getAccessToken = (oauthVerifier, tokens) ->
       uri: url
       headers: processHeader tokens, url, 'post'
       method: 'POST'
-      form:
-        oauth_verifier: oauthVerifier
+      form: oauth_verifier: oauthVerifier
     , (error, response, body) ->
       if error
         reject error
@@ -122,6 +121,26 @@ getTweets = (tokens) ->
       resolver.resolve response
   resolver.promise
 
+searchTweets = (query, tokens) ->
+  resolver = bluebird.defer()
+  url = 'https://api.twitter.com/1.1/search/tweets.json'
+
+  url += '?include_entities=false'
+  request
+    uri: url + '&q=' + encodeURIComponent query
+    headers: processHeader tokens, url, 'get'
+    method: 'GET'
+  , (error, response, body) ->
+    if error
+      console.error 'search tweets error :/ '
+      resolver.reject error
+    else
+      if body?.statusCode > 400
+        console.error 'error in response body ', body
+        return resolver.reject 'error in response'
+      resolver.resolve body
+  resolver.promise
+
 #return 200 if token is valid
 exports.verifyCredentials = (tokens) ->
   processGetRequest tokens, 'https://api.twitter.com/1.1/account/verify_credentials.json', (body, response) ->
@@ -132,19 +151,24 @@ exports.getUserInfo = (tokens) ->
     userInfo = JSON.parse body
     userName: userInfo.screen_name
 
-processHeader = ({oauth_token, oauth_token_secret}, url, httpVerb, oauthCallback) ->
-  console.log 'process header'
-  return 'Authorization': 'Bearer ' + applicationOnlyToken?.access_token unless tokens?
+processHeader = (tokens, url, httpVerb, oauthCallback) ->
+  return 'Authorization': 'Bearer ' + applicationOnlyToken.access_token unless tokens?
   headerParams =
     'oauth_consumer_key': APP_KEY
     'oauth_nonce': oAuthNonce()
     'oauth_signature_method': 'HMAC-SHA1'
     'oauth_timestamp': Math.round new Date() / 1000
-    'oauth_token': oauth_token
+    'oauth_token': tokens.oauth_token
     'oauth_version': '1.0'
   headerParams['oauth_callback'] = oauthCallback if oauthCallback?
   globalParams = headerParams
-  headerParams.oauth_signature = getSignature globalParams, httpVerb, url, oauth_token_secret, APP_SECRET
+  headerParams.oauth_signature = getSignature(
+    globalParams
+    httpVerb
+    url
+    tokens.oauth_token_secret
+    APP_SECRET
+  )
   'Authorization': 'OAuth ' + inLineParams headerParams
 
 processGetRequest = (tokens, url, callback) ->
@@ -189,8 +213,7 @@ getApplicationOnlyToken = ->
 
 getApplicationOnlyToken()
 .then (token) ->
-  console.log 'twitter getApplicationOnlyToken success, token: ', token
-  applicationOnlyToken = token
+  applicationOnlyToken = JSON.parse(token)
 .catch (error) ->
   console.log 'twitter getApplicationOnlyToken failure, error: ', error
 
@@ -203,6 +226,7 @@ module.exports =
   getAccessToken: getAccessToken
   postMessage: postMessage
   getTweets: getTweets
+  searchTweets: searchTweets
   getSignature: getSignature
   bodyToTokens: bodyToTokens
   _getEncodedBearedTokenCredentials: getEncodedBearedTokenCredentials
