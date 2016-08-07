@@ -68,14 +68,8 @@ describe 'test Twitter API', ->
 
     describe 'tweets', ->
 
-      it 'should get tweets', (done) ->
-        @timeout 5000
+      it 'should get tweets', ->
         @sandbox.stub(twitterAPI, 'getSignature').returns 'dummySignature'
         @sandbox.stub(request, 'get').yields undefined, {}, {}
-        twitterAPI.getTweets oauth_token: 'dummy_oauth_token'
-        .then (tweets) ->
-          'dummySignature'.should.equal twitterAPI.getSignature()
-          done()
-        .catch (error) ->
-          console.log 'error: ', console.error
-          done error
+        twitterAPI.getTweets(oauth_token: 'dummy_oauth_token').should.be.fulfilled
+        'dummySignature'.should.equal twitterAPI.getSignature()

@@ -28,14 +28,9 @@ describe 'EventsDAO', ->
   afterEach ->
     @sandbox.restore()
 
-  it 'createEvent should create new Event', (done) ->
-    eventsDAO.createEvent 'dummyEvent', 'dummyCollection'
-    .then (createdEventId) ->
-      createdEventId.should.equal 42
-      done()
+  it 'createEvent should create new Event', ->
+    eventsDAO.createEvent('dummyEvent', 'dummyCollection').should.eventually.equal 42
 
-  it 'updateEvent should return number of modified events', (done) ->
+  it 'updateEvent should return number of modified events', ->
     eventsDAO.updateEvent 'dummyQuery', 'dummyUpdate', 'dummyCollection'
-    .then (nbModifiedEvents) ->
-      nbModifiedEvents.should.equal 7
-      done()
+    .should.eventually.equal 7
