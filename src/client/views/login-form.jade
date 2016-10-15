@@ -1,0 +1,56 @@
+div
+  header.jumbotron
+    h2 Enregistrez-vous / Créez votre compte
+  .row
+    .col-lg-6.col-lg-offset-3
+      uib-tabset.panel.panel-default(justified="true")
+        uib-tab(heading="Créez un compte")
+          .panel-body
+
+            .row
+              .col-xs-5.col-md-5.col-lg-6
+                form.form-signin(name="create" id="createForm" ng-submit="create()")
+                  fieldset
+                    .form-group
+                      input.form-control(type="text" id="firstName" placeholder="Prénom" ng-model="form.firstName")
+                    .form-group
+                      input.form-control(type="text" id="lastName" placeholder="Nom" ng-model="form.lastName")                                  
+                    .form-group
+                      input.form-control(type="text" id="login" placeholder="Email (login)" ng-model="form.login")
+                    .form-group(ng-if="!isSocialNetworkAuthenticated")
+                      input.form-control(type="password" id="password" placeholder="Mot de passe" ng-model="form.password")
+                    .form-group(ng-if="!isSocialNetworkAuthenticated")
+                      input.form-control(type="password" id="repeatedPassword" placeholder="Répétez vore mot de passe" ng-model="form.repeatedPassword")
+                    //captcha pour éviter les bots
+                    div(vc-recaptcha key="'6LdYdAUTAAAAACh8N-aW_9k1dPMg0I-u5uWnULnW'")
+                    button.btn.btn-primary(id="createButt" type="submit")
+                      | inscrivez-vous
+              .col-xs-5.col-md-5.col-lg-6
+        
+        uib-tab(heading="Connectez-vous" active="true")
+          .panel-body
+
+            form.form-signin(name="signIn" id="signInForm" ng-submit="authenticate()")
+              fieldset                                        
+                .row
+                  .col-xs-5.col-md-5.col-lg-6
+                    .form-group
+                      input.form-control(type="text" id="log" placeholder="Email (login)" ng-model="form.login")
+
+                .row
+                  .col-xs-5.col-md-5.col-lg-6
+                    .form-group
+                      input.form-control(type="password" id="pswd" placeholder="Mot de passe" ng-model="form.password")
+                  .col-xs-5.col-md-5.col-lg-6.col-lg-offset-0
+                    button.btn.btn-primary(id="signInButt" type="submit")
+                      | connectez-vous
+            .clean
+              hr(style="margin-bottom:0px;")
+
+            .row
+              .col-xs-8.col-md-8.col-lg-9.col-md-offset-2
+                h3 Mot de passe oublié ?
+              .col-xs-5.col-md-5.col-lg-6
+                input.form-control(type="text" placeholder="Email (login)" ng-model="form.loginPasswordRetrieve")
+              .col-xs-5.col-md-5.col-lg-6
+                button.btn.btn-primary(type="button" ng-click="sendResetPassword()") Reset password
