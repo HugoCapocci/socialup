@@ -12,17 +12,17 @@ define ['./module'], (appModule) ->
         $q.reject err
 
     @searchVideo = (provider, videoName, limit, order, next) ->
-      url = 'search/video/'+provider+'?videoName='+encodeURI(videoName)+'&limit='+limit
+      url = 'search/video/' + provider + '?videoName=' + encodeURIComponent(videoName) + '&limit=' + limit
       if order
-        url += "&order=" + order
+        url += '&order=' + order
       if next
-        url += "&next=" + next
+        url += '&next=' + next
       $http.get(url)
       .then (response) ->
         console.log "searchVideo response data for provider: #{provider}", response.data
         response.data
       .catch (err) ->
-        console.error "err: ", err
+        console.error 'err: ', err
         $q.reject err
 
     return
