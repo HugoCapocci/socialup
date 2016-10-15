@@ -99,6 +99,7 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
         isLoading: true
         type: 'warning'
         progress: 0
+
       @$rootScope.stopProgress = (message) ->
         @$scope.modal.type = 'success'
         @$scope.modal.message = message
