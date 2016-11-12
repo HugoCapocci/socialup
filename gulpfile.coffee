@@ -3,10 +3,21 @@ coffeelint = require 'gulp-coffeelint'
 gulp = require 'gulp'
 istanbul = require 'gulp-coffee-istanbul'
 jade = require 'gulp-jade'
+less  = require 'gulp-less'
+concatCss = require 'gulp-concat-css'
 mocha = require 'gulp-mocha'
 uglify = require 'gulp-uglify'
 gulpFilter = require 'gulp-filter'
 guppy = require('git-guppy')(gulp)
+plumber = require 'gulp-plumber'
+
+gulp.task 'watch', ['default'], ->
+
+  gulp.watch './src/client/**/*.coffee', ['compileAngularCoffee']
+  gulp.watch './src/client/**/*.jade', ['compileJade']
+  gulp.watch 'src/client/**/*.less', ['compileCss']
+
+  return
 
 gulp.task 'coverage', ->
   gulp.src [
@@ -51,17 +62,20 @@ gulp.task 'pre-commit', ['coffeelintNode', 'coverage']
 
 gulp.task 'minifyServer', ['compileCoffee'], ->
   gulp.src ['./temp/server/**/*.js']
+  .pipe plumber()
   .pipe uglify()
   .pipe gulp.dest './server'
 
 gulp.task 'minifyClient', ['compileAngularCoffee'], ->
   #TODO remove temp files
   gulp.src ['./temp/client/**/*.js']
+  .pipe plumber()
   .pipe uglify()
   .pipe gulp.dest './public'
 
 gulp.task 'compileCoffee', ->
   gulp.src ['./src/server/coffee/**/*.coffee']
+  .pipe plumber()
   .pipe coffee(bare: true).on 'error', (err) ->
     console.error 'compileCoffee error: ', err
     process.exit 1
@@ -69,10 +83,10 @@ gulp.task 'compileCoffee', ->
 
 gulp.task 'compileAngularCoffee', ->
   gulp.src ['./src/client/**/*.coffee']
+  .pipe plumber()
   .pipe coffee(bare: true).on 'error', (err) ->
     console.error 'compileAngularCoffee error: ', err
     process.exit 1
-  #.pipe gulp.dest './temp/client'
   .pipe gulp.dest './public'
 
 gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
@@ -102,12 +116,32 @@ gulp.task 'pre-commit-old', guppy.src 'pre-commit', (files) ->
 
 gulp.task 'compileJade', ->
   gulp.src './src/client/**/*.jade'
+  .pipe plumber()
   .pipe jade(locals: {})
   .pipe gulp.dest './public/'
+
+gulp.task 'compileLess', ->
+  gulp.src 'src/client/**/*.less'
+  .pipe plumber()
+  .pipe less()
+  .pipe gulp.dest './temp/css'
+
+gulp.task 'compileCss', ['compileLess'], ->
+  gulp.src [
+    'temp/css/*.css'
+    'public/bower_components/angular-tree-control/css/tree-control.css'
+    'public/bower_components/angular-tree-control/css/tree-control-attribute.css'
+    'public/bower_components/ng-tags-input/ng-tags-input.css'
+    'public/bower_components/angular-chart.js/dist/angular-chart.css'
+    'public/bower_components/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.css'
+  ]
+  .pipe concatCss 'bundle.css'
+  .pipe gulp.dest 'public/'
 
 gulp.task 'default', [
   'coffeelintNode'
   'minifyServer'
   'compileAngularCoffee'
   'compileJade'
+  'compileCss'
 ]

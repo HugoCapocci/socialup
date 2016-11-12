@@ -1,38 +1,38 @@
 .cal-slide-box(uib-collapse="vm.isCollapsed" mwl-collapse-fallback="vm.isCollapsed")
-    .cal-slide-content(cal-event-list)
-        ul.unstyled.list-unstyled
-            li(
-                ng-repeat="event in vm.events | orderBy:'startsAt' track by event.$id"
-                ng-class="event.cssClass"
-                mwl-draggable="event.draggable === true"
-                drop-data="{event: event}"
-            )
-                span.pull-left.event(ng-class="'event-' + event.type")= "&nbsp;"
-                a.event-item(href="javascript:;" ng-click="vm.onEventClick({calendarEvent: event})")
-                    span(ng-bind-html="vm.$sce.trustAsHtml(event.title)")
-                    span(ng-if="!event.allDay")= "("
-                        span(ng-bind="event.startsAt | calendarDate:(isMonthView ? 'time' : 'datetime'):true")
-                        span(ng-if="vm.calendarConfig.displayEventEndTimes && event.endsAt")= " - "
-                        span(ng-bind="event.endsAt | calendarDate:(isMonthView ? 'time' : 'datetime'):true")
-                        = ")"
-                        span(ng-if="event.allDay && !isMonthView")= ")"
-                            span(ng-bind="event.startsAt | calendarDate:'day':true")
-                        = ")"
-                a.event-item-edit(
-                    href="javascript:;"
-                    ng-if="vm.editEventHtml && event.editable !== false"
-                    ng-bind-html="vm.$sce.trustAsHtml(vm.editEventHtml)"
-                    ng-click="vm.onEditEventClick({calendarEvent: event})"
-                )
-                a.event-item-delete(
-                    href="javascript:;"
-                    ng-if="vm.deleteEventHtml && event.deletable !== false"
-                    ng-bind-html="vm.$sce.trustAsHtml(vm.deleteEventHtml)"
-                 ng-click="vm.onDeleteEventClick({calendarEvent: event})"
-                )
-                = "&nbsp;"
-                img(
-                    ng-src="{{'images/icons/'+event.provider+'.png'}}"
-                    style="background-color:#FFF;border-radius:12px;border: 1px solid #ccc;max-height:20px; max-width:20px"
-                    align="middle"
-                )
+  .cal-slide-content(cal-event-list)
+    ul.unstyled.list-unstyled
+      li(
+        ng-repeat="event in vm.events | orderBy:'startsAt' track by event.$id"
+        ng-class="event.cssClass"
+        mwl-draggable="event.draggable === true"
+        drop-data="{event: event}"
+      )
+        span.pull-left.event(ng-class="'event-' + event.type")= "&nbsp;"
+        a.event-item(href="javascript:;" ng-click="vm.onEventClick({calendarEvent: event})")
+          span(ng-bind-html="vm.$sce.trustAsHtml(event.title)")
+          span(ng-if="!event.allDay")= "("
+            span(ng-bind="event.startsAt | calendarDate:(isMonthView ? 'time' : 'datetime'):true")
+            span(ng-if="vm.calendarConfig.displayEventEndTimes && event.endsAt")= " - "
+            span(ng-bind="event.endsAt | calendarDate:(isMonthView ? 'time' : 'datetime'):true")
+            = ")"
+            span(ng-if="event.allDay && !isMonthView")= ")"
+              span(ng-bind="event.startsAt | calendarDate:'day':true")
+            = ")"
+        a.event-item-edit(
+          href="javascript:;"
+          ng-if="vm.editEventHtml && event.editable !== false"
+          ng-bind-html="vm.$sce.trustAsHtml(vm.editEventHtml)"
+          ng-click="vm.onEditEventClick({calendarEvent: event})"
+        )
+        a.event-item-delete(
+          href="javascript:;"
+          ng-if="vm.deleteEventHtml && event.deletable !== false"
+          ng-bind-html="vm.$sce.trustAsHtml(vm.deleteEventHtml)"
+          ng-click="vm.onDeleteEventClick({calendarEvent: event})"
+        )
+        = "&nbsp;"
+        img(
+          ng-src="{{'images/icons/'+event.provider+'.png'}}"
+          style="background-color:#FFF;border-radius:12px;border: 1px solid #ccc;max-height:20px; max-width:20px"
+          align="middle"
+        )
