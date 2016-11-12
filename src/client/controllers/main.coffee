@@ -39,7 +39,7 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
       number + (if number is 1 then 'er' else 'ème')
     meridiemParse: /PD|MD/
     isPM: (input) ->
-      input.charAt(0) is 'M'
+      input.charAt 0 is 'M'
     meridiem: (hours) ->
       hours < 12 ? 'PD' : 'MD'
     week:

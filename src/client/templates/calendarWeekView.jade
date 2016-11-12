@@ -1,61 +1,60 @@
 .cal-week-box(ng-class="{'cal-day-box': vm.showTimes}")
+  .cal-row-fluid.cal-row-head
 
-    .cal-row-fluid.cal-row-head
+      .cal-cell1(
+          ng-repeat="day in vm.view.days track by $index"
+          ng-class="{'cal-day-weekend': day.isWeekend, 'cal-day-past': day.isPast, 'cal-day-today': day.isToday, 'cal-day-future': day.isFuture}"
+          mwl-element-dimensions="vm.dayColumnDimensions"
+      )
 
-        .cal-cell1(
-            ng-repeat="day in vm.view.days track by $index"
-            ng-class="{'cal-day-weekend': day.isWeekend, 'cal-day-past': day.isPast, 'cal-day-today': day.isToday, 'cal-day-future': day.isFuture}"
-            mwl-element-dimensions="vm.dayColumnDimensions"
-        )
+          span(ng-bind="day.weekDayLabel")
+          br
+          small
+              span.pointer(
+                  data-cal-date
+                  ng-click="vm.calendarCtrl.dateClicked(day.date)"
+                  ng-bind="day.dayLabel"
+              )
 
-            span(ng-bind="day.weekDayLabel")
-            br
-            small
-                span.pointer(
-                    data-cal-date
-                    ng-click="vm.calendarCtrl.dateClicked(day.date)"
-                    ng-bind="day.dayLabel"
-                )
+  .cal-day-panel.clearfix(ng-style="{height: vm.showTimes ? (vm.dayViewHeight + 'px') : 'auto'}")
 
-    .cal-day-panel.clearfix(ng-style="{height: vm.showTimes ? (vm.dayViewHeight + 'px') : 'auto'}")
+      mwl-calendar-hour-list(
+          day-view-start="vm.dayViewStart"
+          day-view-end="vm.dayViewEnd"
+          day-view-split="vm.dayViewSplit"
+          view-date="vm.viewDate"
+          on-timespan-click="vm.onTimespanClick"
+          ng-if="vm.showTimes"
+      )
 
-        mwl-calendar-hour-list(
-            day-view-start="vm.dayViewStart"
-            day-view-end="vm.dayViewEnd"
-            day-view-split="vm.dayViewSplit"
-            view-date="vm.viewDate"
-            on-timespan-click="vm.onTimespanClick"
-            ng-if="vm.showTimes"
-        )
-
-        .row
-            .col-xs-12(ng-init="offset=0")
-                .cal-row-fluid(ng-repeat="event in vm.view.events track by event.$id")
-                    div(
-                        ng-class="'cal-cell' + (vm.showTimes ? 1 : event.daySpan) + (vm.showTimes ? '' : ' cal-offset' + event.dayOffset) + ' day-highlight dh-event-' + event.type + ' ' + event.cssClass"
-                        ng-style="{ top: vm.showTimes ? (event.top + 'px') : 'auto', position: vm.showTimes ? 'absolute' : 'inherit', width: (event.allDay ? vm.dayColumnDimensions.width-1 : (vm.dayColumnDimensions.width-6)) + 'px', left: (event.allDay ? (vm.dayColumnDimensions.width * event.dayOffset)+3 : (vm.dayColumnDimensions.width * event.dayOffset)+8) + 'px', height: event.height + 'px', opacity : event.allDay ? 0.6 : 0.9 }"
-                        data-event-class
-                        mwl-draggable="event.draggable === true"
-                        axis="vm.showTimes ? 'xy' : 'x'"
-                        snap-grid="vm.showTimes ? {x: vm.dayColumnDimensions.width, y: 30} : {x: vm.dayColumnDimensions.width}"
-                        on-drag="vm.tempTimeChanged(event, y)"
-                        on-drag-end="vm.weekDragged(event, x, y)"
-                        mwl-resizable="event.resizable === true && event.endsAt && !vm.showTimes"
-                        resize-edges="{left: true, right: true}"
-                        on-resize-end="vm.weekResized(event, edge, x)"
-                    )
-                        a.event-item(
-                            ng-if="!event.allDay"
-                            href="javascript:;"
-                            ng-click="vm.onEventClick({calendarEvent: event})"
-                            ng-bind-html="vm.$sce.trustAsHtml(event.title)"
-                            uib-tooltip="{{ (event.startsAt | calendarDate:'time':true) + (event.endsAt ? (' - '+(event.endsAt | calendarDate:'time':true) ): '') +' : ' +event.title }}"
-                            tooltip-placement="left"
-                            tooltip-append-to-body="true"
-                        )
-                        a.event-item(
-                            ng-if="event.allDay"
-                            href="javascript:;"
-                            ng-click="vm.onEventClick({calendarEvent: event})"
-                            ng-bind-html="vm.$sce.trustAsHtml(event.title)"
-                        )
+      .row
+          .col-xs-12(ng-init="offset=0")
+              .cal-row-fluid(ng-repeat="event in vm.view.events track by event.$id")
+                  div(
+                      ng-class="'cal-cell' + (vm.showTimes ? 1 : event.daySpan) + (vm.showTimes ? '' : ' cal-offset' + event.dayOffset) + ' day-highlight dh-event-' + event.type + ' ' + event.cssClass"
+                      ng-style="{ top: vm.showTimes ? (event.top + 'px') : 'auto', position: vm.showTimes ? 'absolute' : 'inherit', width: (event.allDay ? vm.dayColumnDimensions.width-1 : (vm.dayColumnDimensions.width-6)) + 'px', left: (event.allDay ? (vm.dayColumnDimensions.width * event.dayOffset)+3 : (vm.dayColumnDimensions.width * event.dayOffset)+8) + 'px', height: event.height + 'px', opacity : event.allDay ? 0.6 : 0.9 }"
+                      data-event-class
+                      mwl-draggable="event.draggable === true"
+                      axis="vm.showTimes ? 'xy' : 'x'"
+                      snap-grid="vm.showTimes ? {x: vm.dayColumnDimensions.width, y: 30} : {x: vm.dayColumnDimensions.width}"
+                      on-drag="vm.tempTimeChanged(event, y)"
+                      on-drag-end="vm.weekDragged(event, x, y)"
+                      mwl-resizable="event.resizable === true && event.endsAt && !vm.showTimes"
+                      resize-edges="{left: true, right: true}"
+                      on-resize-end="vm.weekResized(event, edge, x)"
+                  )
+                      a.event-item(
+                          ng-if="!event.allDay"
+                          href="javascript:;"
+                          ng-click="vm.onEventClick({calendarEvent: event})"
+                          ng-bind-html="vm.$sce.trustAsHtml(event.title)"
+                          uib-tooltip="{{ (event.startsAt | calendarDate:'time':true) + (event.endsAt ? (' - '+(event.endsAt | calendarDate:'time':true) ): '') +' : ' +event.title }}"
+                          tooltip-placement="left"
+                          tooltip-append-to-body="true"
+                      )
+                      a.event-item(
+                          ng-if="event.allDay"
+                          href="javascript:;"
+                          ng-click="vm.onEventClick({calendarEvent: event})"
+                          ng-bind-html="vm.$sce.trustAsHtml(event.title)"
+                      )

@@ -129,20 +129,6 @@ gulp.task("minifyClient", ['compileAngularCoffee'], function() {
     //TODO remove temp files
 });
 
-//for js in HTML files, not use with angular...
-gulp.task('lintHTML', function() {
-
-    jshintConfig.node=false;
-    jshintConfig.esnext=false;
-    jshintConfig.browser=true;
-
-    return gulp.src('./public/*.html')
-    // if flag is not defined default value is 'auto' - auto|always|never
-    .pipe(jshint.extract('always'))
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'));
-});
-
 gulp.task('jshintAngular'/*, ['unitTests']*/, function() {
 
     jshintConfig.node=false;

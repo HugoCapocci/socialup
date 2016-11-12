@@ -28,4 +28,7 @@ html(lang="fr")
     )
   //burger menu avec login link (modale)
   body(ng-controller="MainController as mainController")
+    button.btn.btn-primary
+      span.glyphicon.glyphicon-log-in
+      |  Sign In Now!
     adf-dashboard(name="mydashboard" collapsible="true" structure="4-8" adf-model="mainController.model")
