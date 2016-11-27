@@ -6,11 +6,46 @@ var upload = multer({ dest: 'server/uploads/' });
 var fs = require("fs");
 var Q = require('q');
 
-try {
-    require('../../localeConfig.js');
-} catch (error) {
-    console.warn("No configuration file found");
-}
+process.env.NODE_ENV= 'dev'
+
+process.env.DAILYMOTION_API_KEY= '899e322efb0511cecc7b'
+process.env.DAILYMOTION_API_SECRET= 'fb3ee342efb21270242f20c70e31a16ce1feee0c'
+
+process.env.FACEBOOK_APP_ID= '1547209032221140'
+process.env.FACEBOOK_APP_SECRET= '77125a9aca3f82d53695d59329ca62f4'
+
+process.env.GOOGLE_API_ID= '460439937906-82cfg0afrcijo1imh4la3hcb78h692ga.apps.googleusercontent.com'
+process.env.GOOGLE_API_SECRET= 'muE440-P1lSdV6OcNtnfeYIZ'
+process.env.GOOGLE_API_KEY= 'AIzaSyCtyAD30wdPBs2KsOxzpgBAou-56UpgzyE'
+
+process.env.DROPBOX_APP_KEY= 'pdg1k0ng4dkl5gc'
+process.env.DROPBOX_APP_SECRET= 'jledppyfpb42t9g'
+
+process.env.TWITTER_APP_KEY='PxmS6sGcO9ovTH7PqPTA'
+
+process.env.TWITTER_APP_SECRET= 'svJrdcmlRXUZfAfsX2WBTxOjhSRA340Tr34Ds4us'
+process.env.TWITTER_ACCESS_TOKEN= '272385858-LYUX3SGcT7ypjxRCs9Xyk4ZSm3SFnV57lNKWvJAv'
+process.env.TWITTER_ACCESS_TOKEN_SECRET= 'OS4kSfxXT5AikRjIYjoRXktsmLL78IMKVOrguxFpRFq6N'
+
+process.env.LINKEDIN_CLIENT_ID= '77o2srmcmmbjyw'
+process.env.LINKEDIN_CLIENT_SECRET= 'asiP2uX49d3HZZkl'
+
+process.env.MONGOLAB_URI= 'mongodb://heroku_s3461bz3:tpucdct6fij2jnvhesi545ka24@ds055762.mongolab.com:55762/heroku_s3461bz3'
+process.env.APP_URL= 'http://localhost:5000'
+process.env.PORT= 5000
+
+process.env.GMAIL_USER= "h.capocci@gmail.com"
+process.env.GMAIL_PASSWORD= "unnnwistvkekpsci"
+
+process.env.VIMEO_CLIENT_ID= '05a61e9b87c85d7f038dfaceec583ed791087520'
+process.env.VIMEO_CLIENT_SECRET= 'p/mJIwj/r82GA+KKYnJUxON3vhpKQADUHzOI43RJepqHcKFCRn+V9pFFUuEt3fYUu9R0R3pHgWzFQBum/D3MoQ7qwbBFTrwpwX6aB49IZA76WPM20S2tZH3/B5Rw/j0Z'
+
+process.env.MIXCLOUD_CLIENT_ID= 'u63qWpLCwzFJQ38cVJ'
+process.env.MIXCLOUD_CLIENT_SECRET= 'KDLBc8Xx5G27tkPv493K6sUZ7mvv9xAc'
+
+process.env.SOUNDCLOUD_CLIENT_ID= '0f4841392abe8119edb7b153ff822b48'
+process.env.SOUNDCLOUD_CLIENT_SECRET= 'a87a0bdf3bf85cdab2d271f1c426cf66'
+
 console.log("ENV ?", process.env.NODE_ENV);
 
 var providersAPI = require('./providersAPI');
@@ -33,7 +68,7 @@ function initiateUser(user) {
     console.log("initiate user with id: ", user);
     users[user] = {
         id : user,
-        providers : {} 
+        providers : {}
     };
 }
 
@@ -46,7 +81,7 @@ var scheduler = require('./scheduler.js');
 
 // add post message event
 scheduler.addEventListerner("message", function(eventId, userId, providers, providersOptions, message) {
-   
+
     return postMessageToProviders(userId, providers, providersOptions, message).then(function(results) {
         eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         /*console.log("message event OK");*/
@@ -57,7 +92,7 @@ scheduler.addEventListerner("message", function(eventId, userId, providers, prov
 });
 //publishFileToProviders(providers, file)
 scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, providersOptions, file, title, description, tags) {
-   
+
     var params = {
         title:title,
         description:description,
@@ -65,18 +100,18 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
         file : file
     };
     publishFileToProviders(userId, providers, providersOptions, file, params).then(function(results) {
-        
+
         if(results && results.length>0 && results[0].url)
             params.url=results[0].url;
-        console.log("publishFileToProviders results: ",results);        
+        console.log("publishFileToProviders results: ",results);
         eventsDAO.updateScheduledEventAfterExecution(eventId, results);
         // check chained Event
         return eventsDAO.retrieveChainedEvents(eventId);
-    
+
     }, function(err) {
         eventsDAO.updateScheduledEventAfterError(eventId, err);
- 
-    }).then(function(chainedEvents) {                        
+
+    }).then(function(chainedEvents) {
         //executeChainedEvents
         return executeChainedEvents(chainedEvents, params);
     }).fin(function () {
@@ -86,7 +121,7 @@ scheduler.addEventListerner("uploadVideo", function(eventId, userId, providers, 
 });
 
 function executeChainedEvents(chainedEvents, args) {
-    
+
     var results = [];
     chainedEvents.forEach(function(chainedEvent) {
         console.log("execute chainedEvent: ",chainedEvent);
@@ -97,7 +132,7 @@ function executeChainedEvents(chainedEvents, args) {
                 url : args.url,
                 title: args.title,
                 description : args.description
-            }; 
+            };
         else if(chainedEvent.eventType==='uploadCloud') {
             params = {
                 file:args.file
@@ -110,8 +145,8 @@ function executeChainedEvents(chainedEvents, args) {
 
 function executeChainedEvent(event, params) {
 
-    console.log("executeChainedEvent: ",event);           
-    if(event.eventType==='message') {  
+    console.log("executeChainedEvent: ",event);
+    if(event.eventType==='message') {
         return postMediaLinkToProviders(event.user, event.providers, event.eventParams[0], params.url, params.title, params.description, event.providersOptions);
     } else if(event.eventType==='uploadCloud') {
         console.log("upload drive with params: ", params);
@@ -130,12 +165,12 @@ function executeChainedEvent(event, params) {
 userDAO.retrieveUsers().then(function(usersFound) {
     console.log("retieved users: ", usersFound);
     for(var i=0; i< usersFound.length;i++) {
-        users[usersFound[i]._id] = usersFound[i];        
+        users[usersFound[i]._id] = usersFound[i];
     }
     scheduler.loadScheduledEvents();
 });
 
-//clean temp files if any    
+//clean temp files if any
 /*var path = './server/uploads/';
 fs.readdir(path, function (err, files) {
     if (err) {
@@ -164,14 +199,14 @@ app.use(cookieParser());
 
 // returns URL for oauth authentication
 app.get('/oauthURL/:provider/:userId', function(req, res) {
-    
+
     var provider = req.params.provider;
     var userId = req.params.userId;
-    
+
     //twitter is more complicated and cannot give synch url
     if(provider==='twitter') {
         providersAPI.twitter.getTokens(userId).then(function(tokens) {
-          
+
             //store token for user
             if(users[userId]===undefined)
                  initiateUser(userId);
@@ -187,7 +222,7 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
         });
 
     } else {
-        if(providersAPI[provider] === undefined) 
+        if(providersAPI[provider] === undefined)
             res.send('404');
         else
             res.send(providersAPI[provider].getOAuthURL());
@@ -196,9 +231,9 @@ app.get('/oauthURL/:provider/:userId', function(req, res) {
 
 //return promise
 function getRefreshedToken(provider, userId) {
-    
+
     //console.log("getRefreshedToken for userId: ", userId);
-    
+
     var myToken = users[userId].providers[provider].tokens;
     if(provider !== 'soundcloud' && myToken.expiry_date && myToken.expiry_date <= Date.now() ) {
         console.log("refresh oauth token for provider "+provider);
@@ -225,42 +260,42 @@ function getRefreshedToken(provider, userId) {
 
 // oauth callback for each kind of provider
 app.get('/*2callback', function(req, res) {
-    
+
     var provider = req.path.split("2callback")[0].substr(1);
     //console.log("provider found :", provider);
     var code = req.query.code;
     var userId = req.query.state;
     //console.log('call back with userId ',userId);
-    
+
     if(users[userId]===undefined)
         initiateUser(userId);
 
     var getTokens;
     if(provider === TWITTER) {
-        
+
         if(!users[userId].providers[TWITTER]) {
             res.status(400).end("Error in twitter oauth process");
             return;
         }
         var oauth_token = req.query.oauth_token;
-        var oauth_verifier = req.query.oauth_verifier;  
+        var oauth_verifier = req.query.oauth_verifier;
         var tokens = users[userId].providers[TWITTER].tokens;
         tokens.oauth_token=oauth_token;
         getTokens = function() {
             return providersAPI.twitter.getAccessToken(oauth_verifier, tokens);
         };
     } else
-        getTokens = function() { 
-            return providersAPI[provider].pushCode(code, userId); 
+        getTokens = function() {
+            return providersAPI[provider].pushCode(code, userId);
         };
 
     getTokens().then(function(tokens) {
-                  
+
         if(tokens.expires_in) {
-            tokens.expiry_date = Date.now() + (provider === 'linkedin' ? tokens.expires_in*1000 : tokens.expires_in);   
+            tokens.expiry_date = Date.now() + (provider === 'linkedin' ? tokens.expires_in*1000 : tokens.expires_in);
             delete tokens.expires_in;
         }
-        users[userId].providers[provider] = { 
+        users[userId].providers[provider] = {
             tokens : tokens
         };
         //save google original token with refresh-token apart
@@ -269,20 +304,20 @@ app.get('/*2callback', function(req, res) {
         }
         // console.log('stored token for provider: ', tokens);
         return providersAPI[provider].getUserInfo(tokens);
-        
+
     }).then(function(userInfo) {
         users[userId].providers[provider].userName = userInfo.userName;
         return userDAO.saveUser(users[userId]);
-  
+
     }).then(function(userSaved) {
         users[userId] = userSaved;
         res.redirect('/#?close=true');
-    
+
     }).fail(function(err) {
         console.error("error : ", err);
         res.send(err);
     });
-   
+
 });
 
 app.get('/events/:userId', function(req, res) {
@@ -291,10 +326,10 @@ app.get('/events/:userId', function(req, res) {
          res.send(events);
     }, function(err) {
          res.send(err);
-    });    
+    });
 });
 app.get('/chainedEvents/:eventParentId', function(req, res) {
-    var eventParentId = req.params.eventParentId;    
+    var eventParentId = req.params.eventParentId;
     eventsDAO.retrieveChainedEvents(eventParentId).then(function(events) {
          res.send(events);
     }, function(err) {
@@ -302,7 +337,7 @@ app.get('/chainedEvents/:eventParentId', function(req, res) {
     });
 });
 app.get('/tracedEvents/:userId', function(req, res) {
-    var userId = req.params.userId; 
+    var userId = req.params.userId;
     eventsDAO.retrieveTracedEventsByUser(userId).then(function(events) {
          res.send(events);
     }, function(err) {
@@ -310,29 +345,29 @@ app.get('/tracedEvents/:userId', function(req, res) {
     });
 });
 app.get('/event/:eventId', function(req, res) {
- 
+
     var eventId = req.params.eventId;
     eventsDAO.retrieveScheduledEvent(eventId).then(function(events) {
          res.send(events);
     }, function(err) {
          res.send(err);
-    }); 
+    });
 });
 
 app.post('/event/:eventId', function(req, res) {
- 
-    var eventId = req.params.eventId;    
+
+    var eventId = req.params.eventId;
     var scheduledEvent = req.body;
-    
+
     eventsDAO.updateScheduledEvent(eventId, scheduledEvent).then(function(result) {
          res.send(result);
     }, function(err) {
          res.send(err);
-    }); 
+    });
 });
 //create or update chainedEvent
 app.post('/event/chained/:provider/:eventId/:userId', function(req, res) {
- 
+
     var eventId = req.params.eventId;
     var userId = req.params.userId;
     var provider= req.params.provider;
@@ -346,7 +381,7 @@ app.post('/event/chained/:provider/:eventId/:userId', function(req, res) {
 
 app.delete('/event/:eventId', function(req, res) {
 
-    var eventId = req.params.eventId;    
+    var eventId = req.params.eventId;
     eventsDAO.deleteScheduledEvent(eventId).then(function(result) {
         res.status(result===1 ? 200 : 400).end();
     }, function(err) {
@@ -354,7 +389,7 @@ app.delete('/event/:eventId', function(req, res) {
     });
 });
 app.delete('/event/chained/:eventId/:eventParentId', function(req, res) {
-    var eventId = req.params.eventId; 
+    var eventId = req.params.eventId;
     var eventParentId = req.params.eventParentId;
     eventsDAO.deleteChainedEvent(eventId, eventParentId).then(function(result) {
         res.status(result===1 ? 200 : 400).end();
@@ -410,10 +445,10 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
     var folderId = req.params.folderId;
     var provider = req.params.provider;
     var userId = req.params.userId;
-    
+
     var typeFilter = req.query.typeFilter;
     //console.log("Cloud provider: ", provider);
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].listFiles(tokens, folderId, typeFilter);
     }, function(err) {
@@ -426,12 +461,12 @@ app.get('/cloudExplorer/:provider/:folderId/:userId', function(req, res) {
 });
 
 app.get('/file/:provider/:fileId/:userId', function(req, res) {
-    
+
     // console.log("get file ?");
     var fileId = req.params.fileId;
     var provider = req.params.provider;
     var userId = req.params.userId;
-   
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         //pipe the bytes returned from request to the response 'res', in order to directly download the file
         providersAPI[provider].downloadFile(tokens, fileId).pipe(res);
@@ -441,14 +476,14 @@ app.get('/file/:provider/:fileId/:userId', function(req, res) {
 });
 
 app.delete('/file/:provider/:fileId/:userId', function(req, res) {
-    
+
     // console.log("get file ?");
     var fileId = req.params.fileId;
     var provider = req.params.provider;
     var userId = req.params.userId;
-    
+
     console.log("delete cloud file, fileid = ",fileId);
-   
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         //pipe the bytes returned from request to the response 'res', in order to directly download the file
         return providersAPI[provider].deleteFile(tokens, fileId);
@@ -460,10 +495,10 @@ app.delete('/file/:provider/:fileId/:userId', function(req, res) {
 });
 
 app.get('/spaceUsage/:provider/:userId', function(req, res) {
-    
+
     var provider = req.params.provider;
     var userId = req.params.userId;
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         //pipe the bytes returned from request to the response 'res', in order to directly download the file
        return providersAPI[provider].getSpaceUsage(tokens);
@@ -472,15 +507,15 @@ app.get('/spaceUsage/:provider/:userId', function(req, res) {
     }).fail(function(err) {
          res.send(err);
     });
-    
+
 });
 
 app.get('/searchPage/:provider/:pageName', function(req, res) {
-    
+
     var provider = req.params.provider;
     var pageName = req.params.pageName;
     var userId = req.query.userId;
-    
+
     if(!userId)
         providersAPI[provider].searchPage(undefined, pageName).then(function(pagesFound) {
             res.send(pagesFound);
@@ -499,21 +534,21 @@ app.get('/searchPage/:provider/:pageName', function(req, res) {
 });
 
 app.get('/pageMetrics/:provider/:metricType/:pageId', function(req, res) {
-    
+
     var provider = req.params.provider;
     var metricType = req.params.metricType;
     var pageId = req.params.pageId;
     var since = req.query.since;
     var until = req.query.until;
     var userId = req.query.userId;
-    
+
     if(!userId)
         providersAPI[provider].getPageMetrics(undefined, metricType, pageId, since, until).then(function(pagesFound) {
              res.send(pagesFound);
         }).fail(function(err) {
              res.send(err);
         });
-        
+
     else
         getRefreshedToken(provider, userId).then(function(tokens) {
            return providersAPI[provider].getPageMetrics(tokens, metricType, pageId, since, until);
@@ -543,9 +578,9 @@ app.post('/message/:userId', function(req, res) {
         }, function(err) {
             res.send("Cannot create or save chained event: "+err);
         });
-        
+
     } else if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now())
-        
+
         //direct message
         postMessageToProviders(userId, providers, providersOptions, message).then(function(results) {
             //async
@@ -555,9 +590,9 @@ app.post('/message/:userId', function(req, res) {
             eventsDAO.createTracedEventError(userId, "message", [message], providers, providers, err);
             res.send("Cannot send message err: "+err);
         });
-    
+
     else {
-        //scheduled event (eventId, userId, date, eventType, providers, eventParams) 
+        //scheduled event (eventId, userId, date, eventType, providers, eventParams)
         console.log("schedule event for ",scheduledDate);
         scheduler.saveScheduledEvent(userId, scheduledDate, "message", providers, providersOptions, [message]).then(function(eventId) {
             res.send(eventId);
@@ -577,11 +612,11 @@ function postMessageToProviders(userId, providers, providersOptions, message) {
     return Q.all(results);
 }
 function postMessageToProvider(userId, provider, providerOptions, message) {
-    
+
     var deffered = Q.defer();
     if(providersAPI[provider]===undefined || providersAPI[provider].postMessage ===undefined)
     deffered.reject(new Error("unknow provider "+provider+" or unsupported function postMessage"));
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].postMessage(tokens, message, providerOptions);
     }).then(function(result) {
@@ -606,7 +641,7 @@ function postMediaLinkToProviders(userId, providers, message, url, name, descrip
     return Q.all(results);
 }
 function postMediaLinkToProvider(userId, provider, message, url, name, description, messageProviderOptions) {
-    
+
     console.log("postMediaLinkToProvider, messageProviderOptions: ",messageProviderOptions);
     var deffered = Q.defer();
     if(providersAPI[provider]===undefined || providersAPI[provider].postMediaLink ===undefined)
@@ -623,21 +658,21 @@ function postMediaLinkToProvider(userId, provider, message, url, name, descripti
 }
 
 app.post('/publishFromCloud/:userId', function(req, res) {
-    
+
     var userId = req.params.userId;
-        
+
     // var scheduledDate = req.body.scheduledDate;
-    var providers = req.body.providers;        
+    var providers = req.body.providers;
     var providersOptions = req.body.providersOptions;
     var cloudProvider = req.body.cloudProvider;
-    //id or path of the file to download from cloud 
+    //id or path of the file to download from cloud
     var fileId = req.body.fileId;
     var fileName = req.body.fileName;
     var writeStream;
-    
+
     getRefreshedToken(cloudProvider, userId).then(function(tokens) {
 
-        writeStream=fs.createWriteStream('./server/uploads/'+userId+fileName); 
+        writeStream=fs.createWriteStream('./server/uploads/'+userId+fileName);
         providersAPI[cloudProvider].downloadFile(tokens, fileId).pipe(writeStream);
         writeStream.on('finish', function() {
             console.log('file downloaded ');
@@ -649,9 +684,9 @@ app.post('/publishFromCloud/:userId', function(req, res) {
                 params.tags = req.body.tags;
                 console.log('publishFileToProviders params: ', params);
             }
-            console.log('providers: ',providers); 
+            console.log('providers: ',providers);
             publishFileToProviders(userId, providers, providersOptions, {path:'./server/uploads/'+userId+fileName}, params).then(function(results) {
-                //delete temp file 
+                //delete temp file
                 fs.unlink('./server/uploads/'+userId+fileName);
                 eventsDAO.createTracedEvent(userId, "publishFromCloud", [params.title, params.description, params.tags, cloudProvider], providers, providersOptions, results);
                 res.send(results);
@@ -660,7 +695,7 @@ app.post('/publishFromCloud/:userId', function(req, res) {
                  eventsDAO.createTracedEventError(userId, "publishFromCloud", [params.title, params.description, params.tags, cloudProvider], providers, providersOptions, err);
                 res.status(403).send(err);
             });
-            
+
         });
         writeStream.on('error', function (err) {
             console.log(err);
@@ -670,10 +705,10 @@ app.post('/publishFromCloud/:userId', function(req, res) {
 });
 
 app.post('/uploadFileToCloud/:userId', upload.single('file'), function(req, res) {
-    
+
     var provider = req.body.provider;
     var userId = req.params.userId;
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         providersAPI[provider].uploadDrive(tokens, req.file, req.body.target);
     }).then(function(result) {
@@ -682,18 +717,18 @@ app.post('/uploadFileToCloud/:userId', upload.single('file'), function(req, res)
     }).fail(function(err){
         res.status(403).send(err);
     });
-    
+
 });
 
 app.post('/uploadMusic/:userId', upload.single('file'), function(req, res) {
-    
+
     console.log("uploadMusic !");
-    
+
     var path = req.file.path;
     fs.renameSync(path, path+'_'+req.file.originalname);
     req.file.path = path+'_'+req.file.originalname;
     var userId = req.params.userId;
-         
+
     //var scheduledDate = req.body.scheduledDate;
     var providers = req.body.providers.split(',');
     var params = {
@@ -723,8 +758,8 @@ function sendMusicToProviders(providers, userId, file, params) {
 }
 
 function sendMusicToProvider(provider, userId, file, params) {
-    
-    var deffered = Q.defer();    
+
+    var deffered = Q.defer();
     getRefreshedToken(provider, userId).then(function(tokens) {
         console.log("sendMusic with provider: ", provider);
         return providersAPI[provider].sendMusic(tokens, file, params);
@@ -739,13 +774,13 @@ function sendMusicToProvider(provider, userId, file, params) {
 
 //sendvideo with file from http post TODO rename
 app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
-    
+
     //dailymotion issue : need file extension
     var path = req.file.path;
     fs.renameSync(path, path+'_'+req.file.originalname);
     req.file.path = path+'_'+req.file.originalname;
     var userId = req.params.userId;
-         
+
     var scheduledDate = req.body.scheduledDate;
     var providers = req.body.providers.split(',');
 
@@ -762,7 +797,7 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
 
     if(scheduledDate===undefined || (new Date(scheduledDate)).getTime()<=Date.now()) {
 
-        // provider for fileupload            
+        // provider for fileupload
         console.log('targeted providers: ', providers);
         publishFileToProviders(userId, providers, providersOptions, req.file, params).then(function(results) {
             console.log("uploadFile OK");
@@ -790,7 +825,7 @@ app.post('/uploadFile/:userId', upload.single('file'), function(req, res) {
 });
 
 function publishFileToProviders(userId, providers, providersOptions, file, params) {
-    
+
     var results = [];
     for(var i=0; i< providers.length; i++) {
         var provider = providers[i];
@@ -802,7 +837,7 @@ function publishFileToProviders(userId, providers, providersOptions, file, param
 function publishFileToProvider(userId, provider, providerOptions, file, params) {
 
     var deffered = Q.defer();
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].sendVideo(tokens, file, userId, params, providerOptions);
     }).then(function(result) {
@@ -816,10 +851,10 @@ function publishFileToProvider(userId, provider, providerOptions, file, params) 
 }
 
 app.get('/calendars/:provider/:userId', function(req, res) {
-    
+
     var userId = req.params.userId;
     var provider = req.params.provider;
-    
+
      getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].getUserCalendars(tokens);
     }).then(function(calendars) {
@@ -830,15 +865,15 @@ app.get('/calendars/:provider/:userId', function(req, res) {
 });
 
 app.get('/socialEvents/:provider/:userId', function(req, res) {
-   
+
     var userId = req.params.userId;
     var provider = req.params.provider;
     var since = req.query.since;
     var until = req.query.until;
     var calendarId = req.query.calendarId;
-    
+
     //console.log("search events for "+provider + " from "+since+" to "+until);
-    
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         return providersAPI[provider].getUserEvents(tokens, since, until, calendarId);
     }).then(function(events) {
@@ -846,11 +881,11 @@ app.get('/socialEvents/:provider/:userId', function(req, res) {
     }).fail(function(err) {
         res.status(404).send(err);
     });
-    
+
 });
 
 app.get('/facebookGroups/:userId', function(req, res) {
-    
+
     var userId=req.params.userId;
     getRefreshedToken('facebook', userId).then(function(tokens) {
         return providersAPI.facebook.getUserGroups(tokens);
@@ -862,7 +897,7 @@ app.get('/facebookGroups/:userId', function(req, res) {
 });
 
 app.get('/facebookPages/:userId', function(req, res) {
-    
+
     var userId=req.params.userId;
     providersAPI.facebook.getPages(users[userId].providers.facebook.tokens).then(function(pages) {
         res.send(pages);
@@ -874,12 +909,12 @@ app.get('/facebookPages/:userId', function(req, res) {
 //cache
 var providersCategories = {};
 app.get('/categories/:provider/:userId', function(req, res) {
-    
+
     //console.log("get categories");
-    
+
     var provider = req.params.provider;
     var userId=req.params.userId;
-    
+
     //put categories in cache (avoid calls for almost static data)
     if(providersCategories[provider]!==undefined)
         res.send(providersCategories[provider]);
@@ -896,7 +931,7 @@ app.get('/categories/:provider/:userId', function(req, res) {
 });
 
 app.get('/search/video/:provider', function(req, res) {
-    
+
     var provider = req.params.provider;
     var videoName = req.query.videoName;
     //opt
@@ -910,15 +945,15 @@ app.get('/search/video/:provider', function(req, res) {
             res.send(videos);
         }).fail(function(err) {
             res.status(403).send(err);
-        }); 
+        });
 });
 
 app.get('/media/:provider/:userId', function(req, res) {
-    
-    //console.log("get videos");    
+
+    //console.log("get videos");
     var provider = req.params.provider;
     var userId=req.params.userId;
-            
+
     getRefreshedToken(provider, userId).then(function(tokens) {
         //userName
         return providersAPI[provider].listMedia(tokens, userId,users[userId].providers[provider].userName);
@@ -931,12 +966,12 @@ app.get('/media/:provider/:userId', function(req, res) {
 });
 
 app.get('/authenticate', function(req, res) {
-    
+
     var login = req.query.login;
     var password= req.query.password;
-    
+
     if (login !== undefined && password !== undefined) {
-        
+
         userDAO.authenticate(login, password).then(function(data) {
             res.send(data);
         }, function (err) {
@@ -951,14 +986,14 @@ app.get('/authenticate', function(req, res) {
 });
 
 app.post('/user/create', function(req, res) {
-    
+
     var firstName = req.body.firstName;
     var lastName = req.body.lastName;
     var login = req.body.login;
     var password = req.body.password;
 
     if (login !== undefined && password !== undefined && firstName !== undefined && lastName !== undefined) {
-        
+
         var user = {
             firstName:firstName,
             lastName:lastName,
@@ -967,14 +1002,14 @@ app.post('/user/create', function(req, res) {
             providers : {}
         };
         userDAO.saveUser(user).then(function (data) {
-            
+
             //TODO send mail to user
             res.send(data);
         }, function (err) {
             console.log(err);
             res.status(404).end();
         });
-        
+
     } else {
         console.log("social user registration not yet implemented");
         res.status(404).end();
@@ -983,8 +1018,8 @@ app.post('/user/create', function(req, res) {
 
 app.post('/user/resetPassword/:userEmail', function(req, res) {
     var userEmail=req.params.userEmail;
-    
-    emailService.sendMail("reset", userEmail).then(function (data) {  
+
+    emailService.sendMail("reset", userEmail).then(function (data) {
         res.send(data);
     }, function (err) {
         console.log(err);

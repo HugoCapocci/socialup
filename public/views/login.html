@@ -1,95 +1,92 @@
 <div>
+  <header class="jumbotron">
+    <h2>Enregistrez-vous / Créez votre compte</h2>
+  </header>
 
-    <header class="jumbotron">
-        <h2>Enregistrez-vous / Créez votre compte</h2>
-    </header>
+  <div class="row">
+    <div class="col-lg-6 col-lg-offset-3">
+      <uib-tabset justified="true" class="panel panel-default">
+        <uib-tab heading="Créez un compte">
+            <div class="panel-body">
 
-    <div class="row">
-        <div class="col-lg-6 col-lg-offset-3">
-           
-            <uib-tabset justified="true" class="panel panel-default">
-                <uib-tab heading="Créez un compte">
-                    <div class="panel-body">
-                        
-                         <div class="row">
-                             <div class="col-xs-5 col-md-5 col-lg-6">
-                                <form name="create" id="createForm" class="form-signin" ng-submit="create()">
-                                    <fieldset>
-                                         <div class="form-group">
-                                            <input type="text" id="firstName" class="form-control" placeholder="Prénom" ng-model="form.firstName"/>
-                                        </div>
-                                         <div class="form-group">
-                                            <input type="text" id="lastName" class="form-control" placeholder="Nom" ng-model="form.lastName"/>
-                                        </div>                                    
-                                        <div class="form-group">
-                                            <input type="text" id="login" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
-                                        </div>
-                                        <div class="form-group" ng-if="!isSocialNetworkAuthenticated">
-                                            <input type="password" id="password" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
-                                        </div>
-                                         <div class="form-group" ng-if="!isSocialNetworkAuthenticated">
-                                            <input type="password" id="repeatedPassword" class="form-control" placeholder="Répétez vore mot de passe" ng-model="form.repeatedPassword"/>
-                                        </div>
-                                        
-                                        <!-- captcha pour éviter les bots -->
-                                        <div vc-recaptcha key="'6LdYdAUTAAAAACh8N-aW_9k1dPMg0I-u5uWnULnW'" ></div>
-                                        
-                                        <button id="createButt" class="btn btn-primary" type="submit">inscrivez-vous</button>
-                                        
-                                    </fieldset>
-                                </form>
-                             
-                            </div>
-                             
-                            <div class="col-xs-5 col-md-5 col-lg-6">
-                                
-                            </div>
-                             
-                        </div>
-                    </div>
-                </uib-tab>
-                <uib-tab heading="Connectez-vous" active="true">
-
-                    <div class="panel-body">
-                       
-                        <form name="signIn" id="signInForm" class="form-signin" ng-submit="authenticate()">
-                            <fieldset>                                        
-                                <div class="row">
-                                    <div class="col-xs-5 col-md-5 col-lg-6 "> 
-                                        <div class="form-group">
-                                            <input type="text" id="log" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
-                                        </div>                              
-                                    </div>
+                 <div class="row">
+                     <div class="col-xs-5 col-md-5 col-lg-6">
+                        <form name="create" id="createForm" class="form-signin" ng-submit="">
+                            <fieldset>
+                                 <div class="form-group">
+                                    <input type="text" id="firstName" class="form-control" placeholder="Prénom" ng-model="form.firstName"/>
                                 </div>
-                                <div class="row">
-                                    <div class="col-xs-5 col-md-5 col-lg-6">
-                                        <div class="form-group">
-                                            <input type="password" id="pswd" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
-                                        </div>                                
-                                    </div>
-                                    <div class="col-xs-5 col-md-5 col-lg-6 col-lg-offset-0">
-                                        <button id="signInButt" class="btn btn-primary" type="submit">connectez-vous</button>
-                                    </div>
+                                 <div class="form-group">
+                                    <input type="text" id="lastName" class="form-control" placeholder="Nom" ng-model="form.lastName"/>
                                 </div>
+                                <div class="form-group">
+                                    <input type="text" id="login" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
+                                </div>
+                                <div class="form-group" ng-if="!isSocialNetworkAuthenticated">
+                                    <input type="password" id="password" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
+                                </div>
+                                 <div class="form-group" ng-if="!isSocialNetworkAuthenticated">
+                                    <input type="password" id="repeatedPassword" class="form-control" placeholder="Répétez vore mot de passe" ng-model="form.repeatedPassword"/>
+                                </div>
+
+                                <!-- captcha pour éviter les bots -->
+                                <div vc-recaptcha key="'6LdYdAUTAAAAACh8N-aW_9k1dPMg0I-u5uWnULnW'"></div>
+
+                                <button type="button" id="createButt" class="btn btn-primary" ng-click="createUser()">inscrivez-vous</button>
+
                             </fieldset>
                         </form>
-                        <div class="clean">
-                            <hr style="margin-bottom:0px;"/>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-8 col-md-8 col-lg-9 col-md-offset-2">
-                                <h3>Mot de passe oublié ?</h3>
-                            </div>
-                            <div class="col-xs-5 col-md-5 col-lg-6">
-                                <input type="text" class="form-control" placeholder="Email (login)" ng-model="form.loginPasswordRetrieve"/>
-                            </div>
-                            <div class="col-xs-5 col-md-5 col-lg-6">
-                                <button class="btn btn-primary" type="button" ng-click="sendResetPassword()">Reset password</button>
+
+                    </div>
+
+                    <div class="col-xs-5 col-md-5 col-lg-6">
+
+                    </div>
+
+                </div>
+            </div>
+          </uib-tab>
+          <uib-tab heading="Connectez-vous" active="true">
+
+            <div class="panel-body">
+              <form name="signIn" id="signInForm" class="form-signin">
+                <fieldset>
+                    <div class="row">
+                        <div class="col-xs-5 col-md-5 col-lg-6 ">
+                            <div class="form-group">
+                              <input type="text" id="log" class="form-control" placeholder="Email (login)" ng-model="form.login"/>
                             </div>
                         </div>
                     </div>
-                </uib-tab>
-            </uib-tabset>
-        </div>
+                    <div class="row">
+                        <div class="col-xs-5 col-md-5 col-lg-6">
+                            <div class="form-group">
+                                <input type="password" id="pswd" class="form-control" placeholder="Mot de passe" ng-model="form.password"/>
+                            </div>
+                        </div>
+                        <div class="col-xs-5 col-md-5 col-lg-6 col-lg-offset-0">
+                          <button type="button" id="signInButt" class="btn btn-primary" ng-click="authenticate()">connectez-vous</button>
+                        </div>
+                    </div>
+                </fieldset>
+              </form>
+              <div class="clean">
+                  <hr style="margin-bottom:0px;"/>
+              </div>
+              <div class="row">
+                  <div class="col-xs-8 col-md-8 col-lg-9 col-md-offset-2">
+                      <h3>Mot de passe oublié ?</h3>
+                  </div>
+                  <div class="col-xs-5 col-md-5 col-lg-6">
+                      <input type="text" class="form-control" placeholder="Email (login)" ng-model="form.loginPasswordRetrieve"/>
+                  </div>
+                  <div class="col-xs-5 col-md-5 col-lg-6">
+                      <button class="btn btn-primary" type="button" ng-click="sendResetPassword()">Reset password</button>
+                  </div>
+              </div>
+            </div>
+          </uib-tab>
+      </uib-tabset>
     </div>
+  </div>
 </div>
