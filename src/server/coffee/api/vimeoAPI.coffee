@@ -20,7 +20,7 @@ exports.pushCode = (code, userId) ->
   deferred = Q.defer()
   request
     method: 'POST'
-    uri:  'https://api.vimeo.com/oauth/access_token'
+    uri: 'https://api.vimeo.com/oauth/access_token'
     auth:
       user: CLIENT_ID
       pass: CLIENT_SECRET
