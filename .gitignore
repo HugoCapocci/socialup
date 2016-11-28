@@ -2,7 +2,7 @@ node_modules
 public
 server
 coverage
-localeConfig.coffee
+.env
 localeConfig.js
 tasks.json
 build

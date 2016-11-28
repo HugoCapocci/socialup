@@ -1,13 +1,9 @@
+require('dotenv').config()
 express = require 'express'
 multer  = require 'multer'
 upload = multer dest: 'server/uploads/'
 fs = require 'fs'
 Q = require 'q'
-
-try require '../localeConfig'
-catch
-  console.log 'No configuration file found'
-console.log 'ENV ?', process.env.NODE_ENV
 
 providersAPI = require './providersAPI'
 UserDAO = require './userDAO'
