@@ -1,8 +1,9 @@
 define ['./module', 'sha1'], (appModule, sha1) ->
 
   class LoginController
-
-    constructor: (@$scope, @$location, @authService, @alertsService, @userService) ->
+    constructor: (@$scope, @$uibModalInstance, @authService, @alertsService, @userService) ->
+      console.log 'login controller constructor'
+      @$scope.modalTitle = 'Enregistrez-vous / Créez votre compte'
       @$scope.form =
         login: ''
         password: ''
@@ -10,16 +11,15 @@ define ['./module', 'sha1'], (appModule, sha1) ->
         lastName: ''
 
     authenticate: ->
-      if @$scope.form.login isnt '' && @$scope.form.password isnt ''
-
+      console.log 'authenticate: ', @$scope.form
+      if @$scope.form.login isnt '' and @$scope.form.password isnt ''
         @authService.authenticate @$scope.form.login, sha1(@$scope.form.password)
-        .then (userData) ->
-          console.log "authentication userData ", userData
+        .then (userData) =>
           @userService.setData userData
           @alertsService.success 'Authentification ok'
-          @$location.path "/"
-        .catch (err) ->
-          @alertsService.error 'Erreur dans le service d\'authentification: ' + err
+          @$uibModalInstance.dismiss 'authentified'
+        .catch (error) =>
+          @alertsService.error 'Erreur dans le service d\'authentification: ' + error
       else
         @$scope.form =
           login: ''
@@ -33,13 +33,13 @@ define ['./module', 'sha1'], (appModule, sha1) ->
         else
           console.log 'create OK'
           @authService.createUser @$scope.form.firstName, @$scope.form.lastName, @$scope.form.login, sha1 @$scope.form.password
-          .then (userData) ->
-            @$scope.user = userData;
+          .then (userData) =>
+            @$scope.user = userData
             @alertsService.success 'Utilisateur enregistré'
             console.log 'user created: ', userData
             @userService.setData userData
-            @$location.path "/"
-          .catch (error) ->
+            @$uibModalInstance.dismiss 'createdAndAuthentified'
+          .catch (error) =>
             @alertsService.error 'Erreur dans le service d\'authentification: ' + error
       else
         @alertsService.warn 'Veuillez renseigner tous les champs'
@@ -55,6 +55,8 @@ define ['./module', 'sha1'], (appModule, sha1) ->
       else
         @alertsService.warn 'Veuillez renseigner votre email'
 
+    closeAlert: ($index) ->
+	    @alertsService.closeAlert $index
 
-  LoginController.$inject = ['$scope', '$location', 'authService', 'alertsService', 'userService']
+  LoginController.$inject = ['$scope', '$uibModalInstance', 'authService', 'alertsService', 'userService']
   appModule.controller 'LoginController', LoginController

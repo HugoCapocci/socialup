@@ -1,0 +1,13 @@
+.modal-header
+  h2 {{ ::modalTitle }}
+.modal-body
+  .row
+    uib-alert(
+      ng-repeat="alert in $root.alerts"
+      type="{{ ::alert.type }}"
+      style="opacity:{{ ::alert.opacity }};"
+      close="controller.closeAlert($index)"
+    ) {{ ::alert.msg }}
+
+  div  
+    block modalBody

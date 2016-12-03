@@ -10,7 +10,8 @@ UserDAO = require './userDAO'
 userDAO = new UserDAO()
 EventsDAO = require './eventsDAO'
 eventsDAO = new EventsDAO()
-emailService = require './emailService'
+EmailService = require './emailService'
+emailService = new EmailService()
 app = express()
 TWITTER = 'twitter'
 
@@ -699,7 +700,7 @@ app.get '/authenticate', (req, res) ->
     .then (data) ->
       res.send data
     .catch (err) ->
-      console.log err
+      console.log 'authenticate error: ', err
       res.status(403).end()
   else
     console.log 'social auth not yet implemented'
@@ -730,10 +731,26 @@ app.post '/user/create', (req, res) ->
     console.log 'social user registration not yet implemented'
     res.status(404).end()
 
+app.post '/user/updatePassword/:userId', (req, res) ->
+  id = req.params.userId
+  newPassword = req.body.newPassword
+  userDAO.retrieveUserById id
+  .then (user) ->
+    user.password = newPassword
+    userDAO.updateUser user
+  .then (data) ->
+    console.log user modified
+    res.send data
+  .catch (err) ->
+    console.log err
+    res.status(404).end()
+
 app.post '/user/resetPassword/:userEmail', (req, res) ->
   userEmail = req.params.userEmail
-  #TODO verifier que le user existe
-  emailService.sendMail 'reset', userEmail
+
+  userDAO.retrieveUserByLogin userEmail
+  .then (userFound) ->
+    emailService.sendResetPasswordMail 'reset', userEmail, userFound._id
   .then (data) ->
     res.send data
   .catch (err) ->

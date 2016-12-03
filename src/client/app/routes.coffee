@@ -1,31 +1,6 @@
 define ['angular', 'app'], (angular, app) ->
 
-  generateRouteProviders = ($routeProvider, route) ->
-    $routeProvider.when '/' + route,
-      templateUrl: 'views/' + route + '.html',
-      controller: route.substring(0,1).toUpperCase() + route.substring(1) + 'Controller',
-      reloadOnSearch : false
-
-  return app.config ['$routeProvider', ($routeProvider) ->
-    routes = [
-      'uploadFile',
-      'uploadMusic',
-      'cloudExplorer',
-      'postMessage',
-      'login',
-      'resetPassword',
-      'scheduledEvents',
-      'tracedEvents',
-      'calendarEvents',
-      'videos',
-      'searchVideo',
-      'pageStats',
-      'manageSocialNetworks'
-    ]
-    for route in routes
-      generateRouteProviders $routeProvider, route
-  ]
-  .config ['calendarConfig', (calendarConfig) ->
+  return app.config ['calendarConfig', (calendarConfig) ->
 
     # calendarConfig.templates.calendarMonthView = 'path/to/custom/template.html'; //change the month view template to a custom template
     # calendarConfig.templates.calendarMonthCell = 'customMonthCell.html';
@@ -59,4 +34,20 @@ define ['angular', 'app'], (angular, app) ->
 
   .config ['$compileProvider', ($compileProvider) ->
     $compileProvider.debugInfoEnabled false
+  ]
+
+  .config ['$stateProvider', ($stateProvider) ->
+    $stateProvider
+    .state 'home',
+      url: '/'
+    .state 'resetPassword',
+      url: '/resetPassword?hash'
+      onEnter: ['ModalProvider', (ModalProvider) ->
+        ModalProvider.openModal 'resetPassword'
+      ]
+    .state 'login',
+      url: '/login'
+      onEnter: ['ModalProvider', (ModalProvider) ->
+        ModalProvider.openModal 'login'
+      ]
   ]

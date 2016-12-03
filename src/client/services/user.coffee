@@ -17,13 +17,13 @@ define ['./module'], (appModule) ->
       $window.localStorage.setItem 'SocialUp', JSON.stringify user: userData, timestamp: new Date().getTime()
 
     @getData = ->
-      $http.get '/user/'+getUserData().id
+      $http.get '/user/' + getUserData().id
       .then (response) ->
         userData =
-          firstName: response.data.firstName,
-          lastName: response.data.lastName,
-          login: response.data.login,
-          id: response.data._id,
+          firstName: response.data.firstName
+          lastName: response.data.lastName
+          login: response.data.login
+          id: response.data._id
           providers: response.data.providers
         setUserData userData
         $rootScope.user = userData

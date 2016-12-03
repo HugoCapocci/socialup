@@ -7,7 +7,7 @@ fs = require 'fs'
 should = chai.should
 sinon = require 'sinon'
 
-require '../../localeConfig' unless process.env.MONGOLAB_URI?
+require('dotenv').config()
 
 Promise = require 'bluebird'
 UserDAO = require '../../src/server/coffee/userDAO'

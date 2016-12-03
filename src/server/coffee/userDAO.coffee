@@ -1,5 +1,7 @@
 Promise = require 'bluebird'
 MongoDB = require 'mongodb'
+crypto = require 'crypto'
+
 Promise.promisifyAll MongoDB
 MongoClient = MongoDB.MongoClient
 Promise.promisifyAll MongoClient
@@ -41,6 +43,7 @@ module.exports = class UserDAO
       @db.collection(collection).findOne query
     .then (user) ->
       @db.close()
+      user.hashedLogin = crypto.createHash('md5').update(user.login).digest 'hex'
       user
 
   retrieveUsers: ->
@@ -81,15 +84,20 @@ module.exports = class UserDAO
     @retrieveUser query
 
   authenticate: (login, password) ->
+    console.log "search in collection #{collection} for login #{login} and password #{password}"
     @db = null
     @getDB()
     .then (db) ->
       @db = db
-      @db.collection(collection).findOne {login: login, password: password}
-    .then (result) ->
+      @db.collection(collection).findOne login: login, password: password
+    .then (user) ->
       @db.close()
-      return Promise.reject 'no user found' unless result?
-      result
+      return Promise.reject 'no user found' unless user?
+      console.log 'hash the login'
+      #generate email md5 hash (for gravatar)
+      user.hashedLogin = crypto.createHash('md5').update(user.login).digest 'hex'
+      console.log 'hashedLogin: ', user.hashedLogin
+      user
 
   deleteToken: (provider, userId) ->
     @db = null

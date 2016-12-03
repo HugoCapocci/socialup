@@ -3,7 +3,7 @@ require.config
     'domReady': '../bower_components/requirejs-domready/domReady'
     'angular': '../bower_components/angular/angular.min'
     'angular-resource': '../bower_components/angular-resource/angular-resource.min'
-    'angular-route': '../bower_components/angular-route/angular-route.min'
+    'angular-ui-router': '../bower_components/angular-ui-router/release/angular-ui-router.min'
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap'
     'angular-bootstrap-tpls': '../bower_components/angular-bootstrap/ui-bootstrap-tpls'
     'angular-dashboard-framework': '../bower_components/angular-dashboard-framework/dist/angular-dashboard-framework.min'
@@ -27,7 +27,7 @@ require.config
   shim:
     'angular':
       'exports': 'angular'
-    'angular-route': [ 'angular' ]
+    'angular-ui-router': ['angular']
     'angular-resource':
       deps: ['angular']
     'angular-bootstrap':
