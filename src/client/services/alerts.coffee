@@ -16,6 +16,10 @@ define ['./module'], (appModule) ->
     @warn = (message, delay) ->
       createAlert message, 'warning', delay
 
+    @closeAlert = (index) ->
+      $rootScope.alerts.splice index, 1
+      return
+
     createAlert = (message, type, delay) ->
       delay = 2000 unless delay?
       alert =

@@ -1,9 +1,11 @@
 define [
   './main'
+  './login'
+  './resetPassword'
+  './manageSocialNetworks'
 ], ->
 
 ###
-'./login'
 './resetPassword'
 './uploadFile'
 './uploadMusic'
@@ -17,7 +19,6 @@ define [
 './videos'
 './searchVideo'
 './pageStats'
-'./manageSocialNetworks'
 './providers/facebookOptions'
 './providers/dailymotionOptions'
 './providers/googleOptions'

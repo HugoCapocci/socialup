@@ -5,6 +5,7 @@ define [
   './message'
   './user'
   './videos'
+  './modalProvider'
 ], ->
 
 ###
@@ -12,7 +13,5 @@ define [
 './message'
 './event'
 './publishFile'
-'./videos'
-'./user'
 './stats'
 ###

@@ -1,6 +1,6 @@
-div
-  header.jumbotron
-    h2 Enregistrez-vous / Créez votre compte
+extend ./modal.jade
+
+block modalBody
   .row
     .col-lg-6.col-lg-offset-3
       uib-tabset.panel.panel-default(justified="true")
@@ -8,7 +8,7 @@ div
           .panel-body
             .row
               .col-xs-5.col-md-5.col-lg-6
-                form.form-signin(name="create" id="createForm" ng-submit="create()")
+                form.form-signin(name="create" id="createForm" ng-submit="controller.createUser()")
                   fieldset
                     .form-group
                       input.form-control(type="text" id="firstName" placeholder="Prénom" ng-model="form.firstName")
@@ -22,34 +22,29 @@ div
                       input.form-control(type="password" id="repeatedPassword" placeholder="Répétez vore mot de passe" ng-model="form.repeatedPassword")
                     //captcha pour éviter les bots
                     div(vc-recaptcha key="'6LdYdAUTAAAAACh8N-aW_9k1dPMg0I-u5uWnULnW'")
-                    button.btn.btn-primary(id="createButt" type="submit")
-                      | inscrivez-vous
+                    button.btn.btn-primary(id="createButt" type="submit") Inscrivez-vous
               .col-xs-5.col-md-5.col-lg-6
         
         uib-tab(heading="Connectez-vous" active="true")
           .panel-body
-
-            form.form-signin(name="signIn" id="signInForm" ng-submit="authenticate()")
+            form.form-signin(name="signIn" id="signInForm" ng-submit="controller.authenticate()")
               fieldset                                        
                 .row
                   .col-xs-5.col-md-5.col-lg-6
                     .form-group
                       input.form-control(type="text" id="log" placeholder="Email (login)" ng-model="form.login")
-
                 .row
                   .col-xs-5.col-md-5.col-lg-6
                     .form-group
                       input.form-control(type="password" id="pswd" placeholder="Mot de passe" ng-model="form.password")
                   .col-xs-5.col-md-5.col-lg-6.col-lg-offset-0
-                    button.btn.btn-primary(id="signInButt" type="submit")
-                      | connectez-vous
+                    button.btn.btn-primary(id="signInButt" type="submit") Connectez-vous
             .clean
               hr(style="margin-bottom:0px;")
-
             .row
               .col-xs-8.col-md-8.col-lg-9.col-md-offset-2
                 h3 Mot de passe oublié ?
               .col-xs-5.col-md-5.col-lg-6
                 input.form-control(type="text" placeholder="Email (login)" ng-model="form.loginPasswordRetrieve")
               .col-xs-5.col-md-5.col-lg-6
-                button.btn.btn-primary(type="button" ng-click="sendResetPassword()") Reset password
+                button.btn.btn-primary(type="button" ng-click="controller.sendResetPassword()") Réinitialisez votre mdp

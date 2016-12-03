@@ -20,11 +20,12 @@ TEMPLATE_EMAIL_CONFIRMATION = 'src/server/templates/emailConfirmation.html'
 
 module.exports = class EmailService
 
-  sendMail: (message, mailTo, transporter = myTransporter) ->
+  sendResetPasswordMail: (message, mailTo, userId, transporter = myTransporter) ->
+  #sendMail: (message, mailTo, transporter = myTransporter) ->
 
     loadTemplate = ->
       template = fs.readFileSync TEMPLATE_PASSWORD_RESET, 'utf-8'
-      template.replace '%URL%', 'http://localhost:5000/#/resetPassword'
+      template.replace '%URL%', 'http://localhost:5000/#/resetPassword?hash=' + userId
 
     console.log 'sendMail'
     deferred = Promise.pending()
