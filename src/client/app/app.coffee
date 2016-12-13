@@ -2,6 +2,7 @@ define [
   'angular'
   'angular-resource'
   'angular-sanitize'
+  'ngMaterial'
   'angular-ui-router'
   'angular-bootstrap'
   'angular-bootstrap-tpls'
@@ -27,6 +28,7 @@ define [
   angular.module 'SocialUp', [
     'ngResource'
     'ngSanitize'
+    'ngMaterial'
     'ui.router'
     'ui.bootstrap'
     'ui.bootstrap.tpls'

@@ -718,11 +718,11 @@ app.post '/user/create', (req, res) ->
       login: login
       password: password
       providers: {}
+      confirmed: false
     userDAO.saveUser user
     .then (data) ->
       console.log 'user created: ', data
-      emailService.sendConfirmationMail login, data
-      #TODO send mail to user
+      emailService.sendConfirmationMail login, data._id
       res.send data
     .catch (err) ->
       console.log err

@@ -1,12 +1,13 @@
-define ['./module', 'sha1'], (appModule, sha1) ->
+define ['./module'], (appModule) ->
 
-  class ResetPasswordController
+  class ConfirmUserMailController
     constructor: (@$scope, @$stateParams, @$uibModalInstance, @authService, @alertsService) ->
-      @$scope.modalTitle = 'Réinitialisez votre mot de passe'
-      console.log 'search user having hash = ', @$stateParams.hash
-      @authService.getUser @$stateParams.hash
+      @$scope.modalTitle = 'Confirmez votre email'
+      console.log 'search user having id = ', @$stateParams.id
+      @$scope.loading = true
+      @authService.getUser @$stateParams.id
       .then (userFound) =>
-        console.log 'userFound? ', userFound
+        console.log 'active user: ', userFound
         @$scope.form =
           login: userFound.login
           password: ''
@@ -31,5 +32,5 @@ define ['./module', 'sha1'], (appModule, sha1) ->
     closeAlert: ($index) ->
 	    @alertsService.closeAlert $index
 
-  ResetPasswordController.$inject = ['$scope', '$stateParams', '$uibModalInstance', 'authService', 'alertsService']
-  appModule.controller 'ResetPasswordController', ResetPasswordController
+  ConfirmUserMailController.$inject = ['$scope', '$stateParams', '$uibModalInstance', 'authService', 'alertsService']
+  appModule.controller 'ConfirmUserMailController', ConfirmUserMailController

@@ -2,9 +2,9 @@
 # bootstraps angular onto the window.document node
 ###
 define [
-  'require',
-  'angular',
-  'app',
+  'require'
+  'angular'
+  'app'
   'routes'
 ], (require, angular, app) ->
 

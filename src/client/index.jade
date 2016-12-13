@@ -26,10 +26,18 @@ html(lang="fr")
       type="text/css"
       href='bower_components/angular-dashboard-framework/dist/angular-dashboard-framework.min.css'
     )
-  //burger menu avec login link (modale)
+
   body(ng-controller="MainController as mainController")
-    button.btn.btn-primary(ui-sref="login")
-      span.glyphicon.glyphicon-log-in
-      |  Sign In Now!
-    img(ng-src="https://www.gravatar.com/avatar/{{ $root.user.hashedLogin }}")
-    adf-dashboard(name="mydashboard" collapsible="true" structure="4-8" adf-model="mainController.model")
+    md-content.md-padding(layout="row")
+      md-fab-speed-dial.md-scale.menu-dial(md-direction="down" md-open="openMenu" style="top: 0px, left: 5px")
+        md-fab-trigger
+          md-button.md-fab.md-primary.md-hue-1.burger(aria-label="menu")
+            span.glyphicon.glyphicon-menu-hamburger
+        md-fab-actions
+          md-button.md-fab.md-raised.md-mini(ui-sref="login" aria-label="Login")
+            md-tooltip(md-direction="right" md-visible="false" md-autohide="false") Connectez-vous
+            span.glyphicon.glyphicon-log-in
+
+      img(ng-src="https://www.gravatar.com/avatar/{{ $root.user.hashedLogin }}")
+      adf-dashboard(name="mydashboard" collapsible="true" structure="4-8" adf-model="mainController.model")
+  
