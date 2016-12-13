@@ -2,6 +2,7 @@ define [
   './main'
   './login'
   './resetPassword'
+  './confirmUserMail'
   './manageSocialNetworks'
 ], ->
 

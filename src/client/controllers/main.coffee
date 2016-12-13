@@ -52,10 +52,11 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
       console.log 'MainController constructor loaded'
       parameters = @$location.search()
       if parameters.close
-        alertsService.success 'OAuth authentication sucessfull'
+        @alertsService.success 'OAuth authentication sucessfull'
         @$window.close()
       @localData = @userService.getUserData()
       console.log "localData found: ", @localData
+      @$scope.openMenu = false
 
     closeAlert: ($index) ->
       console.log "close alert index: ", $index

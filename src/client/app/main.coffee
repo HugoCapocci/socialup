@@ -1,15 +1,18 @@
 require.config
   paths:
     'domReady': '../bower_components/requirejs-domready/domReady'
-    'angular': '../bower_components/angular/angular.min'
-    'angular-resource': '../bower_components/angular-resource/angular-resource.min'
-    'angular-ui-router': '../bower_components/angular-ui-router/release/angular-ui-router.min'
+    'angular': '../bower_components/angular/angular'
+    'angular-resource': '../bower_components/angular-resource/angular-resource'
+    'angular-ui-router': '../bower_components/angular-ui-router/release/angular-ui-router'
     'angular-bootstrap': '../bower_components/angular-bootstrap/ui-bootstrap'
     'angular-bootstrap-tpls': '../bower_components/angular-bootstrap/ui-bootstrap-tpls'
-    'angular-dashboard-framework': '../bower_components/angular-dashboard-framework/dist/angular-dashboard-framework.min'
-    'angular-file-upload': '../bower_components/angular-file-upload/dist/angular-file-upload.min'
+    'angular-dashboard-framework': '../bower_components/angular-dashboard-framework/dist/angular-dashboard-framework'
+    'angular-file-upload': '../bower_components/angular-file-upload/dist/angular-file-upload'
     'angular-tree-control': '../bower_components/angular-tree-control/angular-tree-control'
-    'angular-sanitize': '../bower_components/angular-sanitize/angular-sanitize.min'
+    'angular-sanitize': '../bower_components/angular-sanitize/angular-sanitize'
+    'ngAnimate': '../bower_components/angular-animate/angular-animate'
+    'ngAria': '../bower_components/angular-aria/angular-aria'
+    'ngMaterial': '../bower_components/angular-material/angular-material'
     'ng-tags-input': '../bower_components/ng-tags-input/ng-tags-input'
     'sha1': '../bower_components/SHA-1/sha1'
     'angular-smart-table': '../bower_components/angular-smart-table/dist/smart-table'
@@ -17,11 +20,11 @@ require.config
     'checklist-model': '../bower_components/checklist-model/checklist-model'
     'moment': '../bower_components/moment/moment'
     'ng-videosharing-embed': '../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min'
-    'angular-chart': '../bower_components/angular-chart.js/dist/angular-chart.min'
-    'chart':  '../bower_components/Chart.js/Chart.min'
-    'angular-drag-and-drop-lists': '../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min'
-    'angular-bootstrap-calendar': '../bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls.min'
-    'interact': '../bower_components/interact/dist/interact.min'
+    'angular-chart': '../bower_components/angular-chart.js/dist/angular-chart'
+    'chart':  '../bower_components/Chart.js/Chart'
+    'angular-drag-and-drop-lists': '../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists'
+    'angular-bootstrap-calendar': '../bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls'
+    'interact': '../bower_components/interact/dist/interact'
     'player': '../bower_components/angular-social-video-player/dist/player.min'
     'Sortable':  '../bower_components/Sortable/Sortable'
   shim:
@@ -53,11 +56,15 @@ require.config
     'angular-drag-and-drop-lists':
       deps: ['angular']
     'angular-bootstrap-calendar':
-      deps: ['angular', 'moment','angular-bootstrap']
+      deps: ['angular', 'moment', 'angular-bootstrap']
     'player':
       deps: ['angular']
     'angular-sanitize':
       deps: ['angular']
+    'ngAnimate': ['angular']
+    'ngAria': ['angular']
+    'ngMaterial':
+       deps: ['ngAnimate', 'ngAria']
 
   #kick start application
   deps: ['./bootstrap']

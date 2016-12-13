@@ -36,7 +36,6 @@ module.exports = class EmailService
       subject: ''
       text: message
       html: loadTemplate message
-
     #send mail with defined transport object
     transporter.sendMail mailOptions, (error, info) ->
       if error
@@ -61,7 +60,6 @@ module.exports = class EmailService
       subject: ''
       text: 'yo'
       html: loadTemplate()
-
     #send mail with defined transport object
     transporter.sendMail mailOptions, (error, info) ->
       if error

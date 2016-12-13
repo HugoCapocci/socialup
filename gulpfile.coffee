@@ -134,6 +134,7 @@ gulp.task 'compileCss', ['compileLess'], ->
     'public/bower_components/ng-tags-input/ng-tags-input.css'
     'public/bower_components/angular-chart.js/dist/angular-chart.css'
     'public/bower_components/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.css'
+    'public/bower_components/angular-material/angular-material.min.css'
   ]
   .pipe concatCss 'bundle.css'
   .pipe gulp.dest 'public/'

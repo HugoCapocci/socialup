@@ -50,4 +50,10 @@ define ['angular', 'app'], (angular, app) ->
       onEnter: ['ModalProvider', (ModalProvider) ->
         ModalProvider.openModal 'login'
       ]
+    .state 'confirm',
+      url: '/confirm?id'
+      onEnter: ['ModalProvider', (ModalProvider) ->
+        ModalProvider.openModal 'confirmUserMail'
+      ]
+
   ]

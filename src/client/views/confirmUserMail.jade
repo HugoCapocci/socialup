@@ -1,0 +1,7 @@
+extend ./modal.jade
+
+block modalBody
+  .row
+    .col-lg-6.col-lg-offset-3
+      div(ng-if="loading")
+        i.fa.fa-refresh.fa-spin.fa-2x.fa-fw
