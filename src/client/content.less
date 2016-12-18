@@ -210,17 +210,22 @@ body {
   top: initial !important;
 }
 
-// FAB  speed dial
-.menu-dial {
-  left: -10px;
-  top: -10px;
-}
-
 .burger {
   font-size: 24px !important;
-  padding: 3px !important;
+  padding: 4px !important;
 }
 
 .dashboard-container h1 {
-  margin-top: 5px;
+  margin-top: -5px;
+}
+
+@md-width: 992px;
+// FAB  speed dial
+.menu-dial {
+  left: -5px;
+  top: -5px;
+  @media (min-width: @md-width) {
+    left: -10px;
+    top: -10px;
+  }
 }

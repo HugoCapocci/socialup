@@ -28,14 +28,14 @@ html(lang="fr")
     )
 
   body(ng-controller="MainController as mainController")
-    md-content.md-padding(layout="row")
-      md-fab-speed-dial.md-scale.menu-dial(md-direction="down" md-open="openMenu" style="top: 0px, left: 5px")
+    md-content.md-padding(layout="{{ layout }}")
+      md-fab-speed-dial.md-scale.menu-dial(md-direction="{{ menu.direction }}" md-open="openMenu" style="top: 0px, left: 5px")
         md-fab-trigger
           md-button.md-fab.md-primary.md-hue-1.burger(aria-label="menu")
             span.glyphicon.glyphicon-menu-hamburger
         md-fab-actions
           md-button.md-fab.md-raised.md-mini(ui-sref="login" aria-label="Login")
-            md-tooltip(md-direction="right" md-visible="false" md-autohide="false") Connectez-vous
+            md-tooltip(md-direction="{{ menu.tooltipDirection }}" md-visible="false" md-autohide="false") Connectez-vous
             span.glyphicon.glyphicon-log-in
 
       img(ng-src="https://www.gravatar.com/avatar/{{ $root.user.hashedLogin }}")
