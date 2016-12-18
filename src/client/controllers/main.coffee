@@ -48,7 +48,7 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
 
   class MainController
 
-    constructor: (@$scope, @$rootScope, @$location, @$window, @alertsService, @userService) ->
+    constructor: (@$mdMedia, @$scope, @$rootScope, @$location, @$window, @alertsService, @userService) ->
       console.log 'MainController constructor loaded'
       parameters = @$location.search()
       if parameters.close
@@ -57,6 +57,18 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
       @localData = @userService.getUserData()
       console.log "localData found: ", @localData
       @$scope.openMenu = false
+      @$scope.layout = if @$mdMedia 'gt-sm' then 'row' else 'column'
+      @$scope.menu =
+        direction: if @$mdMedia 'gt-sm' then 'down' else 'right'
+        tooltipDirection: if @$mdMedia 'gt-sm' then 'right' else 'down'
+
+      @$scope.$watch( => @$mdMedia 'gt-sm'
+      (isGtSm) =>
+        @$scope.layout = if isGtSm then 'row' else 'column'
+        @$scope.menu =
+          direction: if isGtSm then 'down' else 'right'
+          tooltipDirection: if isGtSm then 'right' else 'down'
+      )
 
     closeAlert: ($index) ->
       console.log "close alert index: ", $index
@@ -83,9 +95,8 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
           }]
         }]
       ]
-    console.log 'dashboard model: ', @model
 
-  MainController.$inject = ['$scope', '$rootScope', '$location', '$window', 'alertsService', 'userService']
+  MainController.$inject = ['$mdMedia', '$scope', '$rootScope', '$location', '$window', 'alertsService', 'userService']
   appModule.controller 'MainController', MainController
 
   class WaitingModalController
