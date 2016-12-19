@@ -15,7 +15,6 @@ fs = require 'fs'
 querystring = require 'querystring'
 
 exports.pushCode = (code) ->
-
   deferred = Promise.pending()
   post_data = querystring.stringify
     'client_id': DROPBOX_APP_KEY
@@ -23,7 +22,6 @@ exports.pushCode = (code) ->
     'redirect_uri' : DROPBOX_REDIRECT_URI
     'grant_type' : 'authorization_code'
     'code' : code
-
   post_options =
     host: END_POINT
     port: 443
@@ -32,22 +30,17 @@ exports.pushCode = (code) ->
     headers:
       'Content-Type': 'application/x-www-form-urlencoded'
       'Content-Length': post_data.length
-
   post_req = https.request post_options, (res) ->
     res.setEncoding 'utf8'
     res.on 'data', (chunk) ->
-      deferred.resolve JSON.parse(chunk)
-
-  post_req.on 'error', (e) ->
-    deferred.reject new Error(e)
-
+      deferred.resolve JSON.parse chunk
+  post_req.on 'error', (error) ->
+    deferred.reject new Error error
   post_req.write post_data
   post_req.end()
-
   deferred.promise
 
 exports.listFiles = (token, path, typeFilter) ->
-
   if path is undefined or path is 'root'
     path = ''
   else
@@ -55,13 +48,11 @@ exports.listFiles = (token, path, typeFilter) ->
   retrieveAllFiles token, path, typeFilter
 
 retrieveAllFiles = (token, path, typeFilter) ->
-
   deferred = Promise.pending()
   post_data =
     path: path
     recursive: false
     include_media_info: false
-
   request
     uri: 'https://' + END_POINT + '/2/files/list_folder'
     auth:
@@ -83,9 +74,7 @@ retrieveAllFiles = (token, path, typeFilter) ->
         else
           results.push name: entry.name, id: entry.path_lower, mimeType: entry['.tag'],
           isFolder: entry['.tag'] is 'folder'
-
       deferred.resolve results
-
   deferred.promise
 
 exports.getSpaceUsage = (tokens) ->
@@ -103,19 +92,16 @@ exports.getSpaceUsage = (tokens) ->
       deferred.resolve
         used: result.used
         total: result.allocation.allocated
-
   deferred.promise
 
 exports.getFileMetaData = (tokens,filePath) ->
-
-  processGetRequest tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent(filePath),
+  processGetRequest tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent filePath,
   (fileContent, response) ->
     metaData = JSON.parse response.headers['x-dropbox-metadata']
     metaData.fileName = metaData.path.substring metaData.path.lastIndexOf('/') + 1
     metaData
 
 exports.downloadFile = (tokens,filePath) ->
-
   request
     uri: 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent filePath
     auth:
@@ -123,7 +109,6 @@ exports.downloadFile = (tokens,filePath) ->
     method: 'GET'
 
 exports.deleteFile = (tokens,filePath) ->
-
   deferred = Promise.pending()
   request
     uri: 'https://api.dropboxapi.com/2/files/delete'
@@ -136,21 +121,17 @@ exports.deleteFile = (tokens,filePath) ->
       path: '/' + filePath
     method: 'POST'
   , (error, response, body) ->
-
     if error?
       deferred.reject error
     else
       deferred.resolve body
-
   deferred.promise
 
 exports.uploadDrive = (tokens, file, path) ->
-
   deferred = Promise.pending()
   url = 'https://content.dropboxapi.com/1/files_put/auto'
-  if path? then url += encodeURIComponent path
+  url += encodeURIComponent(path) if path?
   url += '/' + file.originalname
-
   request
     uri : url
     auth:
@@ -170,13 +151,12 @@ exports.getOAuthURL = ->
   'https://www.dropbox.com/1/oauth2/authorize?client_id=' + DROPBOX_APP_KEY + '&redirect_uri=' +
   DROPBOX_REDIRECT_URI + '&response_type=code'
 
-getUserInfo = (tokens) ->
+exports.getUserInfo = (tokens) ->
 
   processGetRequest tokens.access_token, 'https://' + END_POINT + '/1/account/info', (userInfo) ->
     userName: JSON.parse(userInfo).display_name
 
 processGetRequest = (access_token, url, callback) ->
-
   deferred = Promise.pending()
   request
     uri: url
@@ -187,12 +167,11 @@ processGetRequest = (access_token, url, callback) ->
     if error?
       deferred.reject error
     else
-      deferred.resolve callback(body, response)
+      deferred.resolve callback body, response
 
   deferred.promise
 
 exports.createShareLink = (tokens, filePath) ->
-
   deferred = Promise.pending()
   request
     uri: 'api.dropboxapi.com/2/sharing/create_shared_link'

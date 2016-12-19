@@ -1,0 +1,54 @@
+div
+  table.table.table-striped(st-table="socialTokens")
+    thead
+      tr
+        th Provider
+        th Statut
+        th Nom d'utilisateur
+        th Date d'expiration ?
+        th Auto refresh
+        th
+    tbody
+      tr(ng-repeat="provider in providers")
+        td
+          a(ng-href="{{ oauthURLS[provider] }}" target="_blank")
+            img(ng-src="{{ 'images/' + provider + '.png' }}" width="64" height="64")
+        td
+          i.alert-success.glyphicon.glyphicon-ok-sign(ng-if="socialTokens[provider] && socialTokens[provider].tokens")
+        td
+          p(ng-if="socialTokens[provider]") {{ socialTokens[provider].userName }}
+        td
+          p(ng-if="socialTokens[provider] && socialTokens[provider].tokens && socialTokens[provider].tokens.expiry_date")
+           | {{ socialTokens[provider].tokens.expiry_date }}
+        td
+          p(ng-if="socialTokens[provider] && socialTokens[provider].tokens && (socialTokens[provider].tokens.refresh_token || !socialTokens[provider].tokens.expiry_date)") true
+        td
+          button.btn.btn-sm.btn-info(
+            ng-if="socialTokens[provider] && socialTokens[provider].tokens && socialTokens[provider].tokens.refresh_token"
+            ng-click="controller.refreshToken(provider)"
+            type="button"
+            uib-tooltip="refresh token"
+          )
+            i.glyphicon.glyphicon-refresh
+          button.btn.btn-sm.btn-info(
+            ng-if="socialTokens[provider] && socialTokens[provider].tokens && !socialTokens[provider].tokens.refresh_token"
+            ng-click="controller.generateToken(provider)"
+            type="button"
+            uib-tooltip="regenerate token"
+          )
+            i.glyphicon.glyphicon-repeat
+          button.btn.btn-sm.btn-warning(
+            ng-if="!socialTokens[provider].tokens"
+            type="button"
+            ng-click="controller.generateToken(provider)"
+            uib-tooltip="generate token"
+          )
+            i.glyphicon.glyphicon-repeat
+        td
+          button.btn.btn-sm.btn-danger(
+            ng-if="socialTokens[provider] && socialTokens[provider].tokens"
+            type="button"
+            ng-click="controller.deleteToken(provider)"
+            uib-tooltip="revoke token"
+          )
+            i.glyphicon.glyphicon-trash

@@ -31,7 +31,7 @@ getTokens = (userId) ->
       uri: url
       headers: processHeader tokens, url, 'post', REDIRECT_URL + userId
       method: 'POST'
-    ,(error, response, body) ->
+    , (error, response, body) ->
       if error
         reject error
       else
@@ -63,6 +63,7 @@ createSignature = (baseString, signingKey) ->
 
 #APP_SECRET
 getSignature = (params, httpMethod, url, tokenSecret, consumerSecret) ->
+  console.log 'getSignature'
   baseString = createSignatureBaseString params, httpMethod, url
   createSignature baseString, createSigningKey consumerSecret, tokenSecret
 
@@ -73,14 +74,18 @@ percentEncode = (str) ->
 
 #last step of the authentication validation
 getAccessToken = (oauthVerifier, tokens) ->
+  console.log 'twitter getAccessToken; oauthVerifier: ', oauthVerifier
+  console.log 'tokens: ', tokens
   new bluebird (fulfill, reject) ->
     url = 'https://api.twitter.com/oauth/access_token'
     tokens =
       oauth_token: tokens.oauth_token
       oauth_token_secret: tokens.oauth_token_secret or TOKEN_SECRET
+    headers = processHeader tokens, url, 'post'
+    console.log 'headers ok: ', headers
     request
       uri: url
-      headers: processHeader tokens, url, 'post'
+      headers: headers
       method: 'POST'
       form: oauth_verifier: oauthVerifier
     , (error, response, body) ->
@@ -88,6 +93,7 @@ getAccessToken = (oauthVerifier, tokens) ->
         reject error
       else
         fulfill bodyToTokens body
+    return
 
 postMessage = (tokens, message) ->
   new bluebird (fulfill, reject) ->
@@ -105,7 +111,7 @@ postMessage = (tokens, message) ->
         results = JSON.parse body
         url = 'https://twitter.com/' + results.user.screen_name + '/status/' + results.id_str
         console.log "tweet published: #{url}"
-        fulfill url:url
+        fulfill url: url
 
 getTweets = (tokens) ->
   resolver = bluebird.defer()
@@ -124,7 +130,6 @@ getTweets = (tokens) ->
 searchTweets = (query, tokens) ->
   resolver = bluebird.defer()
   url = 'https://api.twitter.com/1.1/search/tweets.json'
-
   url += '?include_entities=false'
   request
     uri: url + '&q=' + encodeURIComponent query
@@ -142,16 +147,19 @@ searchTweets = (query, tokens) ->
   resolver.promise
 
 #return 200 if token is valid
-exports.verifyCredentials = (tokens) ->
-  processGetRequest tokens, 'https://api.twitter.com/1.1/account/verify_credentials.json', (body, response) ->
+verifyCredentials = (tokens) ->
+  processGetRequest tokens, 'https://api.twitter.com/1.1/account/verify_credentials.json'
+  .then ({response}) ->
     response.statusCode
 
-exports.getUserInfo = (tokens) ->
-  processGetRequest tokens, 'https://api.twitter.com/1.1/account/settings.json', (body) ->
+getUserInfo = (tokens) ->
+  processGetRequest tokens, 'https://api.twitter.com/1.1/account/settings.json'
+  .then ({body}) ->
     userInfo = JSON.parse body
     userName: userInfo.screen_name
 
 processHeader = (tokens, url, httpVerb, oauthCallback) ->
+  console.log 'processHeader'
   return 'Authorization': 'Bearer ' + applicationOnlyToken.access_token unless tokens?
   headerParams =
     'oauth_consumer_key': APP_KEY
@@ -171,23 +179,31 @@ processHeader = (tokens, url, httpVerb, oauthCallback) ->
   )
   'Authorization': 'OAuth ' + inLineParams headerParams
 
-processGetRequest = (tokens, url, callback) ->
-  request
-    uri: url
-    headers: processHeader tokens, url, 'get'
-    method: 'GET'
-  , (error, response, body) ->
-    if error
-      reject error
-    else
-      fulfill callback body, response
+processGetRequest = (tokens, url) ->
+  console.log 'processGetRequest'
+  new bluebird (fulfill, reject) ->
+    request
+      uri: url
+      headers: processHeader tokens, url, 'get'
+      method: 'GET'
+    , (error, response, body) ->
+      if error
+        console.log 'processGetRequest reject :/'
+        reject error
+      else
+        console.log 'processGetRequest fulfill :D'
+        fulfill body: body, response: response
+    return
 
 bodyToTokens = (body) ->
+  console.log 'bodyToTokens: ', body
   tokenArray = body.split '&'
+  console.log 'tokenArray: ', tokenArray
   tokens = {}
   for token in tokenArray
     elems = token.split '='
     tokens[elems[0]] = elems[1]
+  console.log 'tokens: ', tokens
   tokens
 
 getEncodedBearedTokenCredentials = (consumerKey = APP_KEY, consumerSecret = APP_SECRET) ->
@@ -220,6 +236,7 @@ getApplicationOnlyToken()
 module.exports =
   getOAuthURL: getOAuthURL
   getTokens: getTokens
+  getUserInfo: getUserInfo
   createSignatureBaseString: createSignatureBaseString
   createSigningKey: createSigningKey
   createSignature: createSignature
@@ -229,4 +246,5 @@ module.exports =
   searchTweets: searchTweets
   getSignature: getSignature
   bodyToTokens: bodyToTokens
+  verifyCredentials: verifyCredentials
   _getEncodedBearedTokenCredentials: getEncodedBearedTokenCredentials

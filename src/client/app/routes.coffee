@@ -55,5 +55,10 @@ define ['angular', 'app'], (angular, app) ->
       onEnter: ['ModalProvider', (ModalProvider) ->
         ModalProvider.openModal 'confirmUserMail'
       ]
+    .state 'manageSocialNetworks',
+      url: '/manageSocialNetworks'
+      onEnter: ['ModalProvider', (ModalProvider) ->
+        ModalProvider.openModal 'manageSocialNetworks'
+      ]
 
   ]

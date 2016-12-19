@@ -26,11 +26,11 @@ initiateUser = (user) ->
 scheduler = require './scheduler'
 
 scheduler.addEventListerner 'message', (eventId, userId, providers, providersOptions, message) ->
-  postMessageToProviders(userId, providers, providersOptions, message)
+  postMessageToProviders userId, providers, providersOptions, message
   .then (results) ->
-    eventsDAO.updateScheduledEventAfterExecution(eventId, results)
+    eventsDAO.updateScheduledEventAfterExecution eventId, results
   .catch (err) ->
-    eventsDAO.updateScheduledEventAfterError(eventId, err)
+    eventsDAO.updateScheduledEventAfterError eventId, err
 
 scheduler.addEventListerner 'uploadVideo',
 (eventId, userId, providers, providersOptions, file, title, description, tags) ->
@@ -48,12 +48,12 @@ scheduler.addEventListerner 'uploadVideo',
     eventsDAO.updateScheduledEventAfterExecution eventId, results
     eventsDAO.retrieveChainedEvents eventId
   .catch (err) ->
-    eventsDAO.updateScheduledEventAfterError(eventId, err)
+    eventsDAO.updateScheduledEventAfterError eventId, err
   .then (chainedEvents) ->
-    executeChainedEvents(chainedEvents, params)
+    executeChainedEvents chainedEvents, params
   .fin ->
     #eventsDAO.updateScheduledEventAfterExecution(eventId, results);
-    fs.unlink(file.path)
+    fs.unlink file.path
 
 getRefreshedToken = (provider, userId) ->
   myToken = users[userId].providers[provider].tokens
@@ -62,10 +62,10 @@ getRefreshedToken = (provider, userId) ->
     if providersAPI[provider].refreshTokens instanceof Function
       if provider is 'google'
         myToken = users[userId].providers[provider].originalTokens
-      providersAPI[provider].refreshTokens(myToken, userId)
+      providersAPI[provider].refreshTokens myToken, userId
       .then (tokens) ->
         users[userId].providers[provider].tokens = tokens
-        userDAO.updateUserTokens(userId, provider, tokens)
+        userDAO.updateUserTokens userId, provider, tokens
         Q.fcall -> tokens
     else
       Q.fcall -> throw new Error 'no "refreshTokens" function for provider ' + provider
@@ -86,7 +86,7 @@ executeChainedEvents = (chainedEvents, args) ->
     else if chainedEvent.eventType is 'uploadCloud'
       params =
         file: args.file
-    results.push executeChainedEvent(chainedEvent, params)
+    results.push executeChainedEvent chainedEvent, params
   Q.all results
 
 executeChainedEvent = (event, params) ->
@@ -147,42 +147,54 @@ app.get '/oauthURL/:provider/:userId', (req, res) ->
       res.send providersAPI[provider].getOAuthURL()
 
 app.get '/*2callback', (req, res) ->
-  provider = req.path.split('2callback')[0].substr(1)
+  console.log 'oauth callback'
+  provider = req.path.split('2callback')[0].substr 1
+  console.log 'provider: ', provider
   code = req.query.code
   userId = req.query.state
   getTokens = null
 
+  console.log 'providersAPI: ', providersAPI
+  console.log 'userId: ', userId
+  console.log 'users[userId]: ', users[userId]
   initiateUser userId unless users[userId]?
+
   if provider is TWITTER
-    if not users[userId].providers[TWITTER]
+    unless users[userId].providers[TWITTER]
       res.status(400).end 'Error in twitter oauth process'
     oauth_token = req.query.oauth_token
     oauth_verifier = req.query.oauth_verifier
     tokens = users[userId].providers[TWITTER].tokens
     tokens.oauth_token = oauth_token
+    console.log 'getTwitter token'
     getTokens = ->
+      console.log 'providersAPI.twitter: ', providersAPI.twitter
       providersAPI.twitter.getAccessToken oauth_verifier, tokens
-    return
   else
+    console.log 'get non-Twitter token'
     getTokens = ->
       providersAPI[provider].pushCode code, userId
-    return
 
   getTokens()
   .then (tokens) ->
+    console.log 'tokens: ', tokens
     if tokens.expires_in
-      tokens.expiry_date = Date.now() + (if provider is 'linkedin' then tokens.expires_in * 1000 else tokens.expires_in)
+      timeToAdd = if provider is 'linkedin' then tokens.expires_in * 1000 else tokens.expires_in
+      tokens.expiry_date = Date.now() + timeToAdd
       delete tokens.expires_in
     users[userId].providers[provider] = tokens: tokens
     #save google original token with refresh-token apart
     if provider is 'google' and tokens.refresh_token
       users[userId].providers[provider].originalTokens = tokens
-    providersAPI[provider].getUserInfo(tokens)
+    console.log 'getUserInfo: '
+    providersAPI[provider].getUserInfo tokens
 
   .then (userInfo) ->
+    console.log 'userInfo: ', userInfo
     users[userId].providers[provider].userName = userInfo.userName
     userDAO.saveUser users[userId]
   .then (userSaved) ->
+    console.log 'userSaved: ', userSaved
     users[userId] = userSaved
     res.redirect '/#?close=true'
   .catch (err) ->
@@ -284,13 +296,15 @@ app.get '/refreshToken/:provider/:userId', (req, res) ->
     users[userId].tokens[provider] = tokens
     userDAO.updateUserTokens userId, provider, tokens
     res.status(200).end()
-  .catch (err) -> res.send err
+  .catch (err) ->
+    res.send err
 
 app.get '/user/:userId', (req, res) ->
   userId = req.params.userId
   userDAO.retrieveUserById(userId).then (user) ->
     res.send user
-  .catch (err) -> res.send err
+  .catch (err) ->
+    res.send err
 
 app.get '/cloudExplorer/:provider/:folderId/:userId', (req, res) ->
   folderId = req.params.folderId
