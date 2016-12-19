@@ -3,11 +3,11 @@
 # see https://www.mixcloud.com/developers/
 ###
 
-https = require('https')
-http = require('http')
-request = require('request')
-Q = require('q')
-fs = require('fs')
+https = require 'https'
+http = require 'http'
+request = require 'request'
+Q = require 'q'
+fs = require 'fs'
 CLIENT_ID = process.env.MIXCLOUD_CLIENT_ID
 CLIENT_SECRET = process.env.MIXCLOUD_CLIENT_SECRET
 REDIRECT_URI = process.env.APP_URL + '/mixcloud2callback'
@@ -16,7 +16,6 @@ exports.getOAuthURL = () ->
   'https://www.mixcloud.com/oauth/authorize?client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT_URI
 
 exports.pushCode = (code, userId) ->
-
   deferred = Q.defer()
   req_options =
     host: 'www.mixcloud.com'
@@ -28,19 +27,20 @@ exports.pushCode = (code, userId) ->
   req = https.request req_options, (res) ->
     data = ''
     res.on 'data', (chunk) ->
+      console.log 'data: ', chunk
       data += chunk
 
     res.on 'end', ->
+      console.log 'data end: ', data
       deferred.resolve JSON.parse(data)
 
-  req.on 'error', (e) ->
-    console.log('mixcloud authentication error: ', e)
-    deferred.reject(e)
+  req.on 'error', (error) ->
+    console.log 'mixcloud authentication error: ', error
+    deferred.reject error
   req.end()
   deferred.promise
 
 exports.getUserInfo = (tokens) ->
-
   deferred = Q.defer()
   req_options =
     host: 'api.mixcloud.com'
@@ -55,14 +55,14 @@ exports.getUserInfo = (tokens) ->
     res.on 'end', ->
       results = JSON.parse(data)
       if results.error
-        console.log('mixcloud authentication error: ', results.error.message)
-        deferred.reject(results.error)
+        console.log 'mixcloud authentication error: ', results.error.message
+        deferred.reject results.error
       else
         deferred.resolve userName: results.username
 
-  req.on 'error', (e) ->
-    console.log('mixcloud authentication error: ', e)
-    deferred.reject(e)
+  req.on 'error', (error) ->
+    console.log 'mixcloud authentication error: ', error
+    deferred.reject error
 
   req.end()
   deferred.promise
@@ -70,7 +70,7 @@ exports.getUserInfo = (tokens) ->
 exports.sendMusic = (tokens, file, params) ->
   #post https://api.mixcloud.com/upload/
   formData =
-    mp3: fs.createReadStream(file.path)
+    mp3: fs.createReadStream file.path
     name: params.title
     description: params.description
 
@@ -91,20 +91,19 @@ exports.sendMusic = (tokens, file, params) ->
       method: 'POST'
       uri: 'https://api.mixcloud.com/upload/?access_token=' + tokens.access_token
       formData: formData
-    ,(err, response, body) ->
+    , (error, response, body) ->
       if err
-        deferred.reject(err)
+        deferred.reject error
       else
-        result = JSON.parse(body)
+        result = JSON.parse body
         if result.error
-          deferred.reject(result)
+          deferred.reject result
         else
-          deferred.resolve(result)
+          deferred.resolve result
 
     deferred.promise
 
 exports.listMedia = (tokens) ->
-
   deferred = Q.defer()
   req_options =
     host: 'api.mixcloud.com'
@@ -117,10 +116,10 @@ exports.listMedia = (tokens) ->
       data += chunk
 
     res.on 'end', ->
-      results = JSON.parse(data)
+      results = JSON.parse data
       if results.error
-        console.log('mixcloud listMedia error: ', results.error.message)
-        deferred.reject(results.error)
+        console.log 'mixcloud listMedia error: ', results.error.message
+        deferred.reject results.error
       else
         counts =
           listener: 0
@@ -132,7 +131,6 @@ exports.listMedia = (tokens) ->
           return name: name, value: counts[name]
 
         dataList = results.data.map (music) ->
-
           counts.listener += music.listener_count
           counts.playback += music.play_count
           counts.repost += music.repost_count
@@ -155,16 +153,16 @@ exports.listMedia = (tokens) ->
         deferred.resolve
           list: dataList
           stats: [
-            getStat('listener')
-            getStat('playback')
-            getStat('repost')
-            getStat('like')
-            getStat('comment')
+            getStat 'listener'
+            getStat 'playback'
+            getStat 'repost'
+            getStat 'like'
+            getStat 'comment'
           ]
 
-  req.on 'error', (e) ->
-    console.log('mixcloud listMedia error: ', e)
-    deferred.reject(e)
+  req.on 'error', (error) ->
+    console.log 'mixcloud listMedia error: ', error
+    deferred.reject error
 
   req.end()
   deferred.promise

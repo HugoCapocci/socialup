@@ -41,7 +41,7 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
     isPM: (input) ->
       input.charAt 0 is 'M'
     meridiem: (hours) ->
-      hours < 12 ? 'PD' : 'MD'
+      if hours < 12 then 'PD' else 'MD'
     week:
       dow: 1
       doy: 4
@@ -52,10 +52,11 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
       console.log 'MainController constructor loaded'
       parameters = @$location.search()
       if parameters.close
+        console.log 'close from oauth call'
         @alertsService.success 'OAuth authentication sucessfull'
         @$window.close()
       @localData = @userService.getUserData()
-      console.log "localData found: ", @localData
+      console.log 'localData found: ', @localData
       @$scope.openMenu = false
       @$scope.layout = if @$mdMedia 'gt-sm' then 'row' else 'column'
       @$scope.menu =
@@ -71,7 +72,7 @@ define ['./module', 'moment', 'angular-i18n-fr'], (appModule, moment) ->
       )
 
     closeAlert: ($index) ->
-      console.log "close alert index: ", $index
+      console.log 'close alert index: ', $index
       @$rootScope.alerts.splice $index, 1
 
     signout: ->

@@ -18,6 +18,7 @@ define ['./module'], (appModule) ->
         firstName: response.data.firstName
         lastName: response.data.lastName
         login: response.data.login
+        hashedLogin: response.data.hashedLogin
         id: response.data._id
         providers: response.data.providers
       .catch (err) ->
@@ -60,6 +61,7 @@ define ['./module'], (appModule) ->
         firstName: response.data.firstName
         lastName: response.data.lastName
         login: response.data.login
+        hashedLogin: response.data.hashedLogin
         id: userId
 
     @changePassword = (id, newPassword) ->

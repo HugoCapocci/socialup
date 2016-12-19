@@ -15,6 +15,7 @@ define ['./module', 'sha1'], (appModule, sha1) ->
       if @$scope.form.login isnt '' and @$scope.form.password isnt ''
         @authService.authenticate @$scope.form.login, sha1(@$scope.form.password)
         .then (userData) =>
+          console.log 'userData: ',userData
           @userService.setData userData
           @alertsService.success 'Authentification ok'
           @$uibModalInstance.dismiss 'authentified'

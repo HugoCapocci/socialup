@@ -17,10 +17,10 @@ module.exports = class UserDAO
   createUser: (user) ->
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       @db.collection(collection).insert user
-    .then (r) ->
+    .then (r) =>
       @db.close()
       r.ops[0]
 
@@ -28,20 +28,21 @@ module.exports = class UserDAO
     query = _id: user._id
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       @db.collection(collection).update query, user
-    .then ->
+    .then =>
       @db.close()
       user
 
   retrieveUser: (query) ->
+    console.log 'retrieveUser'
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       @db.collection(collection).findOne query
-    .then (user) ->
+    .then (user) =>
       @db.close()
       user.hashedLogin = crypto.createHash('md5').update(user.login).digest 'hex'
       user
@@ -49,10 +50,10 @@ module.exports = class UserDAO
   retrieveUsers: ->
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       @db.collection(collection).find({}).toArray()
-    .then (users) ->
+    .then (users) =>
       @db.close()
       users
 
@@ -68,10 +69,10 @@ module.exports = class UserDAO
     fieldUpdate.$set["providers.#{provider}.tokens"] = tokens
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       @db.collection(collection).updateOne query, fieldUpdate, {upsert: false}
-    .then ->
+    .then =>
       console.log "update token for provider #{provider} OK"
       @db.close()
 
@@ -87,10 +88,10 @@ module.exports = class UserDAO
     console.log "search in collection #{collection} for login #{login} and password #{password}"
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       @db.collection(collection).findOne login: login, password: password
-    .then (user) ->
+    .then (user) =>
       @db.close()
       return Promise.reject 'no user found' unless user?
       console.log 'hash the login'
@@ -102,12 +103,12 @@ module.exports = class UserDAO
   deleteToken: (provider, userId) ->
     @db = null
     @getDB()
-    .then (db) ->
+    .then (db) =>
       @db = db
       query = _id: new ObjectID userId
       unset = $unset: {}
       unset.$unset["providers.#{provider}.tokens"] = ''
       @db.collection(collection).update query, unset
-    .then (r) ->
+    .then (r) =>
       @db.close()
       r.result.n

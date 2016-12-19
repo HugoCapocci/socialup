@@ -4,7 +4,7 @@ define ['./module'], (appModule) ->
     getUserData = ->
       userData = $window.localStorage.getItem 'SocialUp'
       if userData
-        return JSON.parse(userData).user
+        JSON.parse(userData).user
       else
         undefined
 
@@ -23,6 +23,7 @@ define ['./module'], (appModule) ->
           firstName: response.data.firstName
           lastName: response.data.lastName
           login: response.data.login
+          hashedLogin: response.data.hashedLogin
           id: response.data._id
           providers: response.data.providers
         setUserData userData
@@ -37,16 +38,14 @@ define ['./module'], (appModule) ->
 
     @deleteData = ->
       $window.localStorage.removeItem 'SocialUp'
-      delete $rootScope.user;
-      #$location.path('/login');
+      delete $rootScope.user
       return
 
     @getActiveProviders = ->
       userData = getUserData()
-      console.log "Active providers: ", userData.providers
+      console.log 'Active providers: ', userData.providers
       Object.keys(userData.providers).map (provider) ->
-        if not userData.providers[provider].tokens
-          delete userData.providers[provider]
+        delete userData.providers[provider] unless userData.providers[provider].tokens
       userData.providers
 
     @deleteToken = (provider) ->
