@@ -41,7 +41,7 @@ html(lang="fr")
             md-tooltip(md-direction="{{ menu.tooltipDirection }}" md-visible="false" md-autohide="false") Gérez vos réseaux sociaux
             span.glyphicon.glyphicon-list-alt
           md-button.md-fab.md-raised.md-mini(ng-if="$root.user")
-            img(ng-src="{{ 'https://www.gravatar.com/avatar/' + $root.user.hashedLogin }}")
+            img.gravatar(ng-src="{{ 'https://www.gravatar.com/avatar/' + $root.user.hashedLogin + '?s=40&d=404' }}")
           md-button.md-fab.md-raised.md-mini(ng-click="mainController.signout()" aria-label="Logout" ng-if="$root.user")
             md-tooltip(md-direction="{{ menu.tooltipDirection }}" md-visible="false" md-autohide="false") Déconnection
             span.glyphicon.glyphicon-log-out

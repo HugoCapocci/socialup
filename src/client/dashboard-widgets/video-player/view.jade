@@ -26,11 +26,10 @@
           )
             .row
               .col-xs-3.col-md-3
-                  img(ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px")
+                img(ng-src="{{element.video.thumbnailURL}}" style="max-height:60px; max-width:80px")
               .col-xs-7.col-md-7
                 h5(style="margin-top:0px;")
-                  label
-                    | {{ (element.video.title.length > 50 ? element.video.title.substr(0,50) : element.video.title) }}
+                  label {{ (element.video.title.length > 50 ? element.video.title.substr(0,50) : element.video.title) }}
                 h6(style="margin-bottom:0px;")
                   a(href="javascript:void(0);" ng-click="openChannel(element.video.channelURL); $event.stopPropagation();")
                     | {{ element.video.channel }}
@@ -56,6 +55,11 @@
       button.btn.btn-default.btn-md(type="button" class="btn btn-default btn-md" ng-click="changeCurrentPlaying('forward')")
         i.glyphicon.glyphicon-step-forward
 
+//si connecté, abonnements
+
+// span.glyphicon.glyphicon-tasks(tooltp="Abonnements")
+
+//recherche
 .input-group(style="margin-top:20px;")
   span.input-group-addon Trier par :
   select.form-control(
@@ -128,28 +132,29 @@
 
                   .col-lg-10
                     div(ng-bind-html="sanitize(video.description)")
-    .text-center(style="margin-top:5px; margin-bottom:10px;")
-      hr               
-      span(ng-if="searchVideoForm.results[provider].prevPageToken")                                    
-        button.btn.btn-sm.btn-primary(type="button" ng-click="searchVideoForm.changeStep(provider, 'backward')" uib-tooltip="Résultats précédents")
-          i.glyphicon.glyphicon-step-backward
-      span(ng-if="searchVideoForm.results[provider].page === null")
-        | &nbsp;
-        label -
-        | &nbsp;
-      span(ng-if="searchVideoForm.results[provider].nextPageToken !== null")
-        button.btn.btn-sm.btn-primary(type="button" ng-click="searchVideoForm.changeStep(provider, 'forward')" uib-tooltip="Résultats suivants")
-          i.glyphicon.glyphicon-step-forward
-      span(ng-if="searchVideoForm.results[provider].page !== null")
-        uib-pagination(
-          total-items="searchVideoForm.results[provider].totalPages" 
-          items-per-page="10" 
-          max-size="10" 
-          ng-model="searchVideoForm.provider[provider].currentPage" 
-          ng-change="searchVideoForm.changePage(provider)" 
-          boundary-links="true" 
-          previous-text="<" 
-          next-text=">" 
-          first-text="<<" 
-          last-text=">>"
-        )
+
+      .text-center(style="margin-top:5px; margin-bottom:10px;")
+        hr               
+        span(ng-if="searchVideoForm.results[provider].prevPageToken")                                    
+          button.btn.btn-sm.btn-primary(type="button" ng-click="searchVideoForm.changeStep(provider, 'backward')" uib-tooltip="Résultats précédents")
+            i.glyphicon.glyphicon-step-backward
+        span(ng-if="searchVideoForm.results[provider].page === null")
+          | &nbsp;
+          label -
+          | &nbsp;
+        span(ng-if="searchVideoForm.results[provider].nextPageToken !== null")
+          button.btn.btn-sm.btn-primary(type="button" ng-click="searchVideoForm.changeStep(provider, 'forward')" uib-tooltip="Résultats suivants")
+            i.glyphicon.glyphicon-step-forward
+        span(ng-if="searchVideoForm.results[provider].page !== null")
+          uib-pagination(
+            total-items="searchVideoForm.results[provider].totalPages" 
+            items-per-page="10" 
+            max-size="10" 
+            ng-model="searchVideoForm.provider[provider].currentPage" 
+            ng-change="searchVideoForm.changePage(provider)" 
+            boundary-links="true" 
+            previous-text="<" 
+            next-text=">" 
+            first-text="<<" 
+            last-text=">>"
+          )

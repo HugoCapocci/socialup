@@ -5,7 +5,7 @@
 https = require 'https'
 http = require 'http'
 request = require 'request'
-bluebird = require 'bluebird'
+Promise = require 'bluebird'
 fs = require 'fs'
 querystring = require 'querystring'
 oAuthNonce = require './oauth_nonce'
@@ -22,11 +22,13 @@ getOAuthURL = -> 'https://api.twitter.com/oauth/authorize'
 
 #request a token by post
 getTokens = (userId) ->
-  new bluebird (fulfill, reject) ->
+  console.log 'get Tokens for userId ', userId
+  new Promise (fulfill, reject) ->
     tokens =
       oauth_token: TOKEN
       oauth_token_secret: TOKEN_SECRET
     url = 'https://api.twitter.com/oauth/request_token'
+    console.log 'tokens: ', tokens
     request
       uri: url
       headers: processHeader tokens, url, 'post', REDIRECT_URL + userId
@@ -35,6 +37,10 @@ getTokens = (userId) ->
       if error
         reject error
       else
+        try
+          errors = JSON.parse(body).errors
+          console.log 'errors? ', errors
+          return reject errors if errors
         fulfill bodyToTokens body
 
 inLineParams = (params) ->
@@ -76,7 +82,7 @@ percentEncode = (str) ->
 getAccessToken = (oauthVerifier, tokens) ->
   console.log 'twitter getAccessToken; oauthVerifier: ', oauthVerifier
   console.log 'tokens: ', tokens
-  new bluebird (fulfill, reject) ->
+  new Promise (fulfill, reject) ->
     url = 'https://api.twitter.com/oauth/access_token'
     tokens =
       oauth_token: tokens.oauth_token
@@ -96,7 +102,7 @@ getAccessToken = (oauthVerifier, tokens) ->
     return
 
 postMessage = (tokens, message) ->
-  new bluebird (fulfill, reject) ->
+  new Promise (fulfill, reject) ->
     url = 'https://api.twitter.com/1.1/statuses/update.json'
     request
       uri: url
@@ -114,7 +120,7 @@ postMessage = (tokens, message) ->
         fulfill url: url
 
 getTweets = (tokens) ->
-  resolver = bluebird.defer()
+  resolver = Promise.defer()
   url = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
   request
     uri: url + '?user_id=' + tokens.user_id
@@ -128,7 +134,7 @@ getTweets = (tokens) ->
   resolver.promise
 
 searchTweets = (query, tokens) ->
-  resolver = bluebird.defer()
+  resolver = Promise.defer()
   url = 'https://api.twitter.com/1.1/search/tweets.json'
   url += '?include_entities=false'
   request
@@ -181,7 +187,7 @@ processHeader = (tokens, url, httpVerb, oauthCallback) ->
 
 processGetRequest = (tokens, url) ->
   console.log 'processGetRequest'
-  new bluebird (fulfill, reject) ->
+  new Promise (fulfill, reject) ->
     request
       uri: url
       headers: processHeader tokens, url, 'get'
@@ -212,7 +218,7 @@ getEncodedBearedTokenCredentials = (consumerKey = APP_KEY, consumerSecret = APP_
 
 getApplicationOnlyToken = ->
   encodedBearedTokenCredentials = getEncodedBearedTokenCredentials()
-  new bluebird (fulfill, reject) ->
+  new Promise (fulfill, reject) ->
     url = 'https://api.twitter.com/oauth2/token'
     request
       uri: url

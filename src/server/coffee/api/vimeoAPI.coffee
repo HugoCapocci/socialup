@@ -113,6 +113,8 @@ exports.searchVideo = (videoName, limit, order, page) ->
   sort = processOrder(order)
   url += '&sort=' + sort
 
+  console.log 'unauthenticatedToken: ', unauthenticatedToken
+
   processGetRequest unauthenticatedToken.access_token, url, (response) ->
     result =
       videos: response.data.map (result) ->

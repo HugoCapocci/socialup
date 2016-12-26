@@ -58,6 +58,7 @@ module.exports = class UserDAO
       users
 
   saveUser: (user) ->
+    console.log 'saveUser ', user
     if not user._id?
       @createUser user
     else

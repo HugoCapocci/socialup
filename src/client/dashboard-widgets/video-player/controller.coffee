@@ -26,7 +26,7 @@ define ['../module', 'moment'], (appModule, moment) ->
           pageToken = $scope.searchVideoForm.results[provider].nextPageToken
         else
           pageToken = $scope.searchVideoForm.results[provider].prevPageToken
-        searchVideo(provider, pageToken);
+        searchVideo provider, pageToken
 
     $scope.providers = ['google', 'dailymotion', 'vimeo']
     $scope.providers.forEach (provider) ->
@@ -51,14 +51,15 @@ define ['../module', 'moment'], (appModule, moment) ->
           else
             $scope.searchVideoForm.results[provider].totalPages = $scope.searchVideoForm.results[provider].totalResults
         alertsService.success data.totalResults + " vidéos trouvées pour le fournisseur " + provider
-      , (err) ->
+      , (error) ->
         $scope.searchVideoForm.provider[provider].isLoading = false
-        alertsService.error "Impossible de récupérer des vidéo pour le fournisseur "+provider+". "+err
+        alertsService.error 'Impossible de récupérer des vidéo pour le fournisseur ' + provider + '. ' + error
 
     $scope.searchVideoForm.order = $scope.searchVideoForm.orders[0]
     #$scope.itemsByPage = 5;
 
     $scope.searchVideo = ->
+
       if $scope.searchVideoForm.videoName and $scope.searchVideoForm.videoName.length > 1
         #search for all video providers at the same time
         $scope.providers.forEach (provider) -> searchVideo provider
@@ -66,7 +67,7 @@ define ['../module', 'moment'], (appModule, moment) ->
         alertsService.warn 'Veuillez taper un titre à rechercher'
 
     $scope.setSelected = (element) ->
-      console.log("setSelected element ", element)
+      console.log 'setSelected element ', element
       $scope.searchVideoForm.selected = element
 
     $scope.addToPlaylist = (provider, $index) ->
@@ -75,19 +76,19 @@ define ['../module', 'moment'], (appModule, moment) ->
         provider: provider
 
       if isAlreadySelected selected.video.id, provider
-        alertsService.warn "La vidéo sélectionnée est déjà dans la playlist"
+        alertsService.warn 'La vidéo sélectionnée est déjà dans la playlist'
         return
 
       $scope.searchVideoForm.playlist.push selected
       unless $scope.searchVideoForm.selected?
         $scope.searchVideoForm.selected = $scope.searchVideoForm.playlist[$scope.searchVideoForm.playlist.length - 1]
       console.log '$scope.searchVideoForm.selected: ',$scope.searchVideoForm.selected
-      console.log "Selected Video: ", $scope.searchVideoForm.selected.video
+      console.log 'Selected Video: ', $scope.searchVideoForm.selected.video
       #playlist lengthInSeconds ?
 
     $scope.removeFromPlaylist = (element) ->
       index = getPlaylistIndex element
-      console.log "removeFromPlaylist: ", element
+      console.log 'removeFromPlaylist: ', element
       $scope.searchVideoForm.playlist.splice index, 1
       if element.provider is $scope.searchVideoForm.selected.provider and element.video.id is $scope.searchVideoForm.selected.video.id
         console.log "removing current played element"
@@ -100,13 +101,13 @@ define ['../module', 'moment'], (appModule, moment) ->
 
     $scope.openChannel = (channelURL) ->
       return if channelURL?.length is 0
-      console.log "open Channel URL"
+      console.log 'open Channel URL'
       $window.open channelURL, '_blank'
 
     isAlreadySelected = (videoId, provider) ->
       isSelected = false
       $scope.searchVideoForm.playlist.forEach (element) ->
-        console.log "element: ", element
+        console.log 'element: ', element
         isSelected = true if element.provider is provider and element.video.id is videoId
       isSelected
 
@@ -139,11 +140,9 @@ define ['../module', 'moment'], (appModule, moment) ->
       #lit la video suivante !
       selectedIndex = getPlaylistIndex $scope.searchVideoForm.selected
       if $scope.searchVideoForm.playlist.length - 1 > selectedIndex
-        console.log "next video"
         $scope.$apply ->
           $scope.searchVideoForm.selected = $scope.searchVideoForm.playlist[selectedIndex + 1]
       else if $scope.searchVideoForm.loop
-        console.log "reset video"
         $scope.$apply ->
           $scope.searchVideoForm.selected = $scope.searchVideoForm.playlist[0]
       else

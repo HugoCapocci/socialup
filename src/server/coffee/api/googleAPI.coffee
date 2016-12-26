@@ -7,8 +7,10 @@
 # TODO check tokens.expiry_date and update user data in database
 # if needed with refreshed tokens (automatically refresh by googleAPI)
 ###
+_ = require 'lodash'
 googleAPI = require 'googleapis'
 Q = require 'q'
+Promise = require 'bluebird'
 fs = require 'fs'
 userDAO = require '../userDAO'
 moment = require 'moment'
@@ -25,60 +27,60 @@ googlePlus = googleAPI.plus version: 'v1', auth: oauth2Client
 calendar = googleAPI.calendar version: 'v3', auth: oauth2Client
 
 #generate url for OAuth authentication URI
-exports.getOAuthURL = ->
-
+getOAuthURL = ->
+  URL = 'https://www.googleapis.com/auth/'
   #generate a url that asks permissions for Google+ and Google Calendar scopes
   scopes = [
-    'https://www.googleapis.com/auth/youtube.upload'
-    'https://www.googleapis.com/auth/youtube'
-    'https://www.googleapis.com/auth/youtubepartner'
-    'https://www.googleapis.com/auth/youtube.force-ssl'
-    'https://www.googleapis.com/auth/drive'
-    'https://www.googleapis.com/auth/plus.me'
-    'https://www.googleapis.com/auth/plus.stream.write'
-    'https://www.googleapis.com/auth/calendar'
+    URL + 'youtube'
+    URL + 'youtube.readonly'
+    URL + 'youtube.upload'
+    URL + 'youtubepartner'
+    URL + 'youtube.force-ssl'
+    URL + 'drive'
+    URL + 'plus.me'
+    URL + 'plus.stream.write'
+    URL + 'calendar'
   ]
   url = oauth2Client.generateAuthUrl
     access_type: 'offline'
     scope: scopes
 
-exports.pushCode = (code) ->
+pushCode = (code) ->
+  console.log 'google pushCode'
   deferred = Q.defer()
   #ask for token
-  oauth2Client.getToken code, (err, tokens) ->
+  oauth2Client.getToken code, (error, tokens) ->
     # Now tokens contains an access_token and an optional refresh_token. Save them.
-    if not err
+    unless error
       oauth2Client.setCredentials tokens
       deferred.resolve tokens
     else
-      console.log 'unable to set credentials, err: ', err
-      deferred.reject err
-
+      console.log 'unable to set credentials, error: ', error
+      deferred.reject error
   deferred.promise
 
-exports.refreshTokens = (tokens, userId) ->
+refreshTokens = (tokens, userId) ->
   deferred = Q.defer()
   credentials = access_token: tokens.access_token
 
   if tokens.refresh_token? then credentials.refresh_token = tokens.refresh_token
   oauth2Client.setCredentials credentials
-  oauth2Client.refreshAccessToken (err, tokens) ->
-    if not err
+  oauth2Client.refreshAccessToken (error, tokens) ->
+    unless error
       oauth2Client.setCredentials tokens
       deferred.resolve okens
     else
-    console.log 'unable to refresh credentials, err: ', err
-    deferred.reject err
+    console.log 'unable to refresh credentials, error: ', error
+    deferred.reject error
 
   deferred.promise
 
-exports.listCategories = (tokens) ->
-
+listCategories = (tokens) ->
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  youtubeAPI.videoCategories.list part: 'snippet', regionCode: 'fr', hl: 'fr_FR', (err, response) ->
-    if err?
-      deferred.reject err
+  youtubeAPI.videoCategories.list {part: 'snippet', regionCode: 'fr', hl: 'fr_FR'}, (error, response) ->
+    if error
+      deferred.reject error
     else
       categories = []
       for item in response.items
@@ -91,16 +93,14 @@ exports.listCategories = (tokens) ->
   deferred.promise
 
 #see https://developers.google.com/youtube/v3/docs/search/list#forMine
-exports.listMedia = (tokens, userId) ->
-
+listMedia = (tokens, userId) ->
+  console.log 'listMedia'
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
   videoIDs = []
-  youtubeAPI.search.list part: 'snippet', forMine: true, type: 'video',
-  (err, response) ->
-
-    if err?
-      deferred.reject err
+  youtubeAPI.search.list {part: 'snippet', forMine: true, type: 'video'}, (error, response) ->
+    if error
+      deferred.reject error
     else
       videos = []
       counts =
@@ -109,8 +109,7 @@ exports.listMedia = (tokens, userId) ->
         dislike: 0
         favorite: 0
         comment: 0
-      getStat = (name) ->
-        return name: name, value: counts[name]
+      getStat = (name) -> name: name, value: counts[name]
 
       for item in response.items
         videoIDs.push item.id.videoId
@@ -121,8 +120,8 @@ exports.listMedia = (tokens, userId) ->
           description: item.snippet.description
           thumbnailURL: item.snippet.thumbnails['default'].url
 
-      youtubeAPI.videos.list part: 'statistics', id: videoIDs.toString(),
-      (e, res) ->
+      youtubeAPI.videos.list {part: 'statistics', id: videoIDs.toString()}, (error, res) ->
+        return deferred.reject(error) if error
         i = 0
         for item in res.items
           videos[i].counts = item.statistics
@@ -143,7 +142,8 @@ exports.listMedia = (tokens, userId) ->
           ]
   deferred.promise
 
-exports.searchPage = (tokens, channelName) ->
+searchPage = (tokens, channelName) ->
+  console.log 'searchPage'
   deferred = Q.defer()
   query =
     auth: API_KEY
@@ -152,23 +152,22 @@ exports.searchPage = (tokens, channelName) ->
     type: 'channel'
     safeSearch: 'none'
 
-  youtubeAPI.search.list query, (err, response) ->
-    if err?
-      deferred.reject err
-    else
-      #TODO confirmed channels have a matching google+ account?
-      channels = {}
-      for item in response.items
-        channels[item.id.channelId] =
-          id: item.id.channelId
-          creationDate: item.snippet.publishedAt
-          name: item.snippet.channelTitle
-          displayName: item.snippet.title
-          description: item.snippet.description
-          thumbnailURL: item.snippet.thumbnails['default'].url
+  youtubeAPI.search.list query, (error, response) ->
+    return deferred.reject(error) if error
+    #TODO confirmed channels have a matching google+ account?
+    channels = {}
+    for item in response.items
+      channels[item.id.channelId] =
+        id: item.id.channelId
+        creationDate: item.snippet.publishedAt
+        name: item.snippet.channelTitle
+        displayName: item.snippet.title
+        description: item.snippet.description
+        thumbnailURL: item.snippet.thumbnails['default'].url
 
-      youtubeAPI.channels.list auth: API_KEY, part:'statistics', id: Object.keys(channels).toString(),
-      (err, res) ->
+    youtubeAPI.channels.list {auth: API_KEY, part:'statistics', id: Object.keys(channels).toString()},
+      (error, res) ->
+        deferred.reject(error) if error
         if res
           for item in res.items
             channels[item.id].counts =
@@ -179,53 +178,56 @@ exports.searchPage = (tokens, channelName) ->
         deferred.resolve Object.keys(channels).map (id) -> channels[id]
   deferred.promise
 
-exports.searchVideo = (videoName, maxResults, order, pageToken) ->
+searchVideo = (videoName, maxResults, order, pageToken, oAuthToken) ->
+  console.log 'google searchVideo'
   deferred = Q.defer()
   videos = {}
   channelIDs = []
   query =
-    auth: API_KEY
-    part:'snippet'
+    part: 'snippet'
     q: videoName
     type: 'video'
     maxResults: maxResults
     safeSearch: 'none'
-
-  if order?
-    query.order = order
-  if pageToken?
-    query.pageToken = pageToken
+  if oAuthToken
+    oauth2Client.setCredentials oAuthToken
+  else
+    query.auth = API_KEY
+  query.order = order if order?
+  query.pageToken = pageToken if pageToken?
 
   totalResults = null
   nextPageToken = null
   prevPageToken = null
-  youtubeAPI.search.list query,
-  (err, response) ->
-    if err?
-      deferred.reject err
-    else
-      totalResults = response.pageInfo.totalResults
-      nextPageToken = response.nextPageToken
-      prevPageToken = response.prevPageToken
-      videos = []
-      for item in response.items
-        videos[item.id.videoId] =
-          id: item.id.videoId
-          channelId: item.snippet.channelId
-          channelURL: 'https://www.youtube.com/channel/' + item.snippet.channelId
-          creationDate: item.snippet.publishedAt
-          title: item.snippet.title
-          description: item.snippet.description
-          thumbnailURL: item.snippet.thumbnails['default'].url
-        if channelIDs.indexOf(item.snippet.channelId) is -1
-          channelIDs.push item.snippet.channelId
+  console.log 'execute query: ', query
+  youtubeAPI.search.list query, (error, response) ->
+    if error
+      console.log 'error: ', error
+      return deferred.reject error
+    totalResults = response.pageInfo.totalResults
+    nextPageToken = response.nextPageToken
+    prevPageToken = response.prevPageToken
+    videos = []
+    for item in response.items
+      videos[item.id.videoId] =
+        id: item.id.videoId
+        channelId: item.snippet.channelId
+        channelURL: 'https://www.youtube.com/channel/' + item.snippet.channelId
+        creationDate: item.snippet.publishedAt
+        title: item.snippet.title
+        description: item.snippet.description
+        thumbnailURL: item.snippet.thumbnails['default'].url
+      if channelIDs.indexOf(item.snippet.channelId) is -1
+        channelIDs.push item.snippet.channelId
 
-    #TODO use tokens if user is connected
-    youtubeAPI.videos.list auth: API_KEY, part: 'statistics,contentDetails', id : Object.keys(videos).toString()
-    ,(err, res) ->
-      if err
-        console.error err
-        deferred.reject err
+    videoListParams =
+      part: 'statistics,contentDetails'
+      id: Object.keys(videos).toString()
+    videoListParams.auth = API_KEY unless oAuthToken
+    youtubeAPI.videos.list videoListParams, (error, res) ->
+      if error
+        console.error error
+        deferred.reject error
       else
         if res
           for item in res.items
@@ -237,11 +239,14 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
               dislike: parseInt item.statistics.dislikeCount
               favorite: parseInt item.statistics.favoriteCount
               comment: parseInt item.statistics.commentCount
-        youtubeAPI.channels.list auth: API_KEY, part:'snippet', id : channelIDs.toString(),
-        (err, channelsResult) ->
-          if err?
-            console.error err
-            deferred.reject err
+        channelListParams =
+          part: 'snippet'
+          id: channelIDs.toString()
+        channelListParams.auth = API_KEY unless oAuthToken
+        youtubeAPI.channels.list channelListParams, (error, channelsResult) ->
+          if error?
+            console.error error
+            deferred.reject error
           else
             channels = {}
             for channel in channelsResult.items
@@ -257,7 +262,8 @@ exports.searchVideo = (videoName, maxResults, order, pageToken) ->
             prevPageToken: prevPageToken
   deferred.promise
 
-exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
+sendVideo = (tokens, file, user, videoParams, providerOptions) ->
+  console.log 'sendVideo'
   deferred = Q.defer()
   oauth2Client.setCredentials tokens
   metaData =
@@ -288,14 +294,15 @@ exports.sendVideo = (tokens, file, user, videoParams, providerOptions) ->
         deferred.resolve
           url: 'https://www.youtube.com/watch?v=' + body.id
           thumbnail: body.snippet.thumbnails.high.url
-    catch
+    catch error
       deferred.reject error
-  videoUploadRequest.on 'error', (err) ->
-    deferred.reject new Error(err)
+  videoUploadRequest.on 'error', (error) ->
+    deferred.reject new Error error
   #TODO do 'on data'?
   deferred.promise
 
-exports.uploadDrive = (tokens, file, parent) ->
+uploadDrive = (tokens, file, parent) ->
+  console.log 'uploadDrive'
   deferred = Q.defer()
   oauth2Client.setCredentials tokens
   metaData =
@@ -324,12 +331,12 @@ exports.uploadDrive = (tokens, file, parent) ->
         downloadUrl: result.downloadUrl
     catch
       deferred.reject error
-  videoUploadRequest.on 'error', (err) ->
-    console.log 'video upload request failed: ', err
-    deferred.reject new Error err
+  videoUploadRequest.on 'error', (error) ->
+    console.log 'video upload request failed: ', error
+    deferred.reject new Error error
   deferred.promise
 
-exports.listFiles = (tokens, folderId, typeFilter) ->
+listFiles = (tokens, folderId, typeFilter) ->
   deferred = Q.defer()
   filter = 'trashed=false'
   if folderId is undefined
@@ -342,11 +349,10 @@ exports.listFiles = (tokens, folderId, typeFilter) ->
     else
       filter += ' and (mimeType="application/vnd.google-apps.folder" or mimeType contains "' + typeFilter + '/") '
   oauth2Client.setCredentials tokens
-  drive.files.list folderId: folderId, q: filter,
-  (err, response) ->
-    if err?
-      console.log 'The API returned an error: ' + err
-      deferred.reject new Error err
+  drive.files.list {folderId: folderId, q: filter}, (error, response) ->
+    if error
+      console.log 'The API returned an error: ' + error
+      deferred.reject new Error error
       return
     files = response.items
     if files.length is 0
@@ -363,32 +369,31 @@ exports.listFiles = (tokens, folderId, typeFilter) ->
         fileInfo
   deferred.promise
 
-exports.getUserInfo = (tokens) ->
+getUserInfo = (tokens) ->
+  console.log 'getUserInfo'
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  googlePlus.people.get userId: 'me', (err, response) ->
-    if err?
-      console.log 'getUserInfo error: ', err
-      deferred.reject new Error err
+  googlePlus.people.get userId: 'me', (error, response) ->
+    if error
+      console.log 'getUserInfo error: ', error
+      deferred.reject new Error error
     else
       deferred.resolve userName: response.displayName
   deferred.promise
 
-exports.downloadFile = (tokens,fileId) ->
+downloadFile = (tokens, fileId) ->
   oauth2Client.setCredentials tokens
   #bytes are to be handled with a pipe()
-  drive.files.get fileId: fileId + '?alt=media',
-  (err) ->
-    if err?
-      console.log "cannot get data for fileId: #{fileId} error: ", err
+  drive.files.get fileId: fileId + '?alt=media', (error) ->
+    if error
+      console.log "cannot get data for fileId: #{fileId} error: ", error
 
-exports.checkFileData = (tokens, fileId) ->
-
+checkFileData = (tokens, fileId) ->
   deferred = Q.defer()
-  drive.files.get fileId: fileId, (err, file) ->
-    if err
-      console.log "cannot get data for fileId: #{fileId} error: ", err
-      deferred.reject err
+  drive.files.get fileId: fileId, (error, file) ->
+    if error
+      console.log "cannot get data for fileId: #{fileId} error: ", error
+      deferred.reject error
     else
       fileInfo =
         name: file.title
@@ -400,20 +405,20 @@ exports.checkFileData = (tokens, fileId) ->
       deferred.resolve fileInfo
   deferred.promise
 
-exports.getSpaceUsage = (tokens) ->
-  oauth2Client.setCredentials(tokens)
+getSpaceUsage = (tokens) ->
+  oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  drive.about.get (err, infos) ->
-    if err
-      console.log 'cannot get googleDrive SpaceUsage, error: ', err
-      deferred.reject err
+  drive.about.get (error, infos) ->
+    if error
+      console.log 'cannot get googleDrive SpaceUsage, error: ', error
+      deferred.reject error
     else
       deferred.resolve
         used: parseInt infos.quotaBytesUsedAggregate
         total: parseInt infos.quotaBytesTotal
   deferred.promise
 
-exports.createShareLink = (tokens, fileId) ->
+createShareLink = (tokens, fileId) ->
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
   permission =
@@ -423,32 +428,32 @@ exports.createShareLink = (tokens, fileId) ->
     role: 'reader'
     withLink: true
 
-  drive.permissions.insert fileId:fileId, resource: permission, (err, results) ->
-    if err?
-      console.log 'cannot change file permission ', err
-      deferred.reject err
+  drive.permissions.insert {fileId: fileId, resource: permission}, (error, results) ->
+    if error
+      console.log 'cannot change file permission ', error
+      deferred.reject error
     else
       deferred.resolve results
   deferred.promise
 
-exports.deleteFile = (tokens, fileId) ->
+deleteFile = (tokens, fileId) ->
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  drive.files.delete fileId: fileId, (err, res) ->
-    if err
-      console.log 'cannot delete file ', err
-      deferred.reject err
+  drive.files.delete fileId: fileId, (error, res) ->
+    if error
+      console.log 'cannot delete file ', error
+      deferred.reject error
     else
       deferred.resolve res
   deferred.promise
 
-exports.getUserCalendars = (tokens) ->
+getUserCalendars = (tokens) ->
   oauth2Client.setCredentials tokens
   deferred = Q.defer()
-  calendar.calendarList.list {}, (err, calendars) ->
-    if err
-      console.error 'err: ', err
-      deferred.reject err
+  calendar.calendarList.list {}, (error, calendars) ->
+    if error
+      console.error 'error: ', error
+      deferred.reject error
     else
     deferred.resolve calendars.items.map (item) ->
       accessRole: item.accessRole
@@ -458,10 +463,9 @@ exports.getUserCalendars = (tokens) ->
       name: item.summary
       selected: item.selected
       description: item.description
-
   deferred.promise
 
-exports.getUserEvents = (tokens, sinceDate, untilDate, calendarId) ->
+getUserEvents = (tokens, sinceDate, untilDate, calendarId) ->
   deferred = Q.defer()
   timeMin = moment(parseInt sinceDate).toISOString()
   timeMax = moment(parseInt untilDate).toISOString()
@@ -473,10 +477,10 @@ exports.getUserEvents = (tokens, sinceDate, untilDate, calendarId) ->
     timeMax: timeMax
     singleEvents: true
     orderBy: 'startTime'
-  ,(err, events) ->
-    if err
-      console.error 'calendarId: ' + calendarId  + ', err: ', err
-      deferred.reject err
+  , (error, events) ->
+    if error
+      console.error 'calendarId: ' + calendarId  + ', error: ', error
+      deferred.reject error
     else
       results = []
       items = events.items
@@ -495,3 +499,46 @@ exports.getUserEvents = (tokens, sinceDate, untilDate, calendarId) ->
       deferred.resolve results
 
   deferred.promise
+
+# see https://developers.google.com/youtube/v3/guides/implementation/subscriptions
+# only 50 first...
+getSubscriptions = (tokens) ->
+  console.log 'getSubscriptions'
+  new Promise (resolve, reject) ->
+    oauth2Client.setCredentials tokens
+    params =
+      part: 'snippet'
+      mine: true
+      order: 'alphabetical'
+      maxResults: 50
+    youtubeAPI.subscriptions.list params, {}, (error, result) ->
+      if error
+        console.log 'error in getSubscriptions: ', error
+        return reject error
+      console.log 'pageInfo: ', result.pageInfo
+      resolve _.map result.items, (item) ->
+        title: item.snippet.title
+        channelId: item.snippet.channelId
+        thumbnail: item.snippet.thumbnails.default.url
+    return
+
+module.exports =
+  getOAuthURL: getOAuthURL
+  pushCode: pushCode
+  refreshTokens: refreshTokens
+  listCategories: listCategories
+  listMedia: listMedia
+  searchPage: searchPage
+  searchVideo: searchVideo
+  sendVideo: sendVideo
+  uploadDrive: uploadDrive
+  listFiles: listFiles
+  getUserInfo: getUserInfo
+  downloadFile: downloadFile
+  checkFileData: checkFileData
+  getSpaceUsage: getSpaceUsage
+  createShareLink: createShareLink
+  deleteFile: deleteFile
+  getUserCalendars: getUserCalendars
+  getUserEvents: getUserEvents
+  getSubscriptions: getSubscriptions

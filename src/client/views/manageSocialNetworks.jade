@@ -14,7 +14,7 @@ div
           a(ng-href="{{ oauthURLS[provider] }}" target="_blank")
             img(ng-src="{{ 'images/' + provider + '.png' }}" width="64" height="64")
         td
-          i.alert-success.glyphicon.glyphicon-ok-sign(ng-if="socialTokens[provider] && socialTokens[provider].tokens")
+          i.green.glyphicon.glyphicon-ok-sign(ng-if="socialTokens[provider] && socialTokens[provider].tokens")
         td
           p(ng-if="socialTokens[provider]") {{ socialTokens[provider].userName }}
         td

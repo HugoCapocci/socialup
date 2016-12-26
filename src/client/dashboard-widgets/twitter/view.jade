@@ -1,7 +1,7 @@
 div(style="display: flex; flex-direction: column")
   div(style="display: flex; flex-direction: row; align-items: flex-start")
     input(ng-model="query")
-    button(ng-click="searchTweets()") Go
+    button(ng-click="searchTweets()" ng-keyup="$event.keyCode === 13? searchTweets():''") Go
   div(ng-repeat="status in statuses" style="margin-top: 5px")
     div(style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: space-between")
       img(src="{{ ::status.user.profile_image_url }}" class="avatar")
