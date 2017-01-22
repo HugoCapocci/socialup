@@ -20,7 +20,7 @@
     "coverage": "istanbul-combine -p both -r none coverage/client-report/coverage-final.json coverage/server-report/coverage-final.json"
   },
   "dependencies": {
-    "bluebird": "3.4.6",
+    "bluebird": "3.4.7",
     "body-parser": "1.15.2",
     "bower": "1.8.0",
     "coffee-script": "1.12.2",
@@ -82,6 +82,7 @@
     "istanbul-traceur": "github:duereg/istanbul-traceur",
     "jasmine": "2.5.2",
     "jasmine-core": "2.5.2",
+    "jasmine-spec-reporter": "^3.2.0",
     "jshint-stylish": "2.2.1",
     "karma": "1.3.0",
     "karma-coffee-preprocessor": "1.0.1",
