@@ -5,6 +5,7 @@ upload = multer dest: 'server/uploads/'
 fs = require 'fs'
 Q = require 'q'
 Promise = require 'bluebird'
+passport = require 'passport'
 providersAPI = require './providersAPI'
 UserDAO = require './userDAO'
 userDAO = new UserDAO()
@@ -24,6 +25,40 @@ initiateUser = (user) ->
   return
 
 scheduler = require './scheduler'
+
+OpenIDStrategy = require('passport-openid').Strategy
+SteamStrategy = new OpenIDStrategy
+  # OpenID provider configuration
+  providerURL: 'http://steamcommunity.com/openid'
+  stateless: true
+  # How the OpenID provider should return the client to us
+  returnURL: 'http://localhost:4000/auth/openid/return'
+  realm: 'http://localhost:4000/'
+    # This is the "validate" callback, which returns whatever object you think
+    # should represent your user when OpenID authentication succeeds.  You
+    # might need to create a user record in your database at this point if
+    # the user doesn't already exist.
+  (identifier, done) ->
+    # The done() function is provided by passport.  It's how we return
+    # execution control back to passport.
+    # Your database probably has its own asynchronous callback, so we're
+    # faking that with nextTick() for demonstration.
+    process.nextTick ->
+      # Retrieve user from Firebase and return it via done().
+      user =
+        identifier: identifier
+        # Extract the Steam ID from the Claimed ID ("identifier")
+        steamId: identifier.match(/\d+$/)[0]
+      # In case of an error, we invoke done(err).
+      # If we cannot find or don't like the login attempt, we invoke
+      # done(null, false).
+      # If everything went fine, we invoke done(null, user).
+      done null, user
+
+#
+# Now we require `passport` and tell pasport to use our new `SteamStrategy`.
+#
+passport.use SteamStrategy
 
 scheduler.addEventListerner 'message', (eventId, userId, providers, providersOptions, message) ->
   postMessageToProviders userId, providers, providersOptions, message

@@ -4,6 +4,8 @@
 # GoogeDrive see https://developers.google.com/drive/web/about-sdk
 # Google+ see https://developers.google.com/+/domains/getting-started
 #
+# quota see https://console.developers.google.com
+#
 # TODO check tokens.expiry_date and update user data in database
 # if needed with refreshed tokens (automatically refresh by googleAPI)
 ###
