@@ -43,6 +43,7 @@ define ['./module'], (appModule) ->
 
     @getActiveProviders = ->
       userData = getUserData()
+      return [] unless userData
       console.log 'Active providers: ', userData.providers
       Object.keys(userData.providers).map (provider) ->
         delete userData.providers[provider] unless userData.providers[provider].tokens

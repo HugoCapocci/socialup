@@ -1,0 +1,47 @@
+.row   
+  .col-md-7
+    .row              
+      .col-md-6
+        .input-group
+          span.input-group-addon Fournisseur de cloud
+          select.form-control(
+            ng-model="cloudExplorer.provider"
+            ng-options="option for option in cloudExplorer.providers"
+            ng-change="cloudExplorer.changeProvider()"
+            style="min-width:150px;"
+          )
+      .col-md-5(style="text-align: right;")
+        span(ng-if="cloudExplorer.selectedFile && !cloudExplorer.selectedFile.isFolder && (cloudExplorer.selectedFile.downloadUrl || cloudExplorer.provider === 'dropbox' )")
+          button.btn.btn-default.btn-primary(ng-click="publishFile()" uib-tooltip="Publiez le fichier")
+            i.glyphicon.glyphicon-share-alt
+          button.btn.btn-default.btn-primary(ng-click="downloadFile()" uib-tooltip="Télécharger le fichier")
+            i.glyphicon.glyphicon-cloud-download
+          button.btn.btn-danger(ng-click="deleteFile()" uib-tooltip="Effacer le fichier")
+            i.glyphicon.glyphicon-trash
+
+        // upload to folder
+        span(ng-if="cloudExplorer.selectedFile && cloudExplorer.selectedFile.isFolder" uib-tooltip="Envoyer un fichier dans le cloud")
+          span.btn.btn-default.btn-primary.btn-file
+            i.glyphicon.glyphicon-cloud-upload
+            input(type="file" id="fileDialog" nv-file-select uploader="cloudUploader")
+
+      .col-md-1
+        span(ng-if="isLoading")
+          img(src="images/loading.gif" width="32" height="32")
+    .row
+      &nbsp
+    .row
+      canvas.chart.chart-pie(id="pie" chart-data="data" chart-labels="labels" chart-options="chartOptions" chart-legend="true")
+
+  .col-md-5(style="max-height:300px; overflow-y: auto;")
+    div(ng-if="!dataForTheTree && isLoading") Chargement en cours...
+   
+    treecontrol.tree-classic(
+      tree-model="dataForTheTree"
+      options="treeOptions"
+      on-selection="showSelected(node, selected)" 
+      on-node-toggle="showToggle(node, expanded, $parentNode, $index, $first, $middle, $last, $odd, $even)"
+      selected-node="node1"
+    )
+      | {{ node.name }}
+              

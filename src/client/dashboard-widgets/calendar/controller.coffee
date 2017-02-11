@@ -142,7 +142,6 @@ define ['../module', 'moment'], (appModule, moment) ->
       ok: -> $uibModalInstance.close()
       cancel: -> $uibModalInstance.dismiss 'cancel'
 
-
   appModule
   .controller 'EventModalController', ['$scope', '$rootScope', '$location', '$uibModalInstance', 'event', EventModalController]
   .controller 'CalendarEventsController', ['$scope', '$location', '$uibModal', 'eventService', 'alertsService', CalendarEventsController]

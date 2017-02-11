@@ -3,6 +3,7 @@ define [
   './calendar/controller'
   './video-player/controller'
   './twitter/controller'
+  './cloud-explorer/controller'
 ], (appModule) ->
 
   appModule.config ['dashboardProvider', (dashboardProvider) ->
@@ -34,5 +35,14 @@ define [
       edit:
         templateUrl: "#{widgetsPath}/calendar/view.html"
         controller: 'CalendarEventsController'
+
+    .widget 'cloudExplorer',
+      title: 'cloud explorer'
+      description: 'Manage cloud files'
+      templateUrl: "#{widgetsPath}/cloud-explorer/view.html"
+      controller: 'CloudExplorerController'
+      edit:
+        templateUrl: "#{widgetsPath}/cloud-explorer/view.html"
+        controller: 'CloudExplorerController'
     return
   ]

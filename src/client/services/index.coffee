@@ -6,10 +6,10 @@ define [
   './user'
   './videos'
   './modalProvider'
+  './cloud'
 ], ->
 
 ###
-'./cloud'
 './message'
 './event'
 './publishFile'
