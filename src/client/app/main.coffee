@@ -21,7 +21,7 @@ require.config
     'moment': '../bower_components/moment/moment'
     'ng-videosharing-embed': '../bower_components/ng-videosharing-embed/build/ng-videosharing-embed.min'
     'angular-chart': '../bower_components/angular-chart.js/dist/angular-chart'
-    'chart':  '../bower_components/Chart.js/Chart'
+    'chart':  '../bower_components/chart.js/dist/Chart'
     'angular-drag-and-drop-lists': '../bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists'
     'angular-bootstrap-calendar': '../bower_components/angular-bootstrap-calendar/dist/js/angular-bootstrap-calendar-tpls'
     'interact': '../bower_components/interact/dist/interact'
