@@ -360,11 +360,18 @@ app.get '/file/:provider/:fileId/:userId', (req, res) ->
   fileId = req.params.fileId
   provider = req.params.provider
   userId = req.params.userId
-  getRefreshedToken(provider, userId).then (tokens) ->
+  getRefreshedToken provider, userId
+  .then (@tokens) ->
+    console.log 'get metaData'
+    providersAPI[provider].getFileMetaData @tokens, fileId
+  .then (metaData) ->
+    console.log 'file metadata: ', metaData
+    res.set 'Content-Type', metaData['mime-type']
+    res.set 'Content-Disposition', 'attachment; filename=' + metaData.fileName
     #pipe the bytes returned from request to the response 'res', in order to directly download the file
-    providersAPI[provider].downloadFile(tokens, fileId).pipe(res)
+    providersAPI[provider].downloadFile(@tokens, fileId).pipe res
   .catch (error) ->
-    res.send(error)
+    res.send error
 
 app.delete '/file/:provider/:fileId/:userId', (req, res) ->
   fileId = req.params.fileId

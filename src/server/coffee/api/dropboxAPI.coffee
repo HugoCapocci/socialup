@@ -94,14 +94,15 @@ exports.getSpaceUsage = (tokens) ->
         total: result.allocation.allocated
   deferred.promise
 
-exports.getFileMetaData = (tokens,filePath) ->
-  processGetRequest tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent filePath,
+exports.getFileMetaData = (tokens, filePath) ->
+  processGetRequest tokens.access_token, 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent(filePath),
   (fileContent, response) ->
     metaData = JSON.parse response.headers['x-dropbox-metadata']
     metaData.fileName = metaData.path.substring metaData.path.lastIndexOf('/') + 1
+    console.log 'metadata requested: ', metaData
     metaData
 
-exports.downloadFile = (tokens,filePath) ->
+exports.downloadFile = (tokens, filePath) ->
   request
     uri: 'https://content.dropboxapi.com/1/files/auto/' + encodeURIComponent filePath
     auth:
@@ -157,19 +158,17 @@ exports.getUserInfo = (tokens) ->
     userName: JSON.parse(userInfo).display_name
 
 processGetRequest = (access_token, url, callback) ->
-  deferred = Promise.pending()
-  request
-    uri: url
-    auth:
-      bearer: access_token
-    method: 'GET'
-  , (error, response, body) ->
-    if error?
-      deferred.reject error
-    else
-      deferred.resolve callback body, response
-
-  deferred.promise
+  new Promise (resolve, reject) ->
+    request
+      uri: url
+      auth:
+        bearer: access_token
+      method: 'GET'
+    , (error, response, body) ->
+      if error?
+        reject error
+      else
+        resolve callback body, response
 
 exports.createShareLink = (tokens, filePath) ->
   deferred = Promise.pending()

@@ -58,16 +58,6 @@ define ['../module'], (appModule) ->
       else
         cloudService.getDownloadFileURL $scope.cloudExplorer.provider, encodeURIComponent($scope.cloudExplorer.selectedFile.id.substring(1))
 
-    #FIXME iFrame workaround not stable
-    $scope.downloadFile = ->
-      iframe = document.createElement 'iframe'
-      if $scope.cloudExplorer.selectedFile.downloadUrl
-        iframe.src = $scope.cloudExplorer.selectedFile.downloadUrl
-      else
-        iframe.src = cloudService.getDownloadFileURL $scope.cloudExplorer.provider, encodeURIComponent($scope.cloudExplorer.selectedFile.id.substring(1))
-      iframe.style.display = 'none'
-      document.body.appendChild iframe
-
     $scope.deleteFile = ->
       console.log 'delete file'
       fileId = $scope.cloudExplorer.selectedFile.id

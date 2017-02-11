@@ -14,7 +14,7 @@
         span(ng-if="cloudExplorer.selectedFile && !cloudExplorer.selectedFile.isFolder && (cloudExplorer.selectedFile.downloadUrl || cloudExplorer.provider === 'dropbox' )")
           button.btn.btn-default.btn-primary(ng-click="publishFile()" uib-tooltip="Publiez le fichier")
             i.glyphicon.glyphicon-share-alt
-          button.btn.btn-default.btn-primary(ng-click="downloadFile()" uib-tooltip="Télécharger le fichier")
+          a.btn.btn-default.btn-primary(ng-href="{{ getDownloadFileURL() }}" uib-tooltip="Télécharger le fichier")
             i.glyphicon.glyphicon-cloud-download
           button.btn.btn-danger(ng-click="deleteFile()" uib-tooltip="Effacer le fichier")
             i.glyphicon.glyphicon-trash
@@ -29,7 +29,7 @@
         span(ng-if="isLoading")
           img(src="images/loading.gif" width="32" height="32")
     .row
-      &nbsp
+      | &nbsp
     .row
       canvas.chart.chart-pie(id="pie" chart-data="data" chart-labels="labels" chart-options="chartOptions" chart-legend="true")
 
