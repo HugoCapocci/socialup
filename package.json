@@ -17,17 +17,19 @@
     "server:test": "node node_modules/mocha/bin/mocha --compilers coffee:coffee-script/register test/server/**/*.coffee -R spec -u bdd",
     "server:test-watch": "npm run server:test -w",
     "client:test": "node_modules/.bin/karma start test/client/karma.conf.coffee",
-    "coverage": "istanbul-combine -p both -r none coverage/client-report/coverage-final.json coverage/server-report/coverage-final.json"
+    "coverage": "istanbul-combine -p both -r none coverage/client-report/coverage-final.json coverage/server-report/coverage-final.json",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "bluebird": "3.4.7",
-    "body-parser": "1.16.0",
+    "body-parser": "1.18.2",
     "bower": "1.8.0",
     "coffee-script": "1.12.3",
     "coffeelint": "1.16.0",
     "cookie-parser": "1.4.3",
     "dotenv": "4.0.0",
-    "express": "4.14.1",
+    "express": "4.16.0",
     "git-guppy": "1.2.1",
     "googleapis": "16.1.0",
     "gulp": "3.9.1",
@@ -59,7 +61,8 @@
     "q": "2.0.3",
     "querystring": "0.2.0",
     "request": "2.79.0",
-    "traceur": "0.0.111"
+    "traceur": "0.0.111",
+    "snyk": "^1.41.1"
   },
   "engines": {
     "node": "7.2.0",
@@ -103,5 +106,6 @@
     "sinon": "1.17.7",
     "sinon-chai": "2.8.0",
     "traceur": "0.0.111"
-  }
+  },
+  "snyk": true
 }
