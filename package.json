@@ -37,7 +37,7 @@
     "gulp-concat-css": "2.3.0",
     "gulp-filter": "4.0.0",
     "gulp-jade": "1.1.0",
-    "gulp-jasmine": "2.4.2",
+    "gulp-jasmine": "4.0.0",
     "gulp-jshint": "2.0.4",
     "gulp-less": "3.3.0",
     "gulp-mocha": "3.0.1",
