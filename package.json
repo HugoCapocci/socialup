@@ -27,7 +27,7 @@
     "coffeelint": "1.16.0",
     "cookie-parser": "1.4.3",
     "dotenv": "4.0.0",
-    "express": "4.14.1",
+    "express": "4.16.0",
     "git-guppy": "2.1.0",
     "googleapis": "16.1.0",
     "gulp": "3.9.1",
