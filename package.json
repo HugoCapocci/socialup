@@ -45,7 +45,7 @@
     "gulp-rename": "1.2.2",
     "gulp-strip-debug": "1.1.0",
     "gulp-uglify": "2.0.1",
-    "jshint": "2.9.4",
+    "jshint": "2.9.6",
     "lodash": "^4.17.2",
     "moment": "2.19.3",
     "mongodb": "2.2.22",
