@@ -1,5 +1,5 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.14.1
+version: v1.19.0
 ignore: {}
 # patches apply the minimum changes required to fix a vulnerability
 patch:
@@ -24,3 +24,11 @@ patch:
         patched: '2020-05-02T02:17:49.926Z'
     - pug > pug-code-gen > pug-attrs > constantinople > babel-types > lodash:
         patched: '2020-05-02T02:17:49.926Z'
+  'npm:minimatch:20160620':
+    - gulp-coffee-istanbul > istanbul-traceur > istanbul > fileset > glob > minimatch:
+        patched: '2021-04-10T02:17:45.387Z'
+    - gulp-coffee-istanbul > istanbul-traceur > istanbul > fileset > minimatch:
+        patched: '2021-04-10T02:17:45.387Z'
+  'npm:uglify-js:20151024':
+    - gulp-coffee-istanbul > istanbul-traceur > istanbul > handlebars > uglify-js:
+        patched: '2021-04-10T02:17:45.387Z'

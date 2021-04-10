@@ -62,7 +62,7 @@
     "querystring": "0.2.0",
     "request": "2.82.0",
     "traceur": "0.0.111",
-    "snyk": "^1.316.2"
+    "snyk": "^1.530.0"
   },
   "engines": {
     "node": "7.2.0",
